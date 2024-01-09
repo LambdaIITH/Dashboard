@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "dashboard"
+version = "0.1.0"
+description = "The backend for the new IITH Dashboard"
+authors = ["Lambda <lambda@iith.ac.in>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.108.0"
+uvicorn = {extras = ["standard"], version = "^0.25.0"}
+python-dotenv = "^1.0.0"
+psycopg2-binary = "^2.9.9"
+google-auth = "^2.26.1"
+pypika = "^0.48.9"
+
+
+[tool.poetry.group.dev.dependencies]
+flake8 = "^7.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
