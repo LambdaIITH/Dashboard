@@ -7,9 +7,10 @@ CREATE TABLE IF NOT EXISTS "courses"
     credits INT NOT NULL,
     PRIMARY KEY(course_code, acad_period)
 );
-CREATE TABLE IF NOT EXISTS "users"(email VARCHAR(256));
+CREATE TABLE IF NOT EXISTS "users"(email VARCHAR(256) PRIMARY KEY,
+cr BOOLEAN DEFAULT FALSE);
 CREATE TABLE IF NOT EXISTS "register"(
-    email INT NOT NULL,
+    email VARCHAR(256) NOT NULL,
     course_code VARCHAR(16) NOT NULL,
     acad_period VARCHAR(32) NOT NULL,
     FOREIGN KEY (email) REFERENCES users(email) ON DELETE CASCADE ON UPDATE CASCADE,
