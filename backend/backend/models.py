@@ -1,13 +1,14 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
 
-class Courses(BaseModel):
+class Course(BaseModel):
     course_code: str
     acad_period: str
     course_name: str
 
-class Users(BaseModel):
+class User(BaseModel):
     email: str
+    cr : bool
 
 class Register(BaseModel):
     user_email: str
