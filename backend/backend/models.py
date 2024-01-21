@@ -7,11 +7,14 @@ class Courses(BaseModel):
     course_name: str
 
 class Users(BaseModel):
-    id: int
     email: str
 
 class Register(BaseModel):
-    user_id: int
+    user_email: str
     course_code: str
     acad_period: str
-    
+
+class Timetable(BaseModel):
+    email: str
+    acad_period: str
+    course_codes: [str]
