@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/login_screen.dart';
+import 'package:frontend/screens/splash_screen.dart';
 
 void main() => runApp(const MyApp());
 
@@ -13,7 +15,8 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: Text("Hello World"),
+      debugShowCheckedModeBanner: false,
+      home: SplashScreen(nextPage: LoginScreen(timeDilation: 4,))
     );
   }
 }

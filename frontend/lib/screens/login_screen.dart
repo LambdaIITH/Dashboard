@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frontend/widgets/google_button.dart';
+import 'package:frontend/widgets/login_guest.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 
@@ -13,7 +14,6 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  
   @override
   Widget build(BuildContext context) {
     timeDilation = widget.timeDilation;
@@ -76,6 +76,19 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(
                 height: 28,
+              ),
+              const ContinueAsGuest(),
+              Container(
+                margin: const EdgeInsets.fromLTRB(0, 12, 0, 12),
+                alignment: Alignment.center,
+                child: Text(
+                  "Or",
+                  style: GoogleFonts.inter(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xffBDBDBD),
+                  ),
+                ),
               ),
               const CustomGoogleButton(),
               const SizedBox(
