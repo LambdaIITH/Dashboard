@@ -35,7 +35,7 @@ class NormalText extends StatelessWidget {
       textAlign: center ? TextAlign.center : TextAlign.left,
       maxLines: limit,
       overflow: TextOverflow.ellipsis,
-      style: GoogleFonts.montserrat(
+      style: GoogleFonts.inter(
         color: color,
         fontSize: getResponsiveFontSize(context),
         fontWeight: FontWeight.w500,

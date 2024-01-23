@@ -32,7 +32,7 @@ class BoldText extends StatelessWidget {
       child: Text(
         text,
         maxLines: limit,
-        style: GoogleFonts.montserrat(
+        style: GoogleFonts.inter(
           color: color,
           fontSize: size,
           fontWeight: FontWeight.bold,
