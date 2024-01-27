@@ -1,14 +1,15 @@
-from Pypika import Table, Query, Field, Column
+from pypika import Table, Query, Field, Column
 from models import *
 
 users, courses, register = Table('users'), Table('courses'), Table('register')
 
 
-def get_course(courseId: str, acad_period: str):
-    query = (Query.from_(courses)
+def get_course(register_details: Register):
+    query = (Query.from_(register)
              .select('*')
-             .where(courses.courseId == courseId)
-             .where(courses.acad_period == acad_period)
+             .where(register.course_code == register_details.course_code)
+             .where(register.acad_period == register_details.acad_period)
+             .where(register.user_id == register_details.user_id)
              )
     return query.get_sql()
 

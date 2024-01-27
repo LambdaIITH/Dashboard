@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
-
+from typing import List
 class Course(BaseModel):
     course_code: str
     acad_period: str
@@ -11,11 +11,11 @@ class User(BaseModel):
     cr : bool
 
 class Register(BaseModel):
-    user_email: str
+    user_id: int
     course_code: str
     acad_period: str
 
 class Timetable(BaseModel):
     email: str
     acad_period: str
-    course_codes: [str]
+    course_codes: List[str]
