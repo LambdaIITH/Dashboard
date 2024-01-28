@@ -5,6 +5,8 @@ class Course(BaseModel):
     course_code: str
     acad_period: str
     course_name: str
+    segment: str
+    credits: int
 
 class User(BaseModel):
     email: str
@@ -16,6 +18,6 @@ class Register(BaseModel):
     acad_period: str
 
 class Timetable(BaseModel):
-    email: str
+    id: int
     acad_period: str
     course_codes: List[str]
