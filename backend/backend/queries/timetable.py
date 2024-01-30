@@ -45,7 +45,9 @@ def get_allRegisteredCourses(user_id: int, acad_period:str):
         register.course_code
     )
     .where(
-        (register.user_id == user_id)
+        (register.user_id == user_id) &
+        (register.acad_period == acad_period)
+        
         )
     )
 
@@ -68,13 +70,11 @@ def delete_timeTable(timetable: Timetable): # deletes some courses which are in 
         Query.from_(register)
         .where(
             (register.user_id == timetable.user_id) &
-            (register.acad_period == timetable.acad_period)
+            (register.acad_period == timetable.acad_period) &
+            (register.course_code.isin(timetable.course_codes))
         )
         
     )
-    
-    for course_code in timetable.course_codes:
-        query = query.where(register.course_code == course_code)
     
     query = query.delete()
     
