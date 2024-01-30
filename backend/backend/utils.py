@@ -18,3 +18,5 @@ conn = psycopg2.connect(
     host=POSTGRES_HOST,
     port=POSTGRES_PORT,
 )
+
+conn.autocommit = False
