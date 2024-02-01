@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS courses
     acad_period VARCHAR(32) NOT NULL,
     course_name VARCHAR(256) NOT NULL,
     segment VARCHAR(3) NOT NULL,
+    slot VARCHAR(8) NOT NULL,
     credits INT NOT NULL,
     PRIMARY KEY(course_code, acad_period)
 );
@@ -22,6 +23,6 @@ CREATE TABLE IF NOT EXISTS register
     course_code VARCHAR(16) NOT NULL,
     acad_period VARCHAR(32) NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (course_code, acad_period) REFERENCES courses(course_code, acad_period) ON DELETE CASCADE ON UPDATE CASCADE
+    FOREIGN KEY (course_code, acad_period) REFERENCES courses(course_code, acad_period) ON DELETE CASCADE ON UPDATE CASCADE,
     PRIMARY KEY(user_id, course_code, acad_period)
 );

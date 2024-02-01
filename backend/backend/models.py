@@ -8,6 +8,7 @@ class Course(BaseModel):
     acad_period: str
     course_name: str
     segment: str
+    slot: str
     credits: int
 
 class User(BaseModel):

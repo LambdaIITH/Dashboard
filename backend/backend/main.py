@@ -31,23 +31,22 @@ async def root(response: Response):
 
 
 @app.get("/courses")
-def get_course(course_code : str, acad_period : str, res: Response) -> Course:
+def get_course(course_code : str, acad_period : str, res: Response):
     try:
         query = course_queries.get_course(course_code, acad_period)
-        result = []
-        
-        with conn.cursor() as cur: 
+
+        with conn.cursor() as cur:
             cur.execute(query)
             
             if cur.rowcount == 0:
                 return HTTPException(status_code=404, detail="Course not Found")
-
+    
             if cur.rowcount > 1:
                 raise Exception()
 
             row = cur.fetchone()
             res.status_code = 200  
-            return Course(course_code=row[0], acad_period=row[1], course_name=row[2], segment=row[3], credits=row[4])
+            return Course(course_code=row[0], acad_period=row[1], course_name=row[2], segment=row[3], credits=row[5], slot=row[4])
 
     except Exception as e:
         return HTTPException(status_code=500, detail= f'Internal Server Error: {e}')
