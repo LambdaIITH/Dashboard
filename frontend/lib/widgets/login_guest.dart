@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/home_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ContinueAsGuest extends StatelessWidget {
@@ -18,11 +19,16 @@ class ContinueAsGuest extends StatelessWidget {
         child: InkWell(
           onTap: () {
             //TODO: handle this
+            Navigator.of(context).pushReplacement(MaterialPageRoute(
+              builder: (context) => const HomeScreen(
+                user: 'guest',
+              ),
+            ));
           },
           borderRadius: BorderRadius.circular(12),
           child: Center(
             child: Text(
-              "Continue as Guest",
+              "Continue without Login",
               style: GoogleFonts.inter(
                 fontSize: 20,
                 fontWeight: FontWeight.w500,

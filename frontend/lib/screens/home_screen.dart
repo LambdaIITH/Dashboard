@@ -1,18 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/cab_sharing_screen.dart';
 import 'package:frontend/widgets/home_card_no_options.dart';
 import 'package:frontend/widgets/home_card_two_options.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final String user;
+  const HomeScreen({
+    super.key,
+    required this.user,
+  });
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  void showError() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Please login to use this feature'),
+        duration: const Duration(milliseconds: 500),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xfffcfcfc),
       appBar: buildNavBar(),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -31,28 +48,34 @@ class _HomeScreenState extends State<HomeScreen> {
               onTap: null,
             ),
             const SizedBox(height: 13),
-            const HomeCardTwoOptions(
+            HomeCardTwoOptions(
               title: 'Lost & Found',
               title1: 'I found',
               title2: 'I lost',
               image1: 'assets/icons/magnifying-icon.svg',
               image2: 'assets/icons/magnifying-icon.svg',
-              onTap: null,
+              onTap: [showError, showError],
             ),
             const SizedBox(height: 13),
-            const HomeCardTwoOptions(
+            HomeCardTwoOptions(
               title: 'Mess Services',
               title1: 'Mess Swap',
               title2: 'Mess Rebate',
-              image2: 'assets/icons/money-icon.png',
               image1: 'assets/icons/swap-icon.svg',
-              onTap: null,
+              image2: 'assets/icons/money-icon.png',
+              onTap: [showError, showError],
             ),
             const SizedBox(height: 13),
-            const HomeCardNoOptions(
+            HomeCardNoOptions(
               title: 'Cab Sharing',
               image: 'assets/icons/cab-sharing-icon.svg',
-              onTap: null,
+              onTap: () {
+                widget.user == 'guest'
+                    ? showError()
+                    : Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => CabSharingScreen(),
+                      ));
+              },
             ),
           ],
         ),

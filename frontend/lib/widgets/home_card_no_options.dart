@@ -16,35 +16,43 @@ class HomeCardNoOptions extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      child: Card(
-        elevation: 3,
-        shadowColor: Colors.white,
-        surfaceTintColor: Colors.white,
-        child: SizedBox(
-          height: 140,
-          child: Stack(
-            children: [
-              Positioned(
-                top: 15,
-                left: 18,
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 28,
-                  ),
+      child: Container(
+        height: 140,
+        decoration:  BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: const [
+            BoxShadow(
+              color: Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
+              offset: Offset(0, 4), // Offset in the x, y direction
+              blurRadius: 10.0,
+              spreadRadius: 0.0,
+            ),
+          ],
+        ),
+        clipBehavior: Clip.hardEdge,
+        child: Stack(
+          children: [
+            Positioned(
+              top: 15,
+              left: 18,
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 28,
                 ),
               ),
-              Positioned(
-                bottom: -13,
-                right: -7,
-                child: SvgPicture.asset(
-                  image,
-                  width: 200,
-                ),
+            ),
+            Positioned(
+              bottom: -13,
+              right: -7,
+              child: SvgPicture.asset(
+                image,
+                width: 200,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

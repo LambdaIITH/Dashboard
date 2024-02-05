@@ -17,6 +17,7 @@ class HomeCardOption extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Card(
+        clipBehavior: Clip.hardEdge,
         color: const Color(0xFFF3F3F3),
         surfaceTintColor: const Color(0xFFF3F3F3),
         elevation: 3,
