@@ -1,5 +1,6 @@
 from pypika import Table, Query, Field, Column
-from models import *
+from models import Timetable
+from typing import List
 
 users, courses, register = Table("users"), Table("courses"), Table("register")
 

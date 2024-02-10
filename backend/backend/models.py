@@ -11,14 +11,17 @@ class Course(BaseModel):
     slot: str
     credits: int
 
+
 class User(BaseModel):
     email: str
-    cr : bool
+    cr: bool
+
 
 class Register(BaseModel):
     user_id: int
     course_code: str
     acad_period: str
+
 
 class Timetable(BaseModel):
     user_id: int
