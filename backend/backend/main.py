@@ -1,10 +1,11 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from models import Course
 from utils import conn
 from queries import timetable as course_queries
 from Routes.timetable import router as timetable_router
+from Routes.auth import router as auth_router, verify_access_token 
 
 load_dotenv()
 
@@ -23,7 +24,7 @@ app.add_middleware(
 
 # include routers
 app.include_router(timetable_router)
-
+app.include_router(auth_router)
 
 @app.get("/")
 async def root():
@@ -54,3 +55,8 @@ def get_course(course_code: str, acad_period: str) -> Course:
         raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f'Internal Server Error: {e}')
+
+# example of how to use auth in each path operation that leads to protected-data
+@app.get("/protected-data" , dependencies=[ Depends(verify_access_token)])
+def get_protected_data(): 
+    return {"user" : "verified"}
