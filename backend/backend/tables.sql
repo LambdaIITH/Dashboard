@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS slot_updates
 (
     course_code VARCHAR(16) NOT NULL,
     acad_period VARCHAR(32) NOT NULL,
-    user_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL, -- user_id is the id of the user who updated the slot
     updated_slot VARCHAR(8),
     custom_timings JSON,
     PRIMARY KEY(course_code, acad_period, user_id),

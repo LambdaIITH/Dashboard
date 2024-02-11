@@ -5,15 +5,6 @@ from typing import List
 users, courses, register = Table("users"), Table("courses"), Table("register")
 
 
-def get_course(course_code: str, acad_period: str):
-    query = (
-        Query.from_(courses)
-        .select("*")
-        .where((courses.course_code == course_code) & (courses.acad_period == acad_period))
-    )
-    return query.get_sql()
-
-
 def get_timeTable(user_id: int, acad_period: str):
     query = (
         Query.from_(register)
@@ -68,10 +59,3 @@ def delete_timeTable(timetable: Timetable):  # deletes some courses which are in
 
     return query.get_sql()
 
-
-def get_all_courses(course_list: List[str], acad_period: str):
-    query = Query.from_(courses).select("*").where(
-        (courses.course_code.isin(course_list)) & (courses.acad_period == acad_period)
-    )
-
-    return query.get_sql()

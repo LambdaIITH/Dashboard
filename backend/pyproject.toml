@@ -14,6 +14,7 @@ python-dotenv = "^1.0.0"
 psycopg2-binary = "^2.9.9"
 google-auth = "^2.26.1"
 pypika = "^0.48.9"
+requests = "^2.31.0"
 
 
 [tool.poetry.group.dev.dependencies]

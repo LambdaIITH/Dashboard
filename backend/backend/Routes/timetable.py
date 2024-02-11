@@ -2,9 +2,11 @@ from fastapi import APIRouter, HTTPException
 from utils import conn
 from models import Timetable, Course
 from queries import timetable as timetable_queries
+from queries import course as course_queries
 from psycopg2.errors import ForeignKeyViolation, InFailedSqlTransaction
-# from psycopg2.errors import UniqueViolation
 from typing import List
+
+
 router = APIRouter(prefix="/timetable", tags=["timetable"])
 
 
@@ -19,14 +21,13 @@ async def get_timetable(user_id: int, acad_period: str) -> List[Course]:
             rows = cur.fetchall()
 
             course_codes = [row[0] for row in rows]
-            cur.execute(timetable_queries.get_all_courses(course_codes, acad_period))
+            cur.execute(course_queries.get_all_courses(course_codes, acad_period))
 
             rows = cur.fetchall()
             courses = []
 
             for row in rows:
-                courses.append(Course(course_code=row[0], acad_period=row[1],
-                               course_name=row[2], segment=row[3], slot=row[4], credits=row[5]))
+                courses.append(Course.from_row(row))
 
             return courses
     except HTTPException as e:
