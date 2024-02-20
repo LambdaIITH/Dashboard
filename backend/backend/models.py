@@ -40,9 +40,15 @@ class Register(BaseModel):
 class Slot_Change(BaseModel):
     course_code: str
     acad_period:str
-    user_id: int
+    user_id: int | None = None
+    user_name: str | None = None
     slot: str |None = None
     custom_slot : Dict | None = None
+    
+    @classmethod
+    def from_row(row: tuple, cr_name :str = None):
+        return Slot_Change(course_code = row[0], acad_period = row[1], user_id = row[2], user_name = cr_name, slot = row[3], custom_slot = row[4])
+    
     
 
 class Timetable(BaseModel):

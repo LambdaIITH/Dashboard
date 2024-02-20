@@ -13,14 +13,7 @@ def get_timeTable(user_id: int, acad_period: str):
             (register.course_code == courses.course_code)
             & (register.acad_period == courses.acad_period)
         )
-        .select(
-            courses.course_code,
-            courses.acad_period,
-            courses.course_name,
-            courses.segment,
-            courses.slot,
-            courses.credits,
-        )
+        .select("*")
         .where((register.user_id == user_id) & (register.acad_period == acad_period))
     )
 

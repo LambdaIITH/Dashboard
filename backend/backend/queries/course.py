@@ -24,15 +24,7 @@ def get_all_courses(course_list: List[str], acad_period: str):
     return query.get_sql()
 
 
-def post_CR_change(new_slot: Slot_Change):
-    query = (
-        Query.into(custom_courses)
-        .insert(
-            new_slot.course_code, new_slot.acad_period, new_slot.user_id, new_slot.slot, new_slot.custom_slot,
-        )
-    )
-    
-    return query.get_sql()
+
 
 def post_user_change(slot: Slot_Change):
     query = (

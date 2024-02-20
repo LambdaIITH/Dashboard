@@ -37,8 +37,8 @@ CREATE TABLE IF NOT EXISTS slot_updates
     custom_timings JSON,
     PRIMARY KEY(course_code, acad_period, user_id),
     FOREIGN KEY (course_code, acad_period) REFERENCES courses(course_code, acad_period) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
-);
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE 
+);CASCADE
 
 
 CREATE TABLE IF NOT EXISTS register
@@ -50,3 +50,4 @@ CREATE TABLE IF NOT EXISTS register
     FOREIGN KEY (course_code, acad_period) REFERENCES courses(course_code, acad_period) ON DELETE CASCADE ON UPDATE CASCADE,
     PRIMARY KEY(user_id, course_code, acad_period)
 );
+
