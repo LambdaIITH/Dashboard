@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/cab_sharing_screen.dart';
+import 'package:frontend/screens/time_table_screen.dart';
 import 'package:frontend/widgets/home_card_no_options.dart';
 import 'package:frontend/widgets/home_card_two_options.dart';
 
@@ -77,6 +78,21 @@ class _HomeScreenState extends State<HomeScreen> {
                       ));
               },
             ),
+            const SizedBox(height: 20),
+            HomeCardNoOptions(
+              title: 'Time Table',
+              image: 'assets/icons/calendar.svg',
+              onTap: () {
+                widget.user == 'guest'
+                    ? showError()
+                    : Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => TimeTableScreen(),
+                      ));
+              },
+            ),
+            const SizedBox(
+              height: 50,
+            )
           ],
         ),
       ),
