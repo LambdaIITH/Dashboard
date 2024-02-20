@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/home_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class CustomGoogleButton extends StatelessWidget {
@@ -17,8 +18,13 @@ class CustomGoogleButton extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-          //TODO: handle login route
-        },
+            //TODO: handle login route
+            Navigator.of(context).pushReplacement(MaterialPageRoute(
+              builder: (context) => const HomeScreen(
+                user: 'someuser',
+              ),
+            ));
+          },
           borderRadius: BorderRadius.circular(12),
           child: Center(
             child: Row(
