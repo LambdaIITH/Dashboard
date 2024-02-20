@@ -5,9 +5,13 @@ from queries import timetable as timetable_queries
 from queries import course as course_queries
 from psycopg2.errors import ForeignKeyViolation, InFailedSqlTransaction
 from typing import List
-
+from cr import router as crRouter
+from custom import router as customRouter
 
 router = APIRouter(prefix="/timetable", tags=["timetable"])
+
+router.use('/cr', crRouter)
+router.use('/custum', customRouter)
 
 
 @router.get("/{user_id}")

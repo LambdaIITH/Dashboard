@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from Routes.timetable import router as timetable_router
 from Routes.auth import router as auth_router, verify_access_token 
-from Routes.courses import router as courses_router
+from backend.backend.Routes.TimeTable.cr import router as courses_router
 
 load_dotenv()
 

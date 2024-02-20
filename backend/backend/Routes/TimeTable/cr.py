@@ -9,7 +9,7 @@ from queries import course as course_queries
 from queries import user as user_queries
 from typing import List, Dict
 
-router = APIRouter(prefix="/courses", tags=["courses"])
+router = APIRouter(prefix="/cr", tags=["courses"])
 # TODO
 
 def get_course(course_code: str, acad_period: str) -> Course:
@@ -39,8 +39,8 @@ def get_course(course_code: str, acad_period: str) -> Course:
             status_code=500, detail=f'Internal Server Error: {e}')
 
 
-@router.post("/change")
-def post_change(new_slot: Slot_Change):
+@router.patch("/slot/cr")
+def post_change_as_cr(new_slot: Slot_Change):
     try:
         cr = check_user_is_cr(new_slot.user_id)
         
@@ -53,8 +53,6 @@ def post_change(new_slot: Slot_Change):
         return {"message" : "Change successfully posted"}     
             
 
-    except HTTPException as e:
-        raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f'Internal Server Error: {e}')
 
@@ -73,4 +71,18 @@ def check_user_is_cr(user_id: int):
 
         return user
     
-    
+# route for changing the slot of a course from frontend
+@router.patch('/slot')
+def post_change_slot(slot: Slot_Change):
+    try:
+        course = get_course(slot.course_code, slot.acad_period)
+        
+        with conn.cursor() as cur:
+            query = course_queries.post_change(slot)
+            cur.execute(query)
+            
+        return {"message" : "Change successfully posted"}     
+            
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f'Internal Server Error: {e}')
