@@ -5,7 +5,7 @@ from typing import List
 users, courses, register = Table("users"), Table("courses"), Table("register")
 
 
-def get_timeTable(user_id: int, acad_period: str):
+def get_registered_course_details(user_id: int, acad_period: str):
     query = (
         Query.from_(register)
         .join(courses)

@@ -1,8 +1,10 @@
 from fastapi import APIRouter, HTTPException
 from utils import conn
-from models import Timetable, Course
+from models import Timetable, Course, Takes
 from queries import timetable as timetable_queries
 from queries import course as course_queries
+from queries import custom as custom_queries
+from queries import changes as changes_queries
 from psycopg2.errors import ForeignKeyViolation, InFailedSqlTransaction
 from typing import List
 from cr import router as crRouter
@@ -13,27 +15,56 @@ router = APIRouter(prefix="/timetable", tags=["timetable"])
 router.use('/cr', crRouter)
 router.use('/custum', customRouter)
 
+def get_required_details_from_course(row: tuple):
+    return (row[0], row[2], row[3], row[4])
+
 
 @router.get("/{user_id}")
-async def get_timetable(user_id: int, acad_period: str) -> List[Course]:
+async def get_timetable(user_id: int, acad_period: str) -> List[Takes]:
     try:
-        query = timetable_queries.get_timeTable(user_id, acad_period)
+        query = timetable_queries.get_registered_course_details(user_id, acad_period)
 
         with conn.cursor() as cur:
+
+            # getting registered courses
             cur.execute(query)
+            registeredCourses = list(map(get_required_details_from_course ,cur.fetchall()))
 
-            rows = cur.fetchall()
+            # getting custom courses
+            query = custom_queries.get_all_custom_courses(user_id, acad_period)
+            cur.execute(query)
+            customCourses = cur.fetchall()
 
-            course_codes = [row[0] for row in rows]
-            cur.execute(course_queries.get_all_courses(course_codes, acad_period))
+            # getting accepted courses
+            query = changes_queries.get_all_accepted_changes(user_id, acad_period)
+            cur.execute(query)
+            acceptedCourses = cur.fetchall()
 
-            rows = cur.fetchall()
-            courses = []
+            answer = []
 
-            for row in rows:
-                courses.append(Course.from_row(row))
+            for row in acceptedCourses:
+                for i, registered_course in enumerate(registeredCourses):
+                    if registered_course[0] == row[0]:
+                        a=registered_course
+                        a[4]=row[4]
+                        answer.append(Takes.from_row(a))
+                        del registeredCourses[i]
+                        break
+            
+            for row in customCourses:
+                for i, registered_course in enumerate(registeredCourses):
+                    if registered_course[0] == row[0]:
+                        a=registered_course
+                        a[4]=row[4]
+                        answer.append(Takes.from_row(a))
+                        del registeredCourses[i]
+                        break
+            
+            for i in registeredCourses:
+                answer.append(i)
+            
+            return answer
 
-            return courses
     except HTTPException as e:
         raise e
     except Exception as e:

@@ -59,4 +59,44 @@ class Timetable(BaseModel):
     acad_period: str
     course_codes: List[str]
     
-    
+class Changes_Accepted(BaseModel):
+    user_id: int
+    course_code: str
+    acad_period: str
+    cr_id: int
+
+    @classmethod
+    def from_row(row: tuple):
+        return Changes_Accepted(user_id=row[0], course_code=row[1], acad_period=row[2], cr_id=row[3])
+
+class Takes(BaseModel):
+    course_code: str
+    course_name: str
+    segment: str
+    slot: str | None = None
+    timings: Dict | None = None
+
+    @classmethod
+    def from_row(row: tuple):
+        return Takes(course_code=row[0], course_name=row[1], segment=row[2], slot=row[3], timings=row[4])
+
+class Changes_tobe_Accepted(BaseModel):
+    course_code: str
+    course_name: str
+    cr_id: int
+    old_slot: str
+    new_slot: str
+    old_timings: Dict | None = None
+    new_timings: Dict | None = None
+
+    @classmethod
+    def from_row(a: tuple,b: tuple):
+        return Changes_tobe_Accepted(
+            course_code=b[0],
+            course_name=b[1],
+            cr_id=a[2],
+            old_slot=b[3],
+            new_slot=a[3],
+            old_timings=None,
+            new_timings=a[4]
+        )
