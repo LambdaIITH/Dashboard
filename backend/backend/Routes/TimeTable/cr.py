@@ -4,10 +4,10 @@ from models import  Course, User, Slot_Change
 from queries import timetable as timetable_queries
 from psycopg2.errors import ForeignKeyViolation
 # from psycopg2.errors import UniqueViolation
-from queries import timetable as timetable_queries
-from queries import course as course_queries
+from queries import custom as custom_queries
 from queries import cr as cr_queries
 from queries import user as user_queries
+from queries import course as course_queries
 from typing import List, Dict
 
 router = APIRouter(prefix="/cr", tags=["courses"])
@@ -124,12 +124,32 @@ def delete_change_slot(course_code :str, acad_period: str, cr_id: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f'Internal Server Error: {e}')
 
-# TODO
+# TODO change cr id's with cr names
 @router.get('/{user_id}')
-def get_cr_changes() -> List[Slot_Change]:
+def get_cr_changes(user_id: int, acad_period: str) -> List[Slot_Change]:
     try:
-        registered_courses = []
-        custom_courses = []
-        
+
+        with conn.cursor() as cur:
+            # fetch all custom queries
+            query1 = custom_queries.get_all_custom_courses(user_id, acad_period)
+            cur.execute(query1)
+            rows = cur.fetchall()
+            courses = [row[0] for row in rows]
+            
+            query2 = timetable_queries.get_allRegisteredCourses(user_id, acad_period)
+            cur.execute(query2)
+            rows = cur.fetchall()
+            courses.extend([row[0] for row in rows])
+            
+            courses = list(set(courses)) # for getting the unique courses
+            
+            # fetch all cr changes in any of custom or registered courses
+            query3 = cr_queries.get_CR_changes(courses, acad_period)
+            cur.execute(query3)
+            rows = cur.fetchall()
+            changes = [Slot_Change.from_row(row) for row in rows]
+            
+            return changes
+            
     except Exception as e:
         raise HTTPException(status_code=500, detail=f'Internal Server Error: {e}')

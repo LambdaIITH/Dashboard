@@ -42,10 +42,10 @@ def delete_CR_change(course_code: str, acad_period: str, user_id: int):
     
     return query.get_sql()
 
-def get_CR_changes(course_code: str, acad_period: str):
+def get_CR_changes(course_codes: List[str], acad_period: str):
     query = (
         Query.from_(slot_updates)
         .select("*")
-        .where((slot_updates.course_code == course_code) & (slot_updates.acad_period == acad_period))
+        .where((slot_updates.course_code.isin(course_codes) ) & (slot_updates.acad_period == acad_period))
     )
     return query.get_sql()
