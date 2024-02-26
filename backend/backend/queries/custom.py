@@ -41,10 +41,12 @@ def delete_course(course_code: str, acad_period: str, user_id: str):
 
 
 def update_course(slot: Slot_Change):
+    custom_timings_json = json.dumps(slot.custom_slot) if slot.custom_slot is not None else None
+    
     query = (
         Query.update(custom_courses)
         .set(custom_courses.slot, slot.slot)
-        .set(custom_courses.custom_timings, slot.custom_slot)
+        .set(custom_courses.custom_timings, custom_timings_json)
         .where(
             (custom_courses.course_code == slot.course_code)
             & (custom_courses.acad_period == slot.acad_period)

@@ -63,9 +63,6 @@ def post_change_as_cr(slot: Slot_Change):
         if slot.slot is not None and slot.slot not in slots:  # checking if this is a valid slot
             raise HTTPException(status_code=400, detail="Invalid Slot")
 
-        if slot.custom_slot is None and slot.slot is None:
-            raise HTTPException(status_code=400, detail="No slot provided")
-
         if slot.custom_slot is not None and slot.slot is not None:
             raise HTTPException(
                 status_code=400, detail="Both slot and custom_slot provided")
@@ -101,10 +98,6 @@ def post_change_slot(slot: Slot_Change):
 
         if slot.custom_slot is None and slot.slot is None:
             raise HTTPException(status_code=400, detail="No slot provided")
-
-        if slot.custom_slot is not None and slot.slot is not None:
-            raise HTTPException(
-                status_code=400, detail="Both slot and custom_slot provided")
 
         if slot.slot is not None and slot.slot not in slots:  # checking if this is a valid slot
             raise HTTPException(status_code=400, detail="Invalid Slot")
@@ -153,9 +146,8 @@ def delete_change_slot(course_code: str, acad_period: str, cr_id: int):
         raise HTTPException(
             status_code=500, detail=f'Internal Server Error: {type(e)} {e}')
 
+
 # TODO change cr id's with cr names
-
-
 @router.get('/{user_id}')
 def get_cr_changes_for_user(user_id: int, acad_period: str) -> List[Slot_Change]:
     try:

@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException
 from utils import conn
 from models import Course, User, Slot_Change
+from constants import slots
 
-# from queries import timetable as timetable_queries
 from psycopg2.errors import ForeignKeyViolation
 from queries import custom as custom_queries
 from typing import List, Dict
@@ -13,12 +13,20 @@ router = APIRouter(prefix="/custom", tags=["custom-changes"])
 @router.post("/")
 def post_custom_slot(slot: Slot_Change):
     try:
-        # course = get_course(slot.course_code, slot.acad_period)
+        if slot.custom_slot == {}:
+            slot.custom_slot = None
+            
+        if slot.slot is not None and slot.slot not in slots:  # checking if this is a valid slot
+            raise HTTPException(status_code=400, detail="Invalid Slot")
 
+        if slot.custom_slot is not None and slot.slot is not None:
+            raise HTTPException(
+                status_code=400, detail="Both slot and custom_slot provided")
+            
         with conn.cursor() as cur:
             query = custom_queries.post_course(slot)
             cur.execute(query)
-            conn.commit()
+        conn.commit()
         return {"message": "Change successfully posted"}
 
     except ForeignKeyViolation as e:
@@ -60,7 +68,7 @@ def delete_custom_slot(slot: Slot_Change):
         with conn.cursor() as cur:
             query = custom_queries.delete_course(slot)
             cur.execute(query)
-
+        conn.commit()
         return {"message": "Course successfully deleted"}
     except Exception as e:
         conn.rollback()
@@ -70,11 +78,23 @@ def delete_custom_slot(slot: Slot_Change):
 @router.patch("/")
 def patch_custom_slot(slot: Slot_Change):
     try:
+        if slot.custom_slot == {}:
+            slot.custom_slot = None
+            
+        if slot.slot is not None and slot.slot not in slots:  # checking if this is a valid slot
+            raise HTTPException(status_code=400, detail="Invalid Slot")
+
+
+        if slot.custom_slot is not None and slot.slot is not None:
+            raise HTTPException(
+                status_code=400, detail="Both slot and custom_slot provided")
+            
         with conn.cursor() as cur:
             query = custom_queries.update_course(slot)
             cur.execute(query)
-
-        return {"message": "Course successfully deleted"}
+        conn.commit()
+            
+        return {"message": "Course successfully Updated"}
     except Exception as e:
         conn.rollback()
         raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
