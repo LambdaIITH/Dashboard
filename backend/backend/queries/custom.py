@@ -1,13 +1,16 @@
 from pypika import Table, Query, Field, Column
 from models import Slot_Change
 from typing import List
+import json 
 
 custom_courses = Table("custom_courses")
 
 
 def post_course(slot: Slot_Change):
+    custom_timings_json = json.dumps(slot.custom_slot) if slot.custom_slot is not None else None
+    
     query = Query.into(custom_courses).insert(
-        slot.course_code, slot.acad_period, slot.user_id, slot.slot, slot.custom_slot
+        slot.course_code, slot.acad_period, slot.user_id, slot.slot, custom_timings_json
     )
     return query.get_sql()
 

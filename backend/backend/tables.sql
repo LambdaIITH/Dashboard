@@ -32,12 +32,12 @@ CREATE TABLE IF NOT EXISTS slot_updates
 (
     course_code VARCHAR(16) NOT NULL,
     acad_period VARCHAR(32) NOT NULL,
-    user_id BIGINT NOT NULL, -- user_id is the id of the user who updated the slot
+    cr_id BIGINT NOT NULL, -- cr_id is the id of the user who updated the slot
     updated_slot VARCHAR(8),
     custom_timings JSON,
-    PRIMARY KEY(course_code, acad_period, user_id),
+    PRIMARY KEY(course_code, acad_period, cr_id),
     FOREIGN KEY (course_code, acad_period) REFERENCES courses(course_code, acad_period) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
+    FOREIGN KEY (cr_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 

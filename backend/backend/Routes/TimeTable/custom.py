@@ -3,16 +3,11 @@ from utils import conn
 from models import Course, User, Slot_Change
 
 # from queries import timetable as timetable_queries
-from psycopg2.errors import ForeignKeyViolation, InFailedSqlTransaction
-
-# from psycopg2.errors import UniqueViolation
-# from queries import timetable as timetable_queries
-# from queries import course as course_queries
-# from queries import user as user_queries
+from psycopg2.errors import ForeignKeyViolation
 from queries import custom as custom_queries
 from typing import List, Dict
 
-router = APIRouter(prefix="/custom", tags=["courses"])
+router = APIRouter(prefix="/custom", tags=["custom-changes"])
 
 
 @router.post("/")
@@ -23,10 +18,14 @@ def post_custom_slot(slot: Slot_Change):
         with conn.cursor() as cur:
             query = custom_queries.post_course(slot)
             cur.execute(query)
-
+            conn.commit()
         return {"message": "Change successfully posted"}
 
+    except ForeignKeyViolation as e:
+        conn.rollback()
+        raise HTTPException(status_code=404, detail= f"Foreign Key Violdation: {e}")
     except Exception as e:
+        conn.rollback()
         raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
 
 
@@ -63,21 +62,19 @@ def delete_custom_slot(slot: Slot_Change):
             cur.execute(query)
 
         return {"message": "Course successfully deleted"}
-
     except Exception as e:
+        conn.rollback()
         raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
 
 
 @router.patch("/")
 def patch_custom_slot(slot: Slot_Change):
     try:
-        # course = get_course(slot.course_code, slot.acad_period)
-
         with conn.cursor() as cur:
             query = custom_queries.update_course(slot)
             cur.execute(query)
 
         return {"message": "Course successfully deleted"}
-
     except Exception as e:
+        conn.rollback()
         raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")

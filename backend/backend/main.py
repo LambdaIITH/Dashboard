@@ -1,9 +1,11 @@
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
-from Routes.timetable import router as timetable_router
+from Routes.TimeTable.timetable import router as timetable_router
 from Routes.auth import router as auth_router, verify_access_token 
-from backend.backend.Routes.TimeTable.cr import router as courses_router
+from Routes.TimeTable.cr import router as cr_router
+from Routes.TimeTable.custom import router as custom_router
+from Routes.TimeTable.changes import router as changes_router
 
 load_dotenv()
 
@@ -23,7 +25,10 @@ app.add_middleware(
 # include routers
 app.include_router(timetable_router)
 app.include_router(auth_router)
-app.include_router(courses_router)
+app.include_router(cr_router)
+app.include_router(custom_router)
+app.include_router(changes_router)
+
 @app.get("/")
 async def root():
     return {"message": "hello dashboard"}
