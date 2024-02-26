@@ -59,5 +59,6 @@ CREATE TABLE IF NOT EXISTS changes_accepted
     cr_id BIGINT NOT NULL,
     PRIMARY KEY(user_id, course_code, acad_period, cr_id),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (course_code, acad_period, cr_id) REFERENCES slot_updates(course_code, acad_period,cr_id) ON DELETE CASCADE ON UPDATE CASCADE
+    FOREIGN KEY (course_code, acad_period, cr_id) REFERENCES slot_updates(course_code, acad_period,cr_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (user_id, course_code, acad_period) REFERENCES register(user_id,course_code,acad_period) ON DELETE CASCADE ON UPDATE CASCADE
 );
