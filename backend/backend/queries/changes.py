@@ -7,11 +7,11 @@ users, courses, register, custom_courses, changes_accepted, slot_updates = Table
 
 # Returns the changes to be accepted by the user
 def get_changes_to_be_accepted(user_id: int,acad_period: str):
-
+    pass
     # In progress
     
 
-    return query.get_sql()
+    # return query.get_sql()
 
 # Returns all the changes which the user has already accepted
 def get_all_accepted_changes(user_id: int,acad_period: str):
@@ -94,6 +94,15 @@ def update_change(change: Changes_Accepted):
             (changes_accepted.course_code==change.course_code) &
             (changes_accepted.acad_period==change.acad_period)
         )
+    )
+
+    return query.get_sql()
+
+def get_all_accepted_courses(user_id: int, acad_period: str):
+    query = (
+        Query.from_(changes_accepted)
+        .select('*')
+        .where((changes_accepted.user_id==user_id)&(changes_accepted.acad_period==acad_period))
     )
 
     return query.get_sql()

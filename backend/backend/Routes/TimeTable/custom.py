@@ -40,22 +40,13 @@ def post_custom_slot(slot: Slot_Change):
 @router.get("/")
 def get_custom_slots(user_id: str, acad_period: str) -> List[Slot_Change]:
     try:
-        out_list = []
         with conn.cursor() as cur:
             query = custom_queries.get_all_custom_courses(user_id, acad_period)
             cur.execute(query)
             rows = cur.fetchall()
-            for row in rows:
-                out_list.append(
-                    Slot_Change(
-                        course_code=row[0],
-                        acad_period=row[1],
-                        user_id=row[2],
-                        slot=row[3],
-                        custom_slot=row[4],
-                    )
-                )
-        return out_list
+            
+            changes = [Slot_Change.from_row(row) for row in rows]
+            return changes
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
 

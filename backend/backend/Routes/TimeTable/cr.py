@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from utils import conn
 from models import Course, User, Slot_Change
 from queries import timetable as timetable_queries
-from psycopg2.errors import ForeignKeyViolation
+from psycopg2.errors import ForeignKeyViolation, UniqueViolation
 # from psycopg2.errors import UniqueViolation
 from queries import custom as custom_queries
 from queries import cr as cr_queries
@@ -70,13 +70,17 @@ def post_change_as_cr(slot: Slot_Change):
 
         return {"message": "Change successfully posted"}
 
-    except HTTPException as e:
-        conn.rollback()
-        raise e
+    
     except ForeignKeyViolation as e:
         conn.rollback()
         raise HTTPException(
             status_code=404, detail=f'Foreign Key Violdated: {e}')
+    except UniqueViolation as e: # if error comes from unique constraint, pass to 
+        conn.rollback()
+        return patch_change_slot(slot)
+    except HTTPException as e:
+        conn.rollback()
+        raise e
     except Exception as e:
         conn.rollback()
         raise HTTPException(
@@ -84,10 +88,10 @@ def post_change_as_cr(slot: Slot_Change):
 
 
 # route for changing the slot of a course from frontend
-@router.patch('/')
-def post_change_slot(slot: Slot_Change):
+# @router.patch('/')
+def patch_change_slot(slot: Slot_Change):
     try:
-        cr = check_user_is_cr(slot.user_id)
+    #     cr = check_user_is_cr(slot.user_id)
 
         if slot.custom_slot == {}:
             slot.custom_slot = None
@@ -97,21 +101,20 @@ def post_change_slot(slot: Slot_Change):
 
         if slot.slot is not None and slot.slot not in slots:  # checking if this is a valid slot
             raise HTTPException(status_code=400, detail="Invalid Slot")
-
         with conn.cursor() as cur:
             query = cr_queries.update_CR_change(slot)
             cur.execute(query)
             conn.commit()
-
+        
         return {"message": "Change successfully posted"}
 
-    except HTTPException as e:
-        conn.rollback()
-        raise e
     except ForeignKeyViolation as e:
         conn.rollback()
         raise HTTPException(
             status_code=404, detail=f'Foreign Key Violdated: {e}')
+    except HTTPException as e:
+        conn.rollback()
+        raise e
     except Exception as e:
         conn.rollback()
         raise HTTPException(
@@ -147,7 +150,6 @@ def delete_change_slot(course_code: str, acad_period: str, cr_id: int):
 @router.get('/{user_id}')
 def get_cr_changes_for_user(user_id: int, acad_period: str) -> List[Slot_Change]:
     try:
-
         with conn.cursor() as cur:
             # fetch all custom queries
             query1 = custom_queries.get_all_custom_courses(
