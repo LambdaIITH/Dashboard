@@ -83,14 +83,16 @@ class Changes_Accepted(BaseModel):
 class Takes(BaseModel):
     course_code: str
     course_name: str
+    acad_period: str
     segment: str
     slot: str | None = None
     timings: Dict | None = None
 
     @classmethod
-    def from_row(cls, row: tuple):
-        return Takes(course_code=row[0], course_name=row[1], segment=row[2], slot=row[3], timings=row[4])
+    def from_row_type1(cls, row: tuple):
+        return Takes(course_code=row[0],acad_period= row[1] ,course_name= "", segment="", slot=row[3], timings=row[4])
 
+    
 # class Changes_tobe_Accepted(BaseModel):
 #     course_code: str
 #     course_name: str

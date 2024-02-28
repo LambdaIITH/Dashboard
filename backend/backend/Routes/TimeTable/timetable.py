@@ -12,7 +12,7 @@ router = APIRouter(prefix="/timetable", tags=["timetable"])
 
 
 def get_required_details_from_course(row: tuple):
-    return (row[0], row[2], row[3], row[4])
+    return (row[1], row[2], 0 , row[7], None) # course_code, acad_period, cr_id(none), slot, Custom(none here)
 
 
 @router.get("/{user_id}")
@@ -25,41 +25,36 @@ async def get_timetable(user_id: int, acad_period: str) -> List[Takes]:
             # getting registered courses
             cur.execute(query)
             registeredCourses = list(map(get_required_details_from_course ,cur.fetchall()))
-
+            registeredCourseCodes = [course[0] for course in registeredCourses]
+            
             # getting custom courses
             query = custom_queries.get_all_custom_courses(user_id, acad_period)
             cur.execute(query)
             customCourses = cur.fetchall()
-
+            customCourseCodes = [course[0] for course in customCourses]
+            
             # getting accepted courses
             query = changes_queries.get_all_accepted_changes(user_id, acad_period)
             cur.execute(query)
             acceptedCourses = cur.fetchall()
+            acceptedCodes = [course[0] for course in acceptedCourses]
+            
+            courses = [Takes.from_row_type1(row) for row in registeredCourses]
+            
+            for course in courses:
+                if course.course_code in acceptedCodes:
+                    course.slot = acceptedCourses[acceptedCodes.index(course.course_code)][3]
+                    course.timings = acceptedCourses[acceptedCodes.index(course.course_code)][4]
 
-            answer = []
+                if course.course_code in customCourseCodes:
+                    course.slot = customCourses[customCourseCodes.index(course.course_code)][3]
+                    course.timings = customCourses[customCourseCodes.index(course.course_code)][4]
+            
+            courses.extend([Takes.from_row_type1(row) for row in customCourses if row[0] not in registeredCourseCodes])
+            print(courses)
+            # TODO TO ADD COURSE NAMES AND SEGMENTS
+            return courses
 
-            for row in acceptedCourses:
-                for i, registered_course in enumerate(registeredCourses):
-                    if registered_course[0] == row[0]:
-                        a=registered_course
-                        a[4]=row[4]
-                        answer.append(Takes.from_row(a))
-                        del registeredCourses[i]
-                        break
-            
-            for row in customCourses:
-                for i, registered_course in enumerate(registeredCourses):
-                    if registered_course[0] == row[0]:
-                        a=registered_course
-                        a[4]=row[4]
-                        answer.append(Takes.from_row(a))
-                        del registeredCourses[i]
-                        break
-            
-            for i in registeredCourses:
-                answer.append(i)
-            
-            return answer
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal Server Error : {e}")
 

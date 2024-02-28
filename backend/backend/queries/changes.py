@@ -17,20 +17,16 @@ def get_changes_to_be_accepted(user_id: int,acad_period: str):
 def get_all_accepted_changes(user_id: int,acad_period: str):
     query = (
         Query.from_(changes_accepted)
-        .join(courses)
-        .on(
-            (courses.course_code==changes_accepted.course_code) &
-            (courses.acad_period==changes_accepted.acad_period)
-        )
         .join(slot_updates)
         .on(
-            (slot_updates.course_code==courses.course_code) &
-            (slot_updates.acad_period==courses.course_code)
+            (slot_updates.course_code== changes_accepted.course_code) &
+            (slot_updates.acad_period== changes_accepted.acad_period) & 
+            (slot_updates.cr_id==changes_accepted.cr_id)
         )
         .select(
-            courses.course_code,
-            courses.course_name,
-            courses.segment,
+            changes_accepted.course_code,
+            changes_accepted.acad_period,
+            changes_accepted.cr_id,
             slot_updates.updated_slot,
             slot_updates.custom_timings
         )

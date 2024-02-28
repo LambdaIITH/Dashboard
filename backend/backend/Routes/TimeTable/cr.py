@@ -146,34 +146,34 @@ def delete_change_slot(course_code: str, acad_period: str, cr_id: int):
             status_code=500, detail=f'Internal Server Error: {type(e)} {e}')
 
 
-# TODO change cr id's with cr names
-@router.get('/{user_id}')
-def get_cr_changes_for_user(user_id: int, acad_period: str) -> List[Slot_Change]:
-    try:
-        with conn.cursor() as cur:
-            # fetch all custom queries
-            query1 = custom_queries.get_all_custom_courses(
-                user_id, acad_period)
-            cur.execute(query1)
-            rows = cur.fetchall()
-            courses = [row[0] for row in rows]
+# # TODO change cr id's with cr names
+# @router.get('/{user_id}')
+# def get_cr_changes_for_user(user_id: int, acad_period: str) -> List[Slot_Change]:
+#     try:
+#         with conn.cursor() as cur:
+#             # fetch all custom queries
+#             query1 = custom_queries.get_all_custom_courses(
+#                 user_id, acad_period)
+#             cur.execute(query1)
+#             rows = cur.fetchall()
+#             courses = [row[0] for row in rows]
 
-            query2 = timetable_queries.get_allRegisteredCourses(
-                user_id, acad_period)
-            cur.execute(query2)
-            rows = cur.fetchall()
-            courses.extend([row[0] for row in rows])
+#             query2 = timetable_queries.get_allRegisteredCourses(
+#                 user_id, acad_period)
+#             cur.execute(query2)
+#             rows = cur.fetchall()
+#             courses.extend([row[0] for row in rows])
 
-            courses = list(set(courses))  # for getting the unique courses
+#             courses = list(set(courses))  # for getting the unique courses
 
-            # fetch all cr changes in any of custom or registered courses
-            query3 = cr_queries.get_CR_changes(courses, acad_period)
-            cur.execute(query3)
-            rows = cur.fetchall()
-            changes = [Slot_Change.from_row(row) for row in rows]
+#             # fetch all cr changes in any of custom or registered courses
+#             query3 = cr_queries.get_CR_changes(courses, acad_period)
+#             cur.execute(query3)
+#             rows = cur.fetchall()
+#             changes = [Slot_Change.from_row(row) for row in rows]
 
-            return changes
+#             return changes
 
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f'Internal Server Error: {e}')
+#     except Exception as e:
+#         raise HTTPException(
+#             status_code=500, detail=f'Internal Server Error: {e}')

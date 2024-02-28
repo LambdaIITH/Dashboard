@@ -19,9 +19,6 @@ def post_custom_slot(slot: Slot_Change):
         if slot.slot is not None and slot.slot not in slots:  # checking if this is a valid slot
             raise HTTPException(status_code=400, detail="Invalid Slot")
 
-        if slot.custom_slot is not None and slot.slot is not None:
-            raise HTTPException(
-                status_code=400, detail="Both slot and custom_slot provided")
             
         with conn.cursor() as cur:
             query = custom_queries.post_course(slot)
@@ -75,10 +72,6 @@ def patch_custom_slot(slot: Slot_Change):
         if slot.slot is not None and slot.slot not in slots:  # checking if this is a valid slot
             raise HTTPException(status_code=400, detail="Invalid Slot")
 
-
-        if slot.custom_slot is not None and slot.slot is not None:
-            raise HTTPException(
-                status_code=400, detail="Both slot and custom_slot provided")
             
         with conn.cursor() as cur:
             query = custom_queries.update_course(slot)
