@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/cab_add_screen.dart';
 import 'package:frontend/widgets/cab_details.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class CabSharingScreen extends StatefulWidget {
+  const CabSharingScreen({Key? key}) : super(key: key);
   @override
   State<CabSharingScreen> createState() => _CabSharingScreenState();
 }
@@ -51,8 +53,15 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
         width: 75.0,
         child: FittedBox(
           child: FloatingActionButton(
-            onPressed: () {},
-            backgroundColor: Color.fromRGBO(254, 114, 76, 0.70),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const CabAddScreen(),
+                ),
+              );
+            },
+            backgroundColor: const Color.fromRGBO(254, 114, 76, 0.70),
             child: const Icon(
               Icons.add,
               size: 30.0,
@@ -239,7 +248,7 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
               ],
             ),
             const SizedBox(height: 25.0),
-            CabCard(),
+            const CabCard(),
           ],
         ),
       ),
