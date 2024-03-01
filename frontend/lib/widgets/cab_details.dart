@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class CabCard extends StatelessWidget {
+  const CabCard({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -87,8 +88,8 @@ class CabCard extends StatelessWidget {
               Row(
                 children: [
                   Container(
-                    decoration: BoxDecoration(
-                      boxShadow: const [
+                    decoration: const BoxDecoration(
+                      boxShadow: [
                         BoxShadow(
                           color: Color.fromRGBO(51, 51, 51, 0.10),
                           offset: Offset(0, 2), // Offset in the x, y direction
@@ -101,9 +102,8 @@ class CabCard extends StatelessWidget {
                     ),
                     child: TextButton(
                       onPressed: () {},
-                      child: const Text("Share Cab"),
                       style: TextButton.styleFrom(
-                        backgroundColor: Color.fromRGBO(254, 114, 76, 0.70),
+                        backgroundColor: const Color.fromRGBO(254, 114, 76, 0.70),
                         textStyle: GoogleFonts.inter(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
@@ -117,12 +117,13 @@ class CabCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(10.0),
                         ),
                       ),
+                      child: const Text("Share Cab"),
                     ),
                   ),
                   const SizedBox(width: 15.0),
                   Container(
                     decoration: BoxDecoration(
-                      boxShadow: [
+                      boxShadow:const  [
                         BoxShadow(
                           color: Color.fromRGBO(51, 51, 51, 0.10),
                           offset: Offset(0, 8), // Offset in the x, y direction
@@ -136,7 +137,7 @@ class CabCard extends StatelessWidget {
                     child: Container(
                       width: 40,
                       height: 40,
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         shape: BoxShape.circle,
                         color: Color.fromRGBO(254, 114, 76, 0.70),
                       ),
