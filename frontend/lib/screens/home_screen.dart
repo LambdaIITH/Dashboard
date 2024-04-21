@@ -3,6 +3,7 @@ import 'package:frontend/screens/cab_sharing_screen.dart';
 import 'package:frontend/screens/time_table_screen.dart';
 import 'package:frontend/widgets/home_card_no_options.dart';
 import 'package:frontend/widgets/home_card_two_options.dart';
+import 'package:frontend/widgets/home_screen_drawer.dart';
 
 class HomeScreen extends StatefulWidget {
   final String user;
@@ -16,6 +17,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+
   void showError() {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -30,6 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: const Color(0xfffcfcfc),
       appBar: buildNavBar(),
       body: Padding(
@@ -96,6 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
+      drawer: const HomeScreenDrawer(),
     );
   }
 
@@ -121,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: IconButton(
             icon: const Icon(Icons.menu, size: 40),
             onPressed: () {
-              // Scaffold.of(context).openDrawer();
+              Scaffold.of(context).openDrawer();
             },
           ),
         );
@@ -129,7 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
       actions: [
         Card(
           elevation: 2,
-          color: const Color(0xb3FE724C),
+          color: const Color.fromRGBO(254, 114, 76, 0.70),
           child: Row(
             children: [
               IconButton(
@@ -154,4 +159,5 @@ class _HomeScreenState extends State<HomeScreen> {
       toolbarHeight: kToolbarHeight + 20,
     );
   }
+
 }
