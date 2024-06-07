@@ -92,7 +92,37 @@ class Takes(BaseModel):
     def from_row_type1(cls, row: tuple):
         return Takes(course_code=row[0],acad_period= row[1] ,course_name= "", segment="", slot=row[3], timings=row[4])
 
+
+class LfItem(BaseModel):
+    id: int
+    item_name: str
+    item_description: str 
+    created_at: datetime
+    image_urls: List[str] | None = None 
     
+    @classmethod
+    def from_row(cls, row: tuple):
+        return LfItem(id=row[0], item_name=row[1], item_description=row[2], created_at=row[3])
+
+class LfResponse(BaseModel):
+    item_name: str
+    item_description: str 
+    created_at: datetime
+    image_urls: List[str]
+    @classmethod
+    def from_im_items(cls, item: LfItem):
+        return LfResponse(item_name = item.item_name, item_description= item.item_description, created_at= item.created_at, image_urls= item.image_urls)
+    
+    
+class image_info(BaseModel):
+    id: int
+    image_url: str
+    item_id: int  
+    
+    @classmethod
+    def from_row(cls, row:tuple):
+        return image_info(id = row[0], image_url= row[1],  item_id = row[3])
+
 # class Changes_tobe_Accepted(BaseModel):
 #     course_code: str
 #     course_name: str

@@ -62,3 +62,37 @@ CREATE TABLE IF NOT EXISTS changes_accepted
     FOREIGN KEY (course_code, acad_period, cr_id) REFERENCES slot_updates(course_code, acad_period,cr_id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (user_id, course_code, acad_period) REFERENCES register(user_id,course_code,acad_period) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS lost
+(
+    id BIGINT PRIMARY KEY,
+    item_name VARCHAR(256) NOT NULL,
+    item_description VARCHAR(512) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS found
+(
+    id BIGINT PRIMARY KEY,
+    item_name VARCHAR(256) NOT NULL,
+    item_description VARCHAR(512) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS lost_images
+(
+    id BIGINT PRIMARY KEY,
+    image_url VARCHAR(256) NOT NULL,
+    item_id BIGINT NOT NULL,
+
+    FOREIGN KEY(item_id) REFERENCES lost(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS found_images
+(
+    id BIGINT PRIMARY KEY,
+    image_url VARCHAR(256) NOT NULL,
+    item_id BIGINT NOT NULL,
+
+    FOREIGN KEY(item_id) REFERENCES found(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
