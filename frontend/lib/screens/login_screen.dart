@@ -5,6 +5,24 @@ import 'package:frontend/widgets/login_guest.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 
+class LoginScreenWrapper extends StatelessWidget {
+  final double timeDilationFactor;
+  
+  const LoginScreenWrapper({super.key, this.timeDilationFactor = 1.0});
+
+  @override
+  Widget build(BuildContext context) {
+    timeDilation = timeDilationFactor;
+    return WillPopScope(
+      onWillPop: () async {
+        timeDilation = 1.0;
+        return true;
+      },
+      child: LoginScreen(timeDilation: timeDilationFactor),
+    );
+  }
+}
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key, this.timeDilation = 1.0});
   final double timeDilation;
@@ -15,13 +33,23 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    super.initState();
     timeDilation = widget.timeDilation;
+  }
+
+  @override
+  void dispose() {
+    timeDilation = 1.0; // Reset to default
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 0.0,
-        systemOverlayStyle:
-            const SystemUiOverlayStyle(statusBarColor: Colors.white),
+        systemOverlayStyle: const SystemUiOverlayStyle(statusBarColor: Colors.white),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -35,14 +63,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   Flexible(
                     child: RichText(
-                        text: TextSpan(
-                            text: "Welcome to\n",
-                            style: GoogleFonts.inter(
-                              fontSize: 28,
-                              fontWeight: FontWeight.w500,
-                              color: const Color(0xff454545),
-                            ),
-                            children: [
+                      text: TextSpan(
+                        text: "Welcome to\n",
+                        style: GoogleFonts.inter(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xff454545),
+                        ),
+                        children: [
                           TextSpan(
                             text: "Campus\nCompanion",
                             style: GoogleFonts.inter(
@@ -50,8 +78,10 @@ class _LoginScreenState extends State<LoginScreen> {
                               fontWeight: FontWeight.w700,
                               color: const Color(0xff272D2F),
                             ),
-                          )
-                        ])),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                   Hero(
                     tag: "splash_icon",
@@ -63,9 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ],
               ),
-              const SizedBox(
-                height: 42,
-              ),
+              const SizedBox(height: 42),
               Text(
                 "Sign in to continue",
                 style: GoogleFonts.inter(
@@ -74,9 +102,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   color: const Color(0xff555555),
                 ),
               ),
-              const SizedBox(
-                height: 28,
-              ),
+              const SizedBox(height: 28),
               const ContinueAsGuest(),
               Container(
                 margin: const EdgeInsets.fromLTRB(0, 12, 0, 12),
@@ -91,9 +117,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               const CustomGoogleButton(),
-              const SizedBox(
-                height: 42,
-              ),
+              const SizedBox(height: 42),
             ],
           ),
         ),
