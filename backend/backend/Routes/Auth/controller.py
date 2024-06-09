@@ -4,8 +4,8 @@ from Routes.Auth.auth import handle_login
 from Routes.Auth.tokens import generate_access_token, verify_refresh_token
 
 router = APIRouter(
-    prefix="/auth1",
-    tags=["auth1"]
+    prefix="/auth",
+    tags=["auth"]
 )
 
 class LoginRequest(BaseModel):
@@ -37,3 +37,4 @@ def refresh_access_token(at_req: AccessTokenRequest):
         return {"access_token": new_at, "refresh_token": rt}
     else:
         return HTTPException(status_code=401, detail=msg)
+    

@@ -19,7 +19,7 @@ class Course(BaseModel):
 
 
 class User(BaseModel):
-    id: int
+    id: int = None
     email: str
     cr: bool = False
     refresh_token: str
