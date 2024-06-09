@@ -7,7 +7,7 @@ license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.10"
 fastapi = "^0.108.0"
 uvicorn = {extras = ["standard"], version = "^0.25.0"}
 python-dotenv = "^1.0.0"
@@ -15,6 +15,7 @@ psycopg2-binary = "^2.9.9"
 google-auth = "^2.26.1"
 pypika = "^0.48.9"
 requests = "^2.31.0"
+pyjwt = "^2.8.0"
 
 
 [tool.poetry.group.dev.dependencies]

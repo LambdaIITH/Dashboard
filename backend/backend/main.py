@@ -1,4 +1,4 @@
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from Routes.TimeTable.timetable import router as timetable_router
@@ -26,11 +26,42 @@ app.add_middleware(
 # include routers
 app.include_router(timetable_router)
 app.include_router(auth_router)
+app.include_router(auth_router1)
 app.include_router(cr_router)
 app.include_router(custom_router)
 app.include_router(changes_router)
 app.include_router(mess_menu_router)
 
+
+user_id = -1
+
+async def token_verification_middleware(request: Request, call_next):
+    global user_id
+    authorization = request.headers.get("Authorization")
+    if authorization:
+        scheme, token = authorization.split()
+        if scheme.lower() != "bearer":
+            return JSONResponse(status_code=401, content={"detail": "Invalid authorization scheme"})
+        status, data = verify_access_token(token)
+        if status is False:
+            return JSONResponse(status_code=401, content={"detail": data})
+        user_id = data["sub"] # Updating user_id 
+    else:
+        return JSONResponse(status_code=401, content={"detail": "Authorization header is missing"})
+
+    response = await call_next(request)
+    return response
+
+
+@app.middleware("http")
+async def apply_middleware(request: Request, call_next):
+    excluded_routes = ["/auth1/login", "/auth1/access_token"]  # Add routes to exclude guard here
+
+    if request.url.path not in excluded_routes:
+        return await token_verification_middleware(request, call_next)
+    else:
+        response = await call_next(request)
+        return response
 
 @app.get("/")
 async def root():

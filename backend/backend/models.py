@@ -22,10 +22,11 @@ class User(BaseModel):
     id: int
     email: str
     cr: bool = False
+    refresh_token: str
     
     @classmethod
     def from_row(cls, row: tuple):
-        return User(id = row[0], email = row[1], cr = row[2])
+        return User(id = row[0], email = row[1], cr = row[2], refresh_token=row[3])
 
 
 class Register(BaseModel):
