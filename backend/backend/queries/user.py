@@ -1,4 +1,4 @@
-from pypika import Table, Query, Field, Column
+from pypika import Table, Query
 from models import User
 from typing import List
 
@@ -19,6 +19,5 @@ def get_refresh_token(user_id: int):
 def post_user(user: User):
     query = (Query.into(users)
              .columns(users.email, users.cr, users.refresh_token)
-             .insert(user.email, user.cr, user.refresh_token)
-             .returning(users.id))
+             .insert(user.email, user.cr, user.refresh_token))
     return query.get_sql()

@@ -9,6 +9,8 @@ import re
 from models import User
 from utils import conn
 from queries import user as user_queries
+from pypika import  Query
+from queries.user import users
 
 load_dotenv()
 
@@ -59,8 +61,24 @@ def is_valid_iith_email(email):
 
 def insert_user(user: User):
     cursor = conn.cursor()
-    insert_query = user_queries.post_user(user)
-    cursor.execute(insert_query)
-    user_id = cursor.fetchone()[0] 
-    conn.commit()
-    return user_id
+    try:
+        insert_query = user_queries.post_user(user)
+        print(f"Executing insert query: {insert_query}")
+        cursor.execute(insert_query)
+        conn.commit()
+    except Exception as e:
+        print(f"Error executing insert query: {e}")
+        conn.rollback()
+        raise
+    try:
+        # Retrieve the user ID of the newly inserted user
+        select_query = Query.from_(users).select(users.id).where(users.email == user.email)
+        print(f"Executing select query: {select_query}")
+        cursor.execute(select_query.get_sql())
+        user_id = cursor.fetchone()[0]
+        return user_id
+    except Exception as e:
+        print(f"Error executing select query: {e}")
+        raise
+    finally:
+        cursor.close()

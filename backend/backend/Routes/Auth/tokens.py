@@ -2,7 +2,8 @@ import os
 import jwt
 from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
-
+from queries import user as user_queries
+from utils import conn
 
 load_dotenv()
 at_secret = os.getenv("ACCESS_TOKEN_SECRET")
@@ -43,16 +44,19 @@ def generate_refresh_token(email):
 
 def verify_refresh_token(refresh_token, user_id):
     try:
-        decoded_token = jwt.decode(
-            refresh_token, 
-            rt_secret, 
-            algorithms=["HS256"]
-        )
-
-        #TODO: `SELECT refresh_token FROM Users WHERE id = {user_id}` 
-        # and if both are same then return TRUE, otherwise 401
-
-        return True , "" # TODO: change it
+        # Fetch the stored refresh token from the database
+        cursor = conn.cursor()
+        query = user_queries.get_refresh_token(user_id)
+        cursor.execute(query)
+        result = cursor.fetchone()
+        if result is None:
+            return False, "User ID does not exist"
+        stored_refresh_token = result[0]
+        
+        if stored_refresh_token == refresh_token:
+            return True, "Valid refresh token"
+        else:
+            return False, "Invalid refresh token"
 
     except jwt.ExpiredSignatureError:
         return False, "Token has expired"
