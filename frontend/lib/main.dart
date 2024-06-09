@@ -1,13 +1,14 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/login_screen.dart';
-import 'package:frontend/screens/splash_screen.dart';
+import 'package:frontend/firebase_options.dart';
+import 'package:frontend/screens/mess_menu_screen.dart';
 // import 'package:frontend/screens/login_screen.dart';
 // import 'package:frontend/screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
   );
   runApp(const MyApp());
 }
@@ -24,11 +25,12 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: SplashScreen(
-          nextPage: LoginScreenWrapper(
-        timeDilationFactor: 4.0,
-      )),
+      // home: SplashScreen(
+      //     nextPage: LoginScreenWrapper(
+      //   timeDilationFactor: 4.0,
+      // )),
       // home: HomeScreen(user: 'guest'),
+      home: MessMenuScreen(),
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:frontend/screens/home_screen.dart';
+import 'package:frontend/services/api_service.dart';
 import 'package:frontend/utils/loading_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -43,8 +44,10 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
       }
 
       if (mounted) {
-        Navigator.push(context,
-            MaterialPageRoute(builder: (context) => const CustomLoadingScreen()));
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => const CustomLoadingScreen()));
       }
 
       final GoogleSignInAuthentication googleAuth =
@@ -57,7 +60,11 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
 
       await auth.signInWithCredential(credential);
 
-      //TODO: call backend
+      printInChunks(googleAuth.idToken ?? '');
+
+      var user = await ApiServices().authUser(googleAuth.idToken ?? 'aa45');
+      print(user!.id);
+      
     } catch (error) {
       showSnackBar('Failed to sign in with Google.');
     }
@@ -67,10 +74,17 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
     await _googleSignIn.signOut();
   }
 
+  void printInChunks(String longString, {int chunkSize = 500}) {
+    for (int i = 0; i < longString.length; i += chunkSize) {
+      int end = (i + chunkSize < longString.length)
+          ? i + chunkSize
+          : longString.length;
+      debugPrint(longString.substring(i, end));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // logout();
-
     return Container(
       height: 60,
       width: double.infinity,
