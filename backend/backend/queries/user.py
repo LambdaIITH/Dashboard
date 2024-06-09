@@ -1,4 +1,4 @@
-from pypika import Table, Query
+from pypika import Table, Query, Field
 from models import User
 from typing import List
 

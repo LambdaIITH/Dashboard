@@ -29,7 +29,6 @@ def verify_id_token(token):
         return False, f"Token verification failed: {e}"
 
 
-#TODO implement for exsiting user also
 def handle_login(id_token):
     ok, data = verify_id_token(id_token)
 
@@ -39,20 +38,21 @@ def handle_login(id_token):
     if not is_valid_iith_email(data["email"]):
         return False, {"error": "Please Try IITH email", "status": 401}
     
-    # if data["hd"] != "iith.ac.in" :
-    #     return False, {"error": "Please Try IITH email", "status": 401}
+    exists, user_id, stored_refresh_token = is_user_exists(data["email"])
     
-    # generating rt
-    refresh_token = generate_refresh_token(data["email"])
-    
-    #insert user into db
-    new_user = User(email=data["email"], refresh_token=refresh_token)
-    user_id = insert_user(new_user)
+    if exists:
+        # User already exists, use the existing refresh token
+        refresh_token = stored_refresh_token
+    else:
+        # Insert new user into the database
+        refresh_token = generate_refresh_token(data["email"])
+        new_user = User(email=data["email"], refresh_token=refresh_token)
+        user_id = insert_user(new_user)
     
     # generating at
     access_token = generate_access_token(user_id)
 
-    return True, {"id": user_id, "access_token": access_token, "refresh_token": refresh_token, "email": new_user.email}
+    return True, {"id": user_id, "access_token": access_token, "refresh_token": refresh_token, "email": data["email"]}
 
 
 def is_valid_iith_email(email):
@@ -63,22 +63,33 @@ def insert_user(user: User):
     cursor = conn.cursor()
     try:
         insert_query = user_queries.post_user(user)
-        print(f"Executing insert query: {insert_query}")
         cursor.execute(insert_query)
         conn.commit()
     except Exception as e:
-        print(f"Error executing insert query: {e}")
         conn.rollback()
         raise
     try:
         # Retrieve the user ID of the newly inserted user
         select_query = Query.from_(users).select(users.id).where(users.email == user.email)
-        print(f"Executing select query: {select_query}")
         cursor.execute(select_query.get_sql())
         user_id = cursor.fetchone()[0]
         return user_id
     except Exception as e:
-        print(f"Error executing select query: {e}")
+        raise
+    finally:
+        cursor.close()
+        
+def is_user_exists(email: str):
+    cursor = conn.cursor()
+    try:
+        query = Query.from_(users).select(users.id, users.refresh_token).where(users.email == email)
+        cursor.execute(query.get_sql())
+        result = cursor.fetchone()
+        if result:
+            return True, result[0], result[1]
+        else:
+            return False, None, None
+    except Exception as e:
         raise
     finally:
         cursor.close()
