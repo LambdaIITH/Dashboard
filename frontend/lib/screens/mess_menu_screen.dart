@@ -4,39 +4,39 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 List breakfast = [
-      '1. Aloo Paratha',
-      '2. Pudina Chutney',
-      '3. Curd',
-      '4. Butter',
-      '5. Milk',
-      '6. Tea',
-      '7. Bournvita',
-      '8. Egg/Banana'
+      'Aloo Paratha',
+      'Pudina Chutney',
+      'Curd',
+      'Butter',
+      'Milk',
+      'Tea',
+      'Bournvita',
+      'Egg/Banana'
 ];
 
 List lunch = [
-      '1. Plain Roti',
-      '2. Masoor Dal',
-      '3. Aloo-methi',
-      '4. Rice',
-      '5. Curd',
-      '6. Papad',
-      '7. Sambar',
-      '8. Salad'
+      'Plain Roti',
+      'Masoor Dal',
+      'Aloo-methi',
+      'Rice',
+      'Curd',
+      'Papad',
+      'Sambar',
+      'Salad'
 ];
 List snacks = [
-      '1. Ginger tea',
-      '2. milk'
+      'Ginger tea',
+      'milk'
 ];
 List dinner = [
-      '1. Plain Roti',
-      '2. Rajma',
-      '3. Chicken/Paneer biryani',
-      '4. Veg korma',
-      '5. Buttermilk',
-      '6. Papad',
-      '7. Rice',
-      '8. Salad'
+      'Plain Roti',
+      'Rajma',
+      'Chicken/Paneer biryani',
+      'Veg korma',
+      'Buttermilk',
+      'Papad',
+      'Rice',
+      'Salad'
 ];
 
 class MessMenuScreen extends StatelessWidget {

@@ -27,9 +27,9 @@ class ShowMessMenu extends StatelessWidget {
                   color: const Color(0xff000000).withOpacity(0.25),
                   offset: const Offset(
                     0.0,
-                    8.0,
+                    4.0,
                   ),
-                  blurRadius: 21.0,
+                  blurRadius: 3.0,
                   spreadRadius: 0.0)
             ]),
         child: RoundedExpansionTile(
