@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -14,6 +16,7 @@ class HomeCardNoOptions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -49,7 +52,7 @@ class HomeCardNoOptions extends StatelessWidget {
               right: -7,
               child: SvgPicture.asset(
                 image,
-                width: 200,
+                width: min(0.5 * screenWidth, 200),
               ),
             ),
           ],

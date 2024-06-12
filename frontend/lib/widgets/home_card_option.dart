@@ -14,6 +14,7 @@ class HomeCardOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
     return InkWell(
       onTap: onTap,
       child: Card(
@@ -23,7 +24,7 @@ class HomeCardOption extends StatelessWidget {
         elevation: 3,
         child: SizedBox(
           height: 68,
-          width: 140,
+          width: 0.38 * screenWidth,
           child: Stack(
             children: [
               Align(
@@ -31,11 +32,11 @@ class HomeCardOption extends StatelessWidget {
                 child: image.endsWith('svg')
                     ? SvgPicture.asset(
                         image,
-                        height: 50,
+                        height: 0.12 * screenWidth,
                       )
                     : Image.asset(
                         image,
-                        height: 50,
+                        height: 0.12 * screenWidth,
                       ),
               ),
               Align(
@@ -43,7 +44,7 @@ class HomeCardOption extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.only(left: 11),
                   child: SizedBox(
-                    width: 60,
+                    width: 0.3 * screenWidth,
                     child: Text(
                       title,
                       style: const TextStyle(

@@ -1,7 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/firebase_options.dart';
-import 'package:frontend/screens/mess_menu_screen.dart';
+import 'package:frontend/screens/home_screen.dart';
+// import 'package:frontend/screens/mess_menu_screen.dart';
 // import 'package:frontend/screens/login_screen.dart';
 // import 'package:frontend/screens/splash_screen.dart';
 
@@ -29,8 +30,8 @@ class _MyAppState extends State<MyApp> {
       //     nextPage: LoginScreenWrapper(
       //   timeDilationFactor: 4.0,
       // )),
-      // home: HomeScreen(user: 'guest'),
-      home: MessMenuScreen(),
+      home: HomeScreen(user: ''),
+      // home: MessMenuScreen(),
     );
   }
 }

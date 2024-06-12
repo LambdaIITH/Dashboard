@@ -8,7 +8,7 @@ class HomeCardTwoOptions extends StatelessWidget {
   final String image1;
   final String image2;
   final List<void Function()>? onTap;
-  
+
   const HomeCardTwoOptions({
     super.key,
     required this.title,
@@ -21,21 +21,22 @@ class HomeCardTwoOptions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
     return Container(
       height: 160,
-        decoration:  BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          boxShadow: const [
-            BoxShadow(
-              color: Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
-              offset: Offset(0, 4), // Offset in the x, y direction
-              blurRadius: 10.0,
-              spreadRadius: 0.0,
-            ),
-          ],
-        ),
-        clipBehavior: Clip.hardEdge,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: const [
+          BoxShadow(
+            color: Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
+            offset: Offset(0, 4), // Offset in the x, y direction
+            blurRadius: 10.0,
+            spreadRadius: 0.0,
+          ),
+        ],
+      ),
+      clipBehavior: Clip.hardEdge,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -61,7 +62,7 @@ class HomeCardTwoOptions extends StatelessWidget {
                   image: image1,
                   onTap: onTap?[0],
                 ),
-                const SizedBox(width: 30),
+                SizedBox(width: 0.06 * screenWidth),
                 HomeCardOption(
                   title: title2,
                   image: image2,
