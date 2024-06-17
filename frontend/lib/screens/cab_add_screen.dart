@@ -10,11 +10,11 @@ class CabAddScreen extends StatefulWidget {
 
 class _CabAddScreenState extends State<CabAddScreen> {
   DateTime selectedDate = DateTime.now();
-  String? selectedOption;
-  String? selectedOption2;
-  TimeOfDay selectedStartTime = TimeOfDay.now();
-  TimeOfDay selectedEndTime = TimeOfDay.now();
-  String seats = '';
+  String? selectedFromPlace;
+  String? selectedToPlace;
+  TimeOfDay? selectedStartTime;
+  TimeOfDay? selectedEndTime;
+  String? seats;
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -32,7 +32,7 @@ class _CabAddScreenState extends State<CabAddScreen> {
   Future<void> _selectStartTime(BuildContext context) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
-      initialTime: selectedStartTime,
+      initialTime: TimeOfDay.now(),
     );
     if (picked != null && picked != selectedStartTime) {
       setState(() {
@@ -44,7 +44,7 @@ class _CabAddScreenState extends State<CabAddScreen> {
   Future<void> _selectEndTime(BuildContext context) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
-      initialTime: selectedEndTime,
+      initialTime: TimeOfDay.now(),
     );
     if (picked != null && picked != selectedEndTime) {
       setState(() {
@@ -122,9 +122,9 @@ class _CabAddScreenState extends State<CabAddScreen> {
                         );
                       }).toList(),
                       onChanged: (String? value) {
-                        selectedOption = value;
+                        selectedFromPlace = value;
                       },
-                      hint: selectedOption == null
+                      hint: selectedFromPlace == null
                           ? Text(
                               'From',
                               style: GoogleFonts.inter(
@@ -185,9 +185,9 @@ class _CabAddScreenState extends State<CabAddScreen> {
                         );
                       }).toList(),
                       onChanged: (String? value) {
-                        selectedOption2 = value;
+                        selectedToPlace = value;
                       },
-                      hint: selectedOption2 == null
+                      hint: selectedToPlace == null
                           ? Text(
                               'To',
                               style: GoogleFonts.inter(
@@ -229,7 +229,11 @@ class _CabAddScreenState extends State<CabAddScreen> {
                         color: Colors.black,
                       ),
                       decoration: InputDecoration(
-                        hintText: selectedOption == null
+                        suffixIcon: const Icon(
+                          Icons.date_range,
+                          color: Color(0xffADADAD),
+                        ),
+                        hintText: selectedFromPlace == null
                             ? 'Date'
                             : "${selectedDate.toLocal()}".split(' ')[0],
                         hintStyle: GoogleFonts.inter(
@@ -279,6 +283,10 @@ class _CabAddScreenState extends State<CabAddScreen> {
                         color: Colors.black,
                       ),
                       decoration: const InputDecoration(
+                        suffixIcon: Icon(
+                          Icons.access_time,
+                          color: Color(0xffADADAD),
+                        ),
                         hintText: 'Start Time',
                         hintStyle: TextStyle(
                           fontSize: 20,
@@ -293,8 +301,9 @@ class _CabAddScreenState extends State<CabAddScreen> {
                       ),
                       onTap: () => _selectStartTime(context),
                       controller: TextEditingController(
-                        text:
-                            "${selectedStartTime.hour}:${selectedStartTime.minute} ",
+                        text: selectedStartTime == null
+                            ? 'Start Time'
+                            : "${selectedStartTime?.hour}:${selectedStartTime?.minute} ",
                       ),
                     ),
                   ),
@@ -324,6 +333,10 @@ class _CabAddScreenState extends State<CabAddScreen> {
                         color: Colors.black,
                       ),
                       decoration: const InputDecoration(
+                        suffixIcon: Icon(
+                          Icons.access_time,
+                          color: Color(0xffADADAD),
+                        ),
                         hintText: 'End Time',
                         hintStyle: TextStyle(
                           fontSize: 20,
@@ -338,8 +351,9 @@ class _CabAddScreenState extends State<CabAddScreen> {
                       ),
                       onTap: () => _selectEndTime(context),
                       controller: TextEditingController(
-                        text:
-                            "${selectedEndTime.hour}:${selectedEndTime.minute}",
+                        text: selectedEndTime == null
+                            ? 'End Time'
+                            : "${selectedEndTime?.hour}:${selectedEndTime?.minute}",
                       ),
                     ),
                   ),
@@ -360,28 +374,47 @@ class _CabAddScreenState extends State<CabAddScreen> {
                 borderRadius: BorderRadius.circular(10.0),
                 color: Colors.white,
               ),
-              child: TextFormField(
-                style: GoogleFonts.inter(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.black,
-                ),
+              child: DropdownButtonFormField<String>(
+                borderRadius: BorderRadius.circular(10.0),
                 decoration: const InputDecoration(
-                  hintText: 'Seats',
-                  hintStyle: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w400,
-                    color: Color(0xffADADAD),
-                  ),
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.symmetric(
-                    horizontal: 20.0,
-                    vertical: 20.0,
+                    horizontal: 15.0,
+                    vertical: 25.0,
                   ),
                 ),
-                onChanged: (String value) {
+                items: [
+                  '1',
+                  '2',
+                  '3',
+                  '4',
+                  '5',
+                ].map((String seat) {
+                  return DropdownMenuItem<String>(
+                    value: seat,
+                    child: Text(
+                      seat,
+                      style: GoogleFonts.inter(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black,
+                      ),
+                    ),
+                  );
+                }).toList(),
+                onChanged: (String? value) {
                   seats = value;
                 },
+                hint: seats == null
+                    ? Text(
+                        'Seats',
+                        style: GoogleFonts.inter(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xffADADAD),
+                        ),
+                      )
+                    : null,
               ),
             ),
             const SizedBox(height: 25.0),
