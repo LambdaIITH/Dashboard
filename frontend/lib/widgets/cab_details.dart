@@ -66,18 +66,37 @@ class CabCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 10.0),
-                  Text(
-                    "QRST",
-                    style: GoogleFonts.inter(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      color: const Color(0xffADADAD),
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        "Campus",
+                        style: GoogleFonts.inter(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xffADADAD),
+                        ),
+                      ),
+                      const SizedBox(width: 10.0),
+                      const Icon(
+                        Icons.arrow_forward,
+                        color: Color(0xffADADAD),
+                        size: 20,
+                      ),
+                      const SizedBox(width: 10.0),
+                      Text(
+                        "RGIA",
+                        style: GoogleFonts.inter(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xffADADAD),
+                        ),
+                      ),
+                    ],
                   ),
                   Text(
-                    "BYD321321",
+                    "TS 32 AB 5327",
                     style: GoogleFonts.inter(
-                      fontSize: 16,
+                      fontSize: 20,
                       fontWeight: FontWeight.w500,
                       color: const Color(0xffADADAD),
                     ),
@@ -103,9 +122,10 @@ class CabCard extends StatelessWidget {
                     child: TextButton(
                       onPressed: () {},
                       style: TextButton.styleFrom(
-                        backgroundColor: const Color.fromRGBO(254, 114, 76, 0.70),
+                        backgroundColor:
+                            const Color.fromRGBO(254, 114, 76, 0.70),
                         textStyle: GoogleFonts.inter(
-                          fontSize: 15,
+                          fontSize: 18,
                           fontWeight: FontWeight.w600,
                           color: Colors.black,
                         ),
@@ -123,7 +143,7 @@ class CabCard extends StatelessWidget {
                   const SizedBox(width: 15.0),
                   Container(
                     decoration: BoxDecoration(
-                      boxShadow:const  [
+                      boxShadow: const [
                         BoxShadow(
                           color: Color.fromRGBO(51, 51, 51, 0.10),
                           offset: Offset(0, 8), // Offset in the x, y direction
@@ -145,7 +165,7 @@ class CabCard extends StatelessWidget {
                         onPressed: () {},
                         icon: const Icon(Icons.call),
                         color: Colors.black,
-                        iconSize: 22.0,
+                        iconSize: 24.0,
                       ),
                     ),
                   ),

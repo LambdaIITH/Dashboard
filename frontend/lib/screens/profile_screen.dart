@@ -30,7 +30,7 @@ class ProfileScreen extends StatelessWidget {
           const SizedBox(height: 40),
           const CircleAvatar(
             radius: 80,
-            backgroundImage: AssetImage('assets/cab-add-success.png'),
+            backgroundImage: AssetImage('assets/icons/profile-photo.jpeg'),
           ),
           const SizedBox(height: 15),
           Text(
@@ -65,9 +65,11 @@ class ProfileScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
-            onPressed: () {},
+            onPressed: () {
+              _showBottomSheet(context);
+            },
             child: Container(
-              padding: const  EdgeInsets.all(20),
+              padding: const EdgeInsets.all(20),
               width: double.infinity,
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -84,13 +86,13 @@ class ProfileScreen extends StatelessWidget {
               child: Row(
                 children: [
                   const Icon(
-                    Icons.settings,
+                    Icons.feedback_rounded,
                     size: 30,
                     color: Colors.black,
                   ),
                   const SizedBox(width: 20),
                   Text(
-                    'Settings',
+                    'Feedback',
                     style: GoogleFonts.inter(
                       fontSize: 20,
                       fontWeight: FontWeight.w500,
@@ -128,13 +130,13 @@ class ProfileScreen extends StatelessWidget {
               child: Row(
                 children: [
                   const Icon(
-                    Icons.info,
+                    Icons.logout_rounded,
                     size: 30,
                     color: Colors.black,
                   ),
                   const SizedBox(width: 20),
                   Text(
-                    'About',
+                    'Logout',
                     style: GoogleFonts.inter(
                       fontSize: 20,
                       fontWeight: FontWeight.w500,
@@ -145,35 +147,152 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
           ),
+          const SizedBox(height: 20),
           Expanded(
             child: Align(
               alignment: Alignment.bottomCenter,
-              child: TextButton(
-                onPressed: () {},
-                child: Container(
-                  padding: const EdgeInsets.all(15),
-                  width: double.infinity,
-                  // height: 80,
-                  decoration: BoxDecoration(
-                    color: const Color.fromRGBO(254, 114, 76, 1),
-                    borderRadius: BorderRadius.circular(10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Image(
+                    image: AssetImage('assets/icons/Icon.png'),
+                    height: 40,
+                    width: 40,
                   ),
-                  child: Text(
-                    'Log Out',
-                    textAlign: TextAlign.center,
+                  const SizedBox(width: 15),
+                  Text(
+                    'IITH Dashboard',
                     style: GoogleFonts.inter(
                       fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black45,
                     ),
                   ),
-                ),
+                  const SizedBox(width: 20),
+                  Text(
+                    'v0.1.0',
+                    style: GoogleFonts.inter(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black45,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 25),
         ],
       ),
     );
   }
+}
+
+void _showBottomSheet(BuildContext context) {
+  showModalBottomSheet(
+    context: context,
+    builder: (BuildContext context) {
+      return Container(
+        width: double.infinity,
+        // height: context.size!.height * 0.5,
+        padding: const EdgeInsets.all(25),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Feedback',
+              style: GoogleFonts.inter(
+                fontSize: 24,
+                fontWeight: FontWeight.w700,
+                color: Colors.black,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'How was your experience with the app?',
+              style: GoogleFonts.inter(
+                fontSize: 20,
+                fontWeight: FontWeight.w500,
+                color: Colors.black,
+              ),
+            ),
+            const SizedBox(height: 20),
+            const TextField(
+              decoration: InputDecoration(
+                hintText: 'Enter your feedback here',
+                hintStyle: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black45,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                  borderSide: BorderSide(
+                    color: Colors.black12,
+                    width: 1,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                  borderSide: BorderSide(
+                    color: Colors.black12,
+                    width: 1,
+                  ),
+                ),
+              ),
+              maxLines: 5,
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () {},
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
+                    backgroundColor: const Color(0xffFEBD76),
+                    // alignment: Alignment.centerLeft,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: Text(
+                    'Contact Us',
+                    style: GoogleFonts.inter(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 20),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
+                    // alignment: Alignment.centerLeft,
+                    backgroundColor: const Color.fromRGBO(254, 114, 76, 0.70),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: Text(
+                    'Submit',
+                    style: GoogleFonts.inter(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    },
+  );
 }

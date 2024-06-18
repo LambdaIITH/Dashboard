@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/profile_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class HomeScreenAppBar extends StatelessWidget {
@@ -37,7 +38,11 @@ class HomeScreenAppBar extends StatelessWidget {
         ),
         InkWell(
           borderRadius: BorderRadius.circular(100),
-          onTap: () {},
+          onTap: () {
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => const ProfileScreen(),
+            ));
+          },
           child: ClipOval(
             child: CircleAvatar(
               radius: 26,

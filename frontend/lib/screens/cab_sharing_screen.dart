@@ -248,6 +248,23 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
               ],
             ),
             const SizedBox(height: 25.0),
+            const Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Icon(
+                  Icons.sort_outlined,
+                  size: 30.0,
+                  color:  Color(0xffFE724C),
+                ),
+                SizedBox(width: 10.0),
+                Icon(
+                  Icons.filter_alt_outlined,
+                  size: 30.0,
+                  color: Color(0xffFE724C),
+                ),
+              ],
+            ),
+            const SizedBox(height: 25.0),
             const CabCard(),
           ],
         ),
