@@ -1,5 +1,5 @@
-
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class HomeScreenAppBar extends StatelessWidget {
   const HomeScreenAppBar({
@@ -12,9 +12,9 @@ class HomeScreenAppBar extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         RichText(
-          text: const TextSpan(
+          text: TextSpan(
             children: [
-              TextSpan(
+              const TextSpan(
                 text: 'Good Morning\n',
                 style: TextStyle(
                   color: Colors.black,
@@ -25,7 +25,7 @@ class HomeScreenAppBar extends StatelessWidget {
               ),
               TextSpan(
                 text: 'Adhith T',
-                style: TextStyle(
+                style: GoogleFonts.inter(
                   color: Colors.black,
                   fontSize: 36,
                   fontWeight: FontWeight.w600,

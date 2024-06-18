@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class HomeCardOption extends StatelessWidget {
   final void Function()? onTap;
@@ -47,10 +48,10 @@ class HomeCardOption extends StatelessWidget {
                     width: 0.3 * screenWidth,
                     child: Text(
                       title,
-                      style: const TextStyle(
+                      style: GoogleFonts.inter().copyWith(
                         fontWeight: FontWeight.w500,
                         fontSize: 20,
-                        color: Color(0xff454545),
+                        color: const Color(0xff454545),
                       ),
                     ),
                   ),

@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class HomeCardNoOptions extends StatelessWidget {
   final String title;
@@ -21,7 +22,7 @@ class HomeCardNoOptions extends StatelessWidget {
       onTap: onTap,
       child: Container(
         height: 140,
-        decoration:  BoxDecoration(
+        decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(10),
           boxShadow: const [
@@ -41,7 +42,7 @@ class HomeCardNoOptions extends StatelessWidget {
               left: 18,
               child: Text(
                 title,
-                style: const TextStyle(
+                style: GoogleFonts.inter().copyWith(
                   fontWeight: FontWeight.bold,
                   fontSize: 28,
                 ),

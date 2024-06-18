@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/cab_sharing_screen.dart';
+import 'package:frontend/screens/lost_and_found_screen.dart';
 import 'package:frontend/screens/time_table_screen.dart';
 import 'package:frontend/widgets/home_card_no_options.dart';
 import 'package:frontend/widgets/home_card_two_options.dart';
@@ -60,7 +61,16 @@ class _HomeScreenState extends State<HomeScreen> {
               title2: 'I lost',
               image1: 'assets/icons/magnifying-icon.svg',
               image2: 'assets/icons/magnifying-icon.svg',
-              onTap: [showError, showError],
+              onTap: [
+                widget.user == 'guest'
+                    ? showError
+                    : () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const LostAndFoundScreen(),
+                          ),
+                        ),
+                showError
+              ],
             ),
             const SizedBox(height: 20),
             HomeCardNoOptions(
