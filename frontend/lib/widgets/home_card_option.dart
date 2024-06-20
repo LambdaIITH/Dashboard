@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -25,7 +27,7 @@ class HomeCardOption extends StatelessWidget {
         elevation: 3,
         child: SizedBox(
           height: 68,
-          width: 0.38 * screenWidth,
+          width: min(300, 0.38 * screenWidth),
           child: Stack(
             children: [
               Align(

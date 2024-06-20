@@ -66,7 +66,7 @@ class HomeCardTwoOptions extends StatelessWidget {
                 HomeCardOption(
                   title: title2,
                   image: image2,
-                  onTap: onTap?[0],
+                  onTap: onTap?[1],
                 ),
               ],
             ),

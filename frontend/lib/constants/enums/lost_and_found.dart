@@ -1,0 +1,1 @@
+enum LostOrFound { lost, found }

@@ -66,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ? showError
                     : () => Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (context) => const LostAndFoundScreen(),
+                            builder: (context) => LostAndFoundScreen(),
                           ),
                         ),
                 showError
