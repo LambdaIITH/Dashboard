@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:frontend/firebase_options.dart';
 import 'package:frontend/screens/bus_timings_screen.dart';
 import 'package:frontend/screens/home_screen.dart';
+import 'package:frontend/screens/login_screen.dart';
+import 'package:frontend/screens/splash_screen.dart';
 // import 'package:frontend/screens/mess_menu_screen.dart';
 // import 'package:frontend/screens/login_screen.dart';
 // import 'package:frontend/screens/splash_screen.dart';
@@ -27,11 +29,11 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      // home: SplashScreen(
-      //     nextPage: LoginScreenWrapper(
-      //   timeDilationFactor: 4.0,
-      // )),
-      home: BusTimingsScreen(),
+      home: SplashScreen(
+          nextPage: LoginScreenWrapper(
+        timeDilationFactor: 4.0,
+      )),
+      // home: BusTimingsScreen(),
       // home: MessMenuScreen(),
     );
   }
