@@ -9,6 +9,7 @@ from Routes.TimeTable.changes import router as changes_router
 from Routes.MessMenu.mess_menu import router as mess_menu_router
 from Routes.Auth.controller import router as auth_router
 from Routes.Auth.tokens import verify_access_token
+from Routes.Lost_and_Found.found import router as found_router
 
 load_dotenv()
 
@@ -32,6 +33,7 @@ app.include_router(cr_router)
 app.include_router(custom_router)
 app.include_router(changes_router)
 app.include_router(mess_menu_router)
+app.include_router(found_router)
 
 user_id = -1
 

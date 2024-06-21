@@ -27,5 +27,11 @@ cd backend
 uvicorn main:app --reload
 ```
 
+if error occurs try: 
+```bash
+poetry install --no-root 
+uvicorn main:app --reload
+```
+
 The server will be available at [http://localhost:8000](http://localhost:8000). The `--reload` flag
 will cause the server to restart whenever a file is changed.
