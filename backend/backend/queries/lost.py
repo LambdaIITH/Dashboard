@@ -1,0 +1,58 @@
+
+from pypika import Query, Table, functions as fn
+from typing import Dict, Any
+
+lost_table, lost_images_table = Table('lost'), Table('lost_images')
+
+def insert_in_lost_table( form_data: Dict[str, Any], user_id: str ): 
+    query = Query.into(lost_table).columns('item_name', 'item_description', 'user_id').insert(
+        form_data['item_name'], form_data['item_description'], user_id
+    )
+    
+    sql_query = query.get_sql()
+    sql_query += " RETURNING id"
+    
+    return sql_query
+
+
+def insert_lost_images( image_paths: list, post_id: int): 
+
+    query = Query.into(lost_images_table).columns('image_url', 'item_id')
+
+    for image_path in image_paths:
+        query = query.insert(image_path, post_id)
+    
+    return query.get_sql()
+
+
+def get_all_lost_items():
+    query = """
+            SELECT
+                f.id,
+                f.item_name,
+                f.item_description,
+                f.user_id,
+                COALESCE(json_agg(fi.image_url) FILTER (WHERE fi.image_url IS NOT NULL), '[]') AS images,
+                f.created_at
+            FROM
+                lost f
+            LEFT JOIN
+                lost_images fi ON f.id = fi.item_id
+            GROUP BY
+                f.id, f.item_name, f.item_description, f.user_id
+            ORDER BY
+                f.created_at DESC;
+            """
+            
+    return query
+
+
+def update_in_lost_table( item_id: str, form_data: Dict[str, Any]):
+    query = Query.update(lost_table)
+
+    for key, value in form_data.items():
+        query = query.set(lost_table[key], value)
+
+    query = query.where(lost_table['id'] == item_id)
+
+    return query.get_sql()

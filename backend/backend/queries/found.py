@@ -45,3 +45,14 @@ def get_all_found_items():
             """
             
     return query
+
+
+def update_in_found_table( item_id: str, form_data: Dict[str, Any] ):
+    query = Query.update(found_table)
+
+    for key, value in form_data.items():
+        query = query.set(found_table[key], value)
+
+    query = query.where(found_table['id'] == item_id)
+
+    return query.get_sql()
