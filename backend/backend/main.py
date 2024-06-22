@@ -1,13 +1,13 @@
+from Routes.Auth.cookie import set_cookie
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from Routes.TimeTable.timetable import router as timetable_router
-from Routes.auth import router as auth_router 
 from Routes.TimeTable.cr import router as cr_router
 from Routes.TimeTable.custom import router as custom_router
 from Routes.TimeTable.changes import router as changes_router
-from Routes.Auth.controller import router as auth_router1
-from Routes.Auth.tokens import verify_access_token
+from Routes.Auth.controller import router as auth_router
+from Routes.Auth.tokens import verify_token
 from fastapi.responses import JSONResponse
 
 load_dotenv()
@@ -28,37 +28,38 @@ app.add_middleware(
 # include routers
 app.include_router(timetable_router)
 app.include_router(auth_router)
-app.include_router(auth_router1)
 app.include_router(cr_router)
 app.include_router(custom_router)
 app.include_router(changes_router)
 
 user_id = -1
 
-async def token_verification_middleware(request: Request, call_next):
+async def cookie_verification_middleware(request: Request, call_next):
     global user_id
-    authorization = request.headers.get("Authorization")
-    if authorization:
-        scheme, token = authorization.split()
-        if scheme.lower() != "bearer":
-            return JSONResponse(status_code=401, content={"detail": "Invalid authorization scheme"})
-        status, data = verify_access_token(token)
-        if status is False:
-            return JSONResponse(status_code=401, content={"detail": data})
-        user_id = data["sub"] # Updating user_id 
+    token = request.cookies.get("session")
+    if token:
+        status, data = verify_token(token)
+        if not status:
+            resp = JSONResponse(status_code=401, content={"detail": data})
+            set_cookie(value="", days_expire=0, key="session", response=resp)
+            return resp
+        user_id = data["sub"]  # Updating user_id
     else:
-        return JSONResponse(status_code=401, content={"detail": "Authorization header is missing"})
-
+        return JSONResponse(status_code=401, content={"detail": "Session cookie is missing"})
+    
     response = await call_next(request)
+    
+    #updating the cookie
+    set_cookie(response=response, key="session", value=token, days_expire=15)
     return response
 
 
 @app.middleware("http")
 async def apply_middleware(request: Request, call_next):
-    excluded_routes = ["/auth1/login", "/auth1/access_token"]  # Add routes to exclude guard here
+    excluded_routes = ["/auth/login", "/auth/access_token"]  # Add routes to exclude guard here
 
     if request.url.path not in excluded_routes:
-        return await token_verification_middleware(request, call_next)
+        return await cookie_verification_middleware(request, call_next)
     else:
         response = await call_next(request)
         return response
@@ -66,3 +67,7 @@ async def apply_middleware(request: Request, call_next):
 @app.get("/")
 async def root():
     return {"message": f"hello dashboard"}
+
+@app.get("/protected-data")
+def get_protected_data():
+    return {"user": "verified"}

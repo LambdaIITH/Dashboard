@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 
 class Course(BaseModel):
@@ -22,11 +22,11 @@ class User(BaseModel):
     id: int
     email: str
     cr: bool = False
-    refresh_token: str
-    
+    phone: str | None = None
+
     @classmethod
     def from_row(cls, row: tuple):
-        return User(id = row[0], email = row[1], cr = row[2], refresh_token=row[3])
+        return cls(id=row[0], email=row[1], cr=row[2], phone=row[3])
 
 
 class Register(BaseModel):
