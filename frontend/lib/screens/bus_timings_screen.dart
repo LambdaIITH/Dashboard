@@ -135,28 +135,25 @@ class _BusSchedulePageState extends State<BusSchedulePage> {
         : Column(
             children: [
               const SizedBox(height: 6,),
-              Padding(
-                padding: const EdgeInsets.only(right: 10),
-                child: ToggleButtons(
-                  direction: Axis.horizontal,
-                  onPressed: (index) {
-                    setState(() {
-                      if (index == 1) {
-                        fullSchedule = true;
-                      } else {
-                        fullSchedule = false;
-                      }
-                    });
-                  },
-                  borderRadius: const BorderRadius.all(Radius.circular(7.0)),
-                  fillColor: const Color.fromARGB(255, 198, 198, 198),
-                  constraints: const BoxConstraints(
-                    minHeight: 40.0,
-                    minWidth: 130.0,
-                  ),
-                  isSelected: [!fullSchedule, fullSchedule],
-                  children: fullScheduleWidget,
+              ToggleButtons(
+                direction: Axis.horizontal,
+                onPressed: (index) {
+                  setState(() {
+                    if (index == 1) {
+                      fullSchedule = true;
+                    } else {
+                      fullSchedule = false;
+                    }
+                  });
+                },
+                borderRadius: const BorderRadius.all(Radius.circular(7.0)),
+                fillColor: const Color.fromARGB(255, 198, 198, 198),
+                constraints: const BoxConstraints(
+                  minHeight: 40.0,
+                  minWidth: 130.0,
                 ),
+                isSelected: [!fullSchedule, fullSchedule],
+                children: fullScheduleWidget,
               ),
               !fullSchedule
                   ? const Expanded(

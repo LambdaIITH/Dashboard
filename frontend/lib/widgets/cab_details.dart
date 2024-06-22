@@ -26,11 +26,11 @@ class _CabCardState extends State<CabCard> {
     },
     {
       'name': 'Ram Kumar',
-      'email': 'msa22btech11010@iith.ac.in',
+      'email': 'ma22btech11010@iith.ac.in',
     },
     {
       'name': 'Shyam Kumar',
-      'email': 'msa22btech11010@iith.ac.in',
+      'email': 'ma22btech11010@iith.ac.in',
     },
   ];
 
@@ -212,14 +212,14 @@ class _CabCardState extends State<CabCard> {
                             flex: 1,
                             child: Align(
                               alignment: Alignment.centerRight,
-                              child: TextButton(
+                              child: ElevatedButton(
                                 onPressed: () {},
                                 style: TextButton.styleFrom(
                                   backgroundColor:
                                       const Color.fromRGBO(254, 114, 76, 0.70),
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 16.0,
-                                    vertical: 0.0,
+                                    vertical: 3.0,
                                   ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10.0),
@@ -270,8 +270,8 @@ class _CabCardState extends State<CabCard> {
                                           child: Text(
                                             traveller['name']!,
                                             style: GoogleFonts.inter(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w600,
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500,
                                               color: Colors.black,
                                             ),
                                           ),
@@ -281,9 +281,9 @@ class _CabCardState extends State<CabCard> {
                                           child: Text(
                                             traveller['email']!,
                                             style: GoogleFonts.inter(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w600,
-                                              color: const Color(0xffADADAD),
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500,
+                                              color: const Color(0xff454545),
                                             ),
                                           ),
                                         ),

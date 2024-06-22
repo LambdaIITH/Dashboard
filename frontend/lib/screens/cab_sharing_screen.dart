@@ -16,17 +16,69 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
   String? selectedOption2;
   bool isTabOneSelected = true;
 
+  final List<Widget> tabNames = [
+    Text(
+      'All Rides',
+      style: GoogleFonts.inter(
+        fontSize: 18.0,
+        fontWeight: FontWeight.w600,
+        color: Colors.black,
+      ),
+    ),
+    Text(
+      'My Rides',
+      style: GoogleFonts.inter(
+        fontSize: 18.0,
+        fontWeight: FontWeight.w600,
+        color: Colors.black,
+      ),
+    ),
+  ];
+
   @override
   Widget build(BuildContext context) {
+    Widget allRides = Column(
+      children: [
+        const CabSearch(),
+        const SizedBox(height: 25.0),
+        Expanded(
+          child: ListView.builder(
+            itemCount: 5,
+            itemBuilder: (ctx, inx) => const Padding(
+              padding: EdgeInsets.only(bottom: 12),
+              child: CabCard(),
+            ),
+          ),
+        ),
+      ],
+    );
+
+    Widget myRides = Column(
+      children: [
+        Expanded(
+          child: ListView.builder(
+            itemCount: 1,
+            itemBuilder: (ctx, inx) => const Padding(
+              padding: EdgeInsets.only(bottom: 12),
+              child: CabCard(),
+            ),
+          ),
+        ),
+      ],
+    );
+
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: Text('Cab Sharing',
-            style: GoogleFonts.inter(
-              fontSize: 28,
-              fontWeight: FontWeight.w700,
-              color: Colors.black,
-            )),
+        title: Text(
+          'Cab Sharing',
+          style: GoogleFonts.inter(
+            fontSize: 28,
+            fontWeight: FontWeight.w700,
+            color: Colors.black,
+          ),
+        ),
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back,
@@ -38,152 +90,58 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
           },
         ),
       ),
-      floatingActionButton: SizedBox(
-        height: 75.0,
-        width: 75.0,
-        child: FittedBox(
-          child: FloatingActionButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const CabAddScreen(),
-                ),
-              );
-            },
-            backgroundColor: const Color.fromRGBO(254, 114, 76, 0.70),
-            child: const Icon(
-              Icons.add,
-              size: 30.0,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const CabAddScreen(),
             ),
-          ),
+          );
+        },
+        backgroundColor: const Color.fromARGB(204, 254, 115, 76),
+        child: const Icon(
+          Icons.add,
+          size: 30.0,
         ),
       ),
-      body: Container(
-        color: Colors.white,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 22.0,
-            vertical: 16.0,
-          ),
-          child: Column(
-            children: [
-              Container(
-                width: MediaQuery.of(context).size.width * 0.8,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10.0),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
-                      offset: Offset(0, 4), // Offset in the x, y direction
-                      blurRadius: 10.0,
-                      spreadRadius: 0.0,
-                    ),
-                  ],
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(
+              height: 6,
+            ),
+            Container(
+              decoration: const BoxDecoration(boxShadow: [
+                BoxShadow(
+                  color: Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
+                  offset: Offset(0, 4), // Offset in the x, y direction
+                  blurRadius: 10.0,
+                  spreadRadius: 0.0,
                 ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              isTabOneSelected = true;
-                            });
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: isTabOneSelected
-                                  ? const Color.fromRGBO(254, 114, 76, 0.70)
-                                  : Colors.white,
-                              borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(10.0),
-                                bottomLeft: Radius.circular(10.0),
-                              ),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10.0,
-                              vertical: 10.0,
-                            ),
-                            child: Center(
-                              child: Text(
-                                'All Rides',
-                                style: GoogleFonts.inter(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w500,
-                                  color: isTabOneSelected
-                                      ? Colors.white
-                                      : Colors.black,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              isTabOneSelected = false;
-                            });
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: isTabOneSelected
-                                  ? Colors.white
-                                  : const Color.fromRGBO(254, 114, 76, 0.70),
-                              borderRadius: const BorderRadius.only(
-                                topRight: Radius.circular(10.0),
-                                bottomRight: Radius.circular(10.0),
-                              ),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10.0,
-                              vertical: 10.0,
-                            ),
-                            child: Center(
-                              child: Text(
-                                'My Rides',
-                                style: GoogleFonts.inter(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w500,
-                                  color: isTabOneSelected
-                                      ? Colors.black
-                                      : Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+              ]),
+              child: ToggleButtons(
+                direction: Axis.horizontal,
+                onPressed: (index) {
+                  setState(() {
+                    isTabOneSelected = index == 0;
+                  });
+                },
+                borderRadius: const BorderRadius.all(Radius.circular(7.0)),
+                fillColor: const Color.fromRGBO(254, 114, 76, 0.70),
+                constraints: const BoxConstraints(
+                  minHeight: 44.0,
+                  minWidth: 130.0,
                 ),
+                isSelected: [isTabOneSelected, !isTabOneSelected],
+                children: tabNames,
               ),
-              const SizedBox(height: 25.0),
-              isTabOneSelected
-                  ? const CabSearch()
-                  : const SizedBox(
-                      height: 0.0,
-                    ),
-              const SizedBox(height: 25.0),
-              const CabCard(),
-              const SizedBox(height: 25.0),
-              Text(
-                "End of List",
-                style: GoogleFonts.inter(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w500,
-                  color: const Color(0xffADADAD),
-                ),
-              )
-            ],
-          ),
+            ),
+            const SizedBox(height: 25.0),
+            Expanded(child: isTabOneSelected ? allRides : myRides),
+          ],
         ),
       ),
     );
