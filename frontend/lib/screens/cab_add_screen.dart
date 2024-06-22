@@ -56,7 +56,9 @@ class _CabAddScreenState extends State<CabAddScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xffFCFCFC),
       appBar: AppBar(
+        backgroundColor: const Color(0xffFCFCFC),
         title: Text('Add a Cab',
             style: GoogleFonts.inter(
               fontSize: 28,
