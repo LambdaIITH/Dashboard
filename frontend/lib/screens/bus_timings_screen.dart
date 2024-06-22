@@ -147,10 +147,10 @@ class _BusSchedulePageState extends State<BusSchedulePage> {
                   });
                 },
                 borderRadius: const BorderRadius.all(Radius.circular(7.0)),
-                fillColor: const Color.fromARGB(255, 198, 198, 198),
+                fillColor: const Color.fromRGBO(254, 114, 76, 0.70),
                 constraints: const BoxConstraints(
                   minHeight: 40.0,
-                  minWidth: 130.0,
+                  minWidth: 150.0,
                 ),
                 isSelected: [!fullSchedule, fullSchedule],
                 children: fullScheduleWidget,

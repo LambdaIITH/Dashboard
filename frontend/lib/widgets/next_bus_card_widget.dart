@@ -14,7 +14,7 @@ class NextBusCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
       child: Card(
-        elevation: 4.5,
+        elevation: 3,
         color: Colors.white,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20)
@@ -23,7 +23,7 @@ class NextBusCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.black,width: 1.3),
+            // border: Border.all(color: Colors.black,width: 1.3),
           ),
           alignment: Alignment.center,
           width: double.infinity,

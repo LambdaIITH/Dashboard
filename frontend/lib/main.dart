@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/bus_timings_screen.dart';
 import 'package:frontend/screens/home_screen.dart';
 // import 'package:frontend/screens/mess_menu_screen.dart';
 // import 'package:frontend/screens/login_screen.dart';
@@ -28,7 +29,7 @@ class _MyAppState extends State<MyApp> {
   //        nextPage: LoginScreenWrapper(
     //    timeDilationFactor: 4.0,
      // )),
-       home: HomeScreen(user: "some"),
+       home: BusTimingsScreen(),
       // home: MessMenuScreen(),
     );
   }
