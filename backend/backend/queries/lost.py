@@ -51,8 +51,21 @@ def update_in_lost_table( item_id: str, form_data: Dict[str, Any]):
     query = Query.update(lost_table)
 
     for key, value in form_data.items():
-        query = query.set(lost_table[key], value)
+        if key == 'item_name' or key == 'item_description':
+            query = query.set(lost_table[key], value)
 
     query = query.where(lost_table['id'] == item_id)
 
     return query.get_sql()
+
+def get_particular_lost_item(item_id: str):
+    query = Query.from_(lost_table).select('*').where(lost_table['id'] == item_id)
+    return str(query)
+
+def delete_an_item_images(item_id):
+    query = Query.from_(lost_images_table).delete().where(lost_images_table['item_id'] == item_id)
+    return str(query)
+
+def get_all_image_uris(item_id):
+    query = Query.from_(lost_images_table).select('image_url').where(lost_images_table['item_id'] == item_id)
+    return str(query)

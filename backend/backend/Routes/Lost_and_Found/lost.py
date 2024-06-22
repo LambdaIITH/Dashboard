@@ -2,8 +2,9 @@ import os, shutil
 import json
 from fastapi import APIRouter, HTTPException, status, UploadFile, File, Form
 from typing import Dict, Any, List
-from utils import conn
-from queries.lost import insert_in_lost_table, insert_lost_images, get_all_lost_items, update_in_lost_table
+from utils import *
+from queries.lost import *
+from models import LfItem, LfResponse
 
 router = APIRouter(prefix="/lost", tags=["lost"])
 
@@ -24,13 +25,7 @@ async def add_item( form_data: str = Form(...),
         
         print( images ) 
         if images is not None:
-            image_paths = []
-            for image in images:
-                file_location = f"uploads/lost/{item_id}/{image.filename}"
-                os.makedirs(os.path.dirname(file_location), exist_ok=True)
-                with open(file_location, "wb") as f:
-                    f.write(image.file.read())
-                image_paths.append(file_location)
+            image_paths = S3Client.uploadToCloud(images, item_id, "lost")
 
             with conn.cursor() as cur:
                 cur.execute(insert_lost_images(image_paths, item_id))
@@ -47,46 +42,52 @@ async def add_item( form_data: str = Form(...),
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=error_message)
 
 
-# show all lost item names 
-@router.get("/show_all_item_names")
+# show all lost item names  sorted by created_at
+@router.get("/all")
 async def get_all_lost_item_names():
     try:   
         with conn.cursor() as cur: 
-            cur.execute("SELECT * FROM lost ORDER BY created_at DESC")
-            rows = cur.fetchall() 
+            cur.execute("SELECT id, item_name FROM lost ORDER BY created_at DESC")
+            rows = cur.fetchall()
+            rows =list( map(lambda x: {"id" : x[0], "name" : x[1]},rows))
+            print(rows) 
             
-        return rows        
+            return rows        
        
     except Exception as e: 
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="failed to fetch items")
          
 
 # show all lost items with images 
-@router.get("/show_all_items")
-def show_lost_items():
+@router.get("/item/{id}")
+def show_lost_items(id: str):
     try:   
         with conn.cursor() as cur: 
-            cur.execute(get_all_lost_items())
-            lost_items = cur.fetchall() 
+            cur.execute(get_particular_lost_item(id))
+            lost_item = cur.fetchall()[0]
+            cur.execute(get_all_image_uris(id))
+            lost_images = cur.fetchall()
+            image_urls = list(map(lambda x: x[0], lost_images))
+            res = LfResponse.from_row(lost_item, image_urls)
+            
+            return res
 
-        return lost_items
+        
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=500, detail="Failed to fetch items")
 
 
 # delete a lost item 
 @router.delete( "/delete_item" )
-def delete_lost_item( item_id: str = Form(...) ): 
-        
+def delete_lost_item( item_id: str = Form(...) ):       
     try: 
         with conn.cursor() as cur: 
             query = f"DELETE from lost WHERE lost.id = {item_id}"
             cur.execute( query )
             conn.commit() 
         
-        dir_path = f"uploads/lost/{item_id}"      
-        if os.path.exists(dir_path):
-            shutil.rmtree(dir_path) 
+        S3Client.deleteFromCloud( item_id, "lost" )
             
         return {"message": "Item deleted successfully!"}
                
@@ -117,28 +118,15 @@ def edit_selected_item( item_id: str = Form(...), user_id: str = Form(...), form
 
         with conn.cursor() as cur:
             cur.execute( update_in_lost_table( item_id, form_data_dict ) )
+            S3Client.deleteFromCloud( item_id, "lost" )
+            cur.execute(delete_an_item_images(item_id))
+        
+            
+            if images is not None:
+                image_paths = S3Client.uploadToCloud(images, item_id, "lost")
+                cur.execute(insert_lost_images(image_paths, item_id))
             conn.commit()
         
-        
-        dir_path = f"uploads/lost/{item_id}"      
-        if os.path.exists(dir_path):
-            with conn.cursor() as cur: 
-                cur.execute( f"DELETE FROM lost_images WHERE lost_images.item_id = {item_id}" )
-                conn.commit()
-            shutil.rmtree(dir_path) 
-            
-        if images is not None:
-            image_paths = []
-            for image in images:
-                file_location = f"uploads/lost/{item_id}/{image.filename}"
-                os.makedirs(os.path.dirname(file_location), exist_ok=True)
-                with open(file_location, "wb") as f:
-                    f.write(image.file.read())
-                image_paths.append(file_location)
-
-            with conn.cursor() as cur:
-                cur.execute(insert_lost_images(image_paths, item_id))
-                conn.commit()
             
         return {"message": "item updated"}
     except Exception as e: 

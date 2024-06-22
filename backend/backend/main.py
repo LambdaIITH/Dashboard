@@ -10,7 +10,7 @@ from Routes.MessMenu.mess_menu import router as mess_menu_router
 from Routes.Auth.controller import router as auth_router
 from Routes.Auth.tokens import verify_access_token
 from Routes.Lost_and_Found.found import router as found_router
-
+from Routes.Lost_and_Found.lost import router as lost_router
 load_dotenv()
 
 app = FastAPI()
@@ -34,6 +34,7 @@ app.include_router(custom_router)
 app.include_router(changes_router)
 app.include_router(mess_menu_router)
 app.include_router(found_router)
+app.include_router(lost_router)
 
 user_id = -1
 
@@ -41,7 +42,7 @@ async def token_verification_middleware(request: Request, call_next):
     global user_id
     authorization = request.headers.get("Authorization")
     if authorization:
-        scheme, token = authorization.split()
+        scheme, token = authorization.split('.')
         if scheme.lower() != "bearer":
             return JSONResponse(status_code=401, content={"detail": "Invalid authorization scheme"})
         status, data = verify_access_token(token)
@@ -54,15 +55,15 @@ async def token_verification_middleware(request: Request, call_next):
     response = await call_next(request)
     return response
 
-@app.middleware("http")
-async def apply_middleware(request: Request, call_next):
-    excluded_routes = ["/auth/login", "/auth/access_token", "/"]  # Add routes to exclude guard
+# @app.middleware("http")
+# async def apply_middleware(request: Request, call_next):
+#     excluded_routes = ["/auth/login", "/auth/access_token", "/", "/docs"]  # Add routes to exclude guard
 
-    if request.url.path not in excluded_routes:
-        return await token_verification_middleware(request, call_next)
-    else:
-        response = await call_next(request)
-        return response
+#     if request.url.path not in excluded_routes:
+#         return await token_verification_middleware(request, call_next)
+#     else:
+#         response = await call_next(request)
+#         return response
 
 @app.get("/")
 async def root():
