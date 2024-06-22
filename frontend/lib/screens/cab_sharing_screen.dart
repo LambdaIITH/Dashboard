@@ -13,24 +13,13 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
   DateTime selectedDate = DateTime.now();
   String? selectedOption;
   String? selectedOption2;
-
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-        context: context,
-        initialDate: selectedDate,
-        firstDate: DateTime(2015, 8),
-        lastDate: DateTime(2101));
-    if (picked != null && picked != selectedDate) {
-      setState(() {
-        selectedDate = picked;
-      });
-    }
-  }
+  bool isTabOneSelected = true;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.white,
         title: Text('Cab Sharing',
             style: GoogleFonts.inter(
               fontSize: 28,
@@ -69,206 +58,352 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
           ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 22.0,
-          vertical: 16.0,
-        ),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10.0),
-                      boxShadow: const [
-                        BoxShadow(
-                          color:
-                              Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
-                          offset: Offset(0, 4), // Offset in the x, y direction
-                          blurRadius: 10.0,
-                          spreadRadius: 0.0,
-                        ),
-                      ],
+      body: Container(
+        color: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 22.0,
+            vertical: 16.0,
+          ),
+          child: Column(
+            children: [
+              Container(
+                width: MediaQuery.of(context).size.width * 0.8,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10.0),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
+                      offset: Offset(0, 4), // Offset in the x, y direction
+                      blurRadius: 10.0,
+                      spreadRadius: 0.0,
                     ),
-                    child: DropdownButtonFormField<String>(
-                      borderRadius: BorderRadius.circular(10.0),
-                      decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 15.0,
-                          vertical: 25.0,
-                        ),
-                      ),
-                      items:
-                          ['Campus', 'RGIA', 'Airport'].map((String location) {
-                        return DropdownMenuItem<String>(
-                          value: location,
-                          child: Text(
-                            location,
-                            style: GoogleFonts.inter(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black,
+                  ],
+                ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              isTabOneSelected = true;
+                            });
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: isTabOneSelected
+                                  ? const Color.fromRGBO(254, 114, 76, 0.70)
+                                  : Colors.white,
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(10.0),
+                                bottomLeft: Radius.circular(10.0),
+                              ),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10.0,
+                              vertical: 10.0,
+                            ),
+                            child: Center(
+                              child: Text(
+                                'All Rides',
+                                style: GoogleFonts.inter(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w500,
+                                  color: isTabOneSelected
+                                      ? Colors.white
+                                      : Colors.black,
+                                ),
+                              ),
                             ),
                           ),
-                        );
-                      }).toList(),
-                      onChanged: (String? value) {
-                        selectedOption = value;
-                      },
-                      hint: selectedOption == null
-                          ? Text(
-                              'From',
-                              style: GoogleFonts.inter(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xffADADAD),
-                              ),
-                            )
-                          : null,
-                    ),
-                  ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.all(10.0),
-                  child: Icon(Icons.arrow_forward,
-                      size: 25.0, color: Color(0xffADADAD)),
-                ),
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10.0),
-                      boxShadow: const [
-                        BoxShadow(
-                          color:
-                              Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
-                          // Shadow color
-                          offset: Offset(0, 8), // Offset in the x, y direction
-                          blurRadius: 21.0,
-                          spreadRadius: 0.0,
-                        ),
-                      ],
-                    ),
-                    child: DropdownButtonFormField<String>(
-                      borderRadius: BorderRadius.circular(10.0),
-                      decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 15.0,
-                          vertical: 25.0,
                         ),
                       ),
-                      items: [
-                        'Campus',
-                        'RGIA',
-                        'Airport',
-                      ].map((String location) {
-                        return DropdownMenuItem<String>(
-                          value: location,
-                          child: Text(
-                            location,
-                            style: GoogleFonts.inter(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black,
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              isTabOneSelected = false;
+                            });
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: isTabOneSelected
+                                  ? Colors.white
+                                  : const Color.fromRGBO(254, 114, 76, 0.70),
+                              borderRadius: const BorderRadius.only(
+                                topRight: Radius.circular(10.0),
+                                bottomRight: Radius.circular(10.0),
+                              ),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10.0,
+                              vertical: 10.0,
+                            ),
+                            child: Center(
+                              child: Text(
+                                'My Rides',
+                                style: GoogleFonts.inter(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w500,
+                                  color: isTabOneSelected
+                                      ? Colors.black
+                                      : Colors.white,
+                                ),
+                              ),
                             ),
                           ),
-                        );
-                      }).toList(),
-                      onChanged: (String? value) {
-                        selectedOption2 = value;
-                      },
-                      hint: selectedOption2 == null
-                          ? Text(
-                              'To',
-                              style: GoogleFonts.inter(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xffADADAD),
-                              ),
-                            )
-                          : null,
-                    ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 25.0),
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      boxShadow: const [
-                        BoxShadow(
-                          color:
-                              Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
-                          // Shadow color
-                          offset: Offset(0, 8), // Offset in the x, y direction
-                          blurRadius: 21.0,
-                          spreadRadius: 0.0,
-                        ),
-                      ],
-                      borderRadius: BorderRadius.circular(10.0),
-                      color: Colors.white,
+              ),
+              const SizedBox(height: 25.0),
+              isTabOneSelected
+                  ? const CabSearch()
+                  : const SizedBox(
+                      height: 0.0,
                     ),
-                    child: TextFormField(
-                      readOnly: true,
-                      style: GoogleFonts.inter(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.black,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: selectedOption == null
-                            ? 'Date'
-                            : "${selectedDate.toLocal()}".split(' ')[0],
-                        hintStyle: GoogleFonts.inter(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          color: const Color(0xffADADAD),
-                        ),
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 20.0,
-                          vertical: 20.0,
-                        ),
-                      ),
-                      onTap: () => _selectDate(context),
-                      controller: TextEditingController(
-                        text: "${selectedDate.toLocal()}".split(' ')[0],
-                      ),
-                    ),
-                  ),
+              const SizedBox(height: 25.0),
+              const CabCard(),
+              const SizedBox(height: 25.0), 
+              Text(
+                "End of List",
+                style: GoogleFonts.inter(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xffADADAD),
                 ),
-              ],
-            ),
-            const SizedBox(height: 25.0),
-            const Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Icon(
-                  Icons.sort_outlined,
-                  size: 30.0,
-                  color:  Color(0xffFE724C),
-                ),
-                SizedBox(width: 10.0),
-                Icon(
-                  Icons.filter_alt_outlined,
-                  size: 30.0,
-                  color: Color(0xffFE724C),
-                ),
-              ],
-            ),
-            const SizedBox(height: 25.0),
-            const CabCard(),
-          ],
+              )
+            ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+class CabSearch extends StatefulWidget {
+  const CabSearch({super.key});
+
+  @override
+  State<CabSearch> createState() => _CabSearchState();
+}
+
+class _CabSearchState extends State<CabSearch> {
+  DateTime selectedDate = DateTime.now();
+  String? selectedOption;
+  String? selectedOption2;
+  bool isTabOneSelected = true;
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+        context: context,
+        initialDate: selectedDate,
+        firstDate: DateTime(2015, 8),
+        lastDate: DateTime(2101));
+    if (picked != null && picked != selectedDate) {
+      setState(() {
+        selectedDate = picked;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        Row(
+          children: [
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10.0),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
+                      offset: Offset(0, 4), // Offset in the x, y direction
+                      blurRadius: 10.0,
+                      spreadRadius: 0.0,
+                    ),
+                  ],
+                ),
+                child: DropdownButtonFormField<String>(
+                  borderRadius: BorderRadius.circular(10.0),
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 15.0,
+                      vertical: 25.0,
+                    ),
+                  ),
+                  items: ['Campus', 'RGIA', 'Airport'].map((String location) {
+                    return DropdownMenuItem<String>(
+                      value: location,
+                      child: Text(
+                        location,
+                        style: GoogleFonts.inter(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (String? value) {
+                    selectedOption = value;
+                  },
+                  hint: selectedOption == null
+                      ? Text(
+                          'From',
+                          style: GoogleFonts.inter(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xffADADAD),
+                          ),
+                        )
+                      : null,
+                ),
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.all(10.0),
+              child: Icon(Icons.arrow_forward,
+                  size: 25.0, color: Color(0xffADADAD)),
+            ),
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10.0),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
+                      // Shadow color
+                      offset: Offset(0, 8), // Offset in the x, y direction
+                      blurRadius: 21.0,
+                      spreadRadius: 0.0,
+                    ),
+                  ],
+                ),
+                child: DropdownButtonFormField<String>(
+                  borderRadius: BorderRadius.circular(10.0),
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 15.0,
+                      vertical: 25.0,
+                    ),
+                  ),
+                  items: [
+                    'Campus',
+                    'RGIA',
+                    'Airport',
+                  ].map((String location) {
+                    return DropdownMenuItem<String>(
+                      value: location,
+                      child: Text(
+                        location,
+                        style: GoogleFonts.inter(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (String? value) {
+                    selectedOption2 = value;
+                  },
+                  hint: selectedOption2 == null
+                      ? Text(
+                          'To',
+                          style: GoogleFonts.inter(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xffADADAD),
+                          ),
+                        )
+                      : null,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 25.0),
+        Row(
+          children: [
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
+                      // Shadow color
+                      offset: Offset(0, 8), // Offset in the x, y direction
+                      blurRadius: 21.0,
+                      spreadRadius: 0.0,
+                    ),
+                  ],
+                  borderRadius: BorderRadius.circular(10.0),
+                  color: Colors.white,
+                ),
+                child: TextFormField(
+                  readOnly: true,
+                  style: GoogleFonts.inter(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.black,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: selectedOption == null
+                        ? 'Date'
+                        : "${selectedDate.toLocal()}".split(' ')[0],
+                    hintStyle: GoogleFonts.inter(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w400,
+                      color: const Color(0xffADADAD),
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 20.0,
+                      vertical: 20.0,
+                    ),
+                  ),
+                  onTap: () => _selectDate(context),
+                  controller: TextEditingController(
+                    text: "${selectedDate.toLocal()}".split(' ')[0],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 25.0),
+        const Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Icon(
+              Icons.sort_outlined,
+              size: 30.0,
+              color: Color(0xffFE724C),
+            ),
+            SizedBox(width: 10.0),
+            Icon(
+              Icons.filter_alt_outlined,
+              size: 30.0,
+              color: Color(0xffFE724C),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

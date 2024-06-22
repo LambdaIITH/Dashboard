@@ -19,6 +19,20 @@ class _CabCardState extends State<CabCard> {
   String availableSeats = "2";
   String startLocation = "RGIA";
   String endLocation = "IITH";
+  List<Map<String, String>> travellers = [
+    {
+      'name': 'Shyam Kumar',
+      'email': 'ms22btech11010@iith.ac.in',
+    },
+    {
+      'name': 'Ram Kumar',
+      'email': 'msa22btech11010@iith.ac.in',
+    },
+    {
+      'name': 'Shyam Kumar',
+      'email': 'msa22btech11010@iith.ac.in',
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +70,7 @@ class _CabCardState extends State<CabCard> {
                       child: Text(
                         id,
                         style: GoogleFonts.inter(
-                          fontSize: 16,
+                          fontSize: 20,
                           fontWeight: FontWeight.w600,
                           color: Colors.black,
                         ),
@@ -69,7 +83,7 @@ class _CabCardState extends State<CabCard> {
                           text: TextSpan(
                             text: 'Available Seats  ',
                             style: GoogleFonts.inter(
-                              fontSize: 14,
+                              fontSize: 16,
                               fontWeight: FontWeight.w600,
                               color: const Color(0xffADADAD),
                             ),
@@ -77,7 +91,7 @@ class _CabCardState extends State<CabCard> {
                               TextSpan(
                                 text: availableSeats,
                                 style: GoogleFonts.inter(
-                                  fontSize: 24,
+                                  fontSize: 26,
                                   fontWeight: FontWeight.w700,
                                   color: Colors.black,
                                 ),
@@ -101,7 +115,7 @@ class _CabCardState extends State<CabCard> {
                               Text(
                                 startLocation,
                                 style: GoogleFonts.inter(
-                                  fontSize: 18,
+                                  fontSize: 20,
                                   fontWeight: FontWeight.w600,
                                   color: const Color(0xffADADAD),
                                 ),
@@ -116,7 +130,7 @@ class _CabCardState extends State<CabCard> {
                               Text(
                                 endLocation,
                                 style: GoogleFonts.inter(
-                                  fontSize: 18,
+                                  fontSize: 20,
                                   fontWeight: FontWeight.w600,
                                   color: const Color(0xffADADAD),
                                 ),
@@ -129,18 +143,18 @@ class _CabCardState extends State<CabCard> {
                               Text(
                                 date,
                                 style: GoogleFonts.inter(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: const Color(0xffADADAD),
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.black,
                                 ),
                               ),
-                              const SizedBox(width: 2.0),
+                              const SizedBox(height: 3.0),
                               Text(
                                 "$startTime - $endTime",
                                 style: GoogleFonts.inter(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: const Color(0xffADADAD),
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.black,
                                 ),
                               ),
                             ],
@@ -172,52 +186,115 @@ class _CabCardState extends State<CabCard> {
                 visible: _isExpanded,
                 child: Container(
                   padding: const EdgeInsets.only(top: 10.0),
-                  child: Row(
+                  child: Column(
                     children: [
-                      Expanded(
-                        flex: 2,
-                        child: Container(
-                          padding: const EdgeInsets.fromLTRB(10, 6, 10, 6),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10.0),
-                            color: Colors.grey[200],
+                      Row(
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: Container(
+                              padding: const EdgeInsets.fromLTRB(10, 6, 10, 6),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10.0),
+                                color: Colors.grey[200],
+                              ),
+                              child: Text(
+                                "Note: $note",
+                                style: GoogleFonts.inter(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
                           ),
-                          child: Text(
-                            "Note: $note",
+                          Expanded(
+                            flex: 1,
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(
+                                onPressed: () {},
+                                style: TextButton.styleFrom(
+                                  backgroundColor:
+                                      const Color.fromRGBO(254, 114, 76, 0.70),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16.0,
+                                    vertical: 0.0,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                  ),
+                                ),
+                                child: Text(
+                                  "Join Cab",
+                                  style: GoogleFonts.inter(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 15.0),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Travellers",
                             style: GoogleFonts.inter(
-                              fontSize: 12,
+                              fontSize: 18,
                               fontWeight: FontWeight.w600,
                               color: Colors.black,
                             ),
                           ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 1,
-                        child: Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: () {},
-                            style: TextButton.styleFrom(
-                              backgroundColor:
-                                  const Color.fromRGBO(254, 114, 76, 0.70),
-                              textStyle: GoogleFonts.inter(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.black,
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10.0,
-                                vertical: 0.0,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.0),
-                              ),
-                            ),
-                            child: const Text("Join Cab"),
+                          const SizedBox(height: 5.0),
+                          Column(
+                            children: travellers
+                                .map(
+                                  (traveller) => Container(
+                                    padding:
+                                        const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                                    // decoration: BoxDecoration(
+                                    //   borderRadius: BorderRadius.circular(10.0),
+                                    //   color: Colors.grey[200],
+                                    // ),
+                                    margin: const EdgeInsets.only(bottom: 5.0),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          flex: 1,
+                                          child: Text(
+                                            traveller['name']!,
+                                            style: GoogleFonts.inter(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                        ),
+                                        Expanded(
+                                          flex: 2,
+                                          child: Text(
+                                            traveller['email']!,
+                                            style: GoogleFonts.inter(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                              color: const Color(0xffADADAD),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                )
+                                .toList(),
                           ),
-                        ),
-                      ),
+                        ],
+                      )
                     ],
                   ),
                 ),
