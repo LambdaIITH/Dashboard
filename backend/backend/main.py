@@ -23,7 +23,11 @@ load_dotenv()
 app = FastAPI()
 
 # TODO: change for prod
-origins = ["*"]
+origins = [
+    "http://localhost:3000",
+    "http://localhost",
+    "*"
+]
 
 app.add_middleware(
     CORSMiddleware,
@@ -47,6 +51,8 @@ app.include_router(user_router)
 
 
 async def cookie_verification_middleware(request: Request, call_next):
+    if request.method == "OPTIONS":
+        return await call_next(request)
     token = request.cookies.get("session")
     if token:
         status, data = verify_token(token)
@@ -64,19 +70,29 @@ async def cookie_verification_middleware(request: Request, call_next):
     set_cookie(response=response, key="session", value=token, days_expire=15)
     return response
 
-# @app.middleware("http")
-# async def apply_middleware(request: Request, call_next):
-#     excluded_routes = ["/auth/login", "/auth/access_token"]  # Add routes to exclude guard here
+@app.middleware("http")
+async def apply_middleware(request: Request, call_next):
+    excluded_routes = ["/auth/login", "/auth/access_token"]  # Add routes to exclude guard here
 
-#     if request.url.path not in excluded_routes:
-#         return await cookie_verification_middleware(request, call_next)
-#     else:
-#         response = await call_next(request)
-#         return response
+    if request.url.path not in excluded_routes:
+        return await cookie_verification_middleware(request, call_next)
+    else:
+        response = await call_next(request)
+        return response
 
 @app.get("/")
 async def root():
     return {"message": f"hello dashboard"}
+
+@app.options("/{path:path}")
+def options_handler(request: Request, path: str):
+    # Add CORS headers to OPTIONS response if needed
+    return JSONResponse(status_code=200, headers={
+        "Access-Control-Allow-Origin": "*", 
+        "Access-Control-Allow-Methods": "*", 
+        "Access-Control-Allow-Headers": "*", 
+    })
+
 
 @app.get("/protected-data")
 def get_protected_data():

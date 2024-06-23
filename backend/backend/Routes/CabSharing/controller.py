@@ -9,6 +9,7 @@ from pytz import timezone
 from utils import conn, queries
 from queries.user import get_user_email
 import Routes.CabSharing.schemas as schemas
+from fastapi.responses import JSONResponse
 
 from Routes.CabSharing.cab import (
     CustomFormatter,
