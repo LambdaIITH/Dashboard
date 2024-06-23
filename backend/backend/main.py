@@ -7,6 +7,7 @@ from Routes.TimeTable.cr import router as cr_router
 from Routes.TimeTable.custom import router as custom_router
 from Routes.TimeTable.changes import router as changes_router
 from Routes.Auth.controller import router as auth_router
+from Routes.CabSharing.controller import app as cab_router
 from Routes.Auth.tokens import verify_token
 from fastapi.responses import JSONResponse
 
@@ -31,11 +32,10 @@ app.include_router(auth_router)
 app.include_router(cr_router)
 app.include_router(custom_router)
 app.include_router(changes_router)
+app.include_router(cab_router)
 
-user_id = -1
 
 async def cookie_verification_middleware(request: Request, call_next):
-    global user_id
     token = request.cookies.get("session")
     if token:
         status, data = verify_token(token)
@@ -43,7 +43,7 @@ async def cookie_verification_middleware(request: Request, call_next):
             resp = JSONResponse(status_code=401, content={"detail": data})
             set_cookie(value="", days_expire=0, key="session", response=resp)
             return resp
-        user_id = data["sub"]  # Updating user_id
+        request.state.user_id = data["sub"]  # Store user_id in request state
     else:
         return JSONResponse(status_code=401, content={"detail": "Session cookie is missing"})
     
