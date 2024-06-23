@@ -477,9 +477,3 @@ async def exit_booking(booking_id: int, user_id: str = Depends(get_user_id),):
             x_exited_email=email,
             x_exited_name=name,
         )
-
-
-# if __name__ == "__main__":
-#     import uvicorn
-
-#     uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -17,7 +17,7 @@ load_dotenv()
 client_id = os.getenv("GOOGLE_CLIENT_ID")
 
 def verify_id_token(token):
-    return True, {"email": "ms22btech11010@iith.ac.in", "name": "Bhaskar"}
+    # return True, {"email": "ms22btech11010@iith.ac.in", "name": "Bhaskar"}
     request = requests.Request()
     
     try:
