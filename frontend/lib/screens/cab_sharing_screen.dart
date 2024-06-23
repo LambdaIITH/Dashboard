@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/cab_add_screen.dart';
 import 'package:frontend/widgets/cab_details.dart';
+import 'package:frontend/widgets/cab_search_form.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class CabSharingScreen extends StatefulWidget {
@@ -13,30 +14,71 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
   DateTime selectedDate = DateTime.now();
   String? selectedOption;
   String? selectedOption2;
+  bool isTabOneSelected = true;
 
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-        context: context,
-        initialDate: selectedDate,
-        firstDate: DateTime(2015, 8),
-        lastDate: DateTime(2101));
-    if (picked != null && picked != selectedDate) {
-      setState(() {
-        selectedDate = picked;
-      });
-    }
-  }
+  final List<Widget> tabNames = [
+    Text(
+      'All Rides',
+      style: GoogleFonts.inter(
+        fontSize: 18.0,
+        fontWeight: FontWeight.w600,
+        color: Colors.black,
+      ),
+    ),
+    Text(
+      'My Rides',
+      style: GoogleFonts.inter(
+        fontSize: 18.0,
+        fontWeight: FontWeight.w600,
+        color: Colors.black,
+      ),
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
+    Widget allRides = Column(
+      children: [
+        const CabSearch(),
+        const SizedBox(height: 25.0),
+        Expanded(
+          child: ListView.builder(
+            itemCount: 5,
+            itemBuilder: (ctx, inx) => const Padding(
+              padding: EdgeInsets.only(bottom: 12),
+              child: CabCard(),
+            ),
+          ),
+        ),
+      ],
+    );
+
+    Widget myRides = Column(
+      children: [
+        Expanded(
+          child: ListView.builder(
+            itemCount: 1,
+            itemBuilder: (ctx, inx) => const Padding(
+              padding: EdgeInsets.only(bottom: 12),
+              child: CabCard(),
+            ),
+          ),
+        ),
+      ],
+    );
+
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Cab Sharing',
-            style: GoogleFonts.inter(
-              fontSize: 28,
-              fontWeight: FontWeight.w700,
-              color: Colors.black,
-            )),
+        backgroundColor: Colors.white,
+        title: Text(
+          'Cab Sharing',
+          style: GoogleFonts.inter(
+            fontSize: 28,
+            fontWeight: FontWeight.w700,
+            color: Colors.black,
+          ),
+        ),
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back,
@@ -48,224 +90,57 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
           },
         ),
       ),
-      floatingActionButton: SizedBox(
-        height: 75.0,
-        width: 75.0,
-        child: FittedBox(
-          child: FloatingActionButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const CabAddScreen(),
-                ),
-              );
-            },
-            backgroundColor: const Color.fromRGBO(254, 114, 76, 0.70),
-            child: const Icon(
-              Icons.add,
-              size: 30.0,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const CabAddScreen(),
             ),
-          ),
+          );
+        },
+        backgroundColor: const Color.fromARGB(204, 254, 115, 76),
+        child: const Icon(
+          Icons.add,
+          size: 30.0,
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 22.0,
-          vertical: 16.0,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10.0),
-                      boxShadow: const [
-                        BoxShadow(
-                          color:
-                              Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
-                          offset: Offset(0, 4), // Offset in the x, y direction
-                          blurRadius: 10.0,
-                          spreadRadius: 0.0,
-                        ),
-                      ],
-                    ),
-                    child: DropdownButtonFormField<String>(
-                      borderRadius: BorderRadius.circular(10.0),
-                      decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 15.0,
-                          vertical: 25.0,
-                        ),
-                      ),
-                      items:
-                          ['Campus', 'RGIA', 'Airport'].map((String location) {
-                        return DropdownMenuItem<String>(
-                          value: location,
-                          child: Text(
-                            location,
-                            style: GoogleFonts.inter(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black,
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (String? value) {
-                        selectedOption = value;
-                      },
-                      hint: selectedOption == null
-                          ? Text(
-                              'From',
-                              style: GoogleFonts.inter(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xffADADAD),
-                              ),
-                            )
-                          : null,
-                    ),
-                  ),
+            const SizedBox(
+              height: 6,
+            ),
+            Container(
+              decoration: const BoxDecoration(boxShadow: [
+                BoxShadow(
+                  color: Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
+                  offset: Offset(0, 4), // Offset in the x, y direction
+                  blurRadius: 10.0,
+                  spreadRadius: 0.0,
                 ),
-                const Padding(
-                  padding: EdgeInsets.all(10.0),
-                  child: Icon(Icons.arrow_forward,
-                      size: 25.0, color: Color(0xffADADAD)),
+              ]),
+              child: ToggleButtons(
+                direction: Axis.horizontal,
+                onPressed: (index) {
+                  setState(() {
+                    isTabOneSelected = index == 0;
+                  });
+                },
+                borderRadius: const BorderRadius.all(Radius.circular(7.0)),
+                fillColor: const Color.fromRGBO(254, 114, 76, 0.70),
+                constraints: const BoxConstraints(
+                  minHeight: 44.0,
+                  minWidth: 130.0,
                 ),
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10.0),
-                      boxShadow: const [
-                        BoxShadow(
-                          color:
-                              Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
-                          // Shadow color
-                          offset: Offset(0, 8), // Offset in the x, y direction
-                          blurRadius: 21.0,
-                          spreadRadius: 0.0,
-                        ),
-                      ],
-                    ),
-                    child: DropdownButtonFormField<String>(
-                      borderRadius: BorderRadius.circular(10.0),
-                      decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 15.0,
-                          vertical: 25.0,
-                        ),
-                      ),
-                      items: [
-                        'Campus',
-                        'RGIA',
-                        'Airport',
-                      ].map((String location) {
-                        return DropdownMenuItem<String>(
-                          value: location,
-                          child: Text(
-                            location,
-                            style: GoogleFonts.inter(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black,
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (String? value) {
-                        selectedOption2 = value;
-                      },
-                      hint: selectedOption2 == null
-                          ? Text(
-                              'To',
-                              style: GoogleFonts.inter(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xffADADAD),
-                              ),
-                            )
-                          : null,
-                    ),
-                  ),
-                ),
-              ],
+                isSelected: [isTabOneSelected, !isTabOneSelected],
+                children: tabNames,
+              ),
             ),
             const SizedBox(height: 25.0),
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      boxShadow: const [
-                        BoxShadow(
-                          color:
-                              Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
-                          // Shadow color
-                          offset: Offset(0, 8), // Offset in the x, y direction
-                          blurRadius: 21.0,
-                          spreadRadius: 0.0,
-                        ),
-                      ],
-                      borderRadius: BorderRadius.circular(10.0),
-                      color: Colors.white,
-                    ),
-                    child: TextFormField(
-                      readOnly: true,
-                      style: GoogleFonts.inter(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.black,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: selectedOption == null
-                            ? 'Date'
-                            : "${selectedDate.toLocal()}".split(' ')[0],
-                        hintStyle: GoogleFonts.inter(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          color: const Color(0xffADADAD),
-                        ),
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 20.0,
-                          vertical: 20.0,
-                        ),
-                      ),
-                      onTap: () => _selectDate(context),
-                      controller: TextEditingController(
-                        text: "${selectedDate.toLocal()}".split(' ')[0],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 25.0),
-            const Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Icon(
-                  Icons.sort_outlined,
-                  size: 30.0,
-                  color:  Color(0xffFE724C),
-                ),
-                SizedBox(width: 10.0),
-                Icon(
-                  Icons.filter_alt_outlined,
-                  size: 30.0,
-                  color: Color(0xffFE724C),
-                ),
-              ],
-            ),
-            const SizedBox(height: 25.0),
-            const CabCard(),
+            Expanded(child: isTabOneSelected ? allRides : myRides),
           ],
         ),
       ),
