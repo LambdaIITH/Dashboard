@@ -3,7 +3,6 @@ import 'package:frontend/screens/cab_sharing_screen.dart';
 import 'package:frontend/screens/lost_and_found_screen.dart';
 import 'package:frontend/screens/time_table_screen.dart';
 import 'package:frontend/widgets/home_card_no_options.dart';
-import 'package:frontend/widgets/home_card_two_options.dart';
 import 'package:frontend/widgets/home_screen_appbar.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -55,22 +54,16 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
             const SizedBox(height: 20),
-            HomeCardTwoOptions(
+            HomeCardNoOptions(
               title: 'Lost & Found',
-              title1: 'I found',
-              title2: 'I lost',
-              image1: 'assets/icons/magnifying-icon.svg',
-              image2: 'assets/icons/magnifying-icon.svg',
-              onTap: [
-                widget.user == 'guest'
-                    ? showError
-                    : () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => LostAndFoundScreen(),
-                          ),
+              image: 'assets/icons/magnifying-icon.svg',
+              onTap: widget.user == 'guest'
+                  ? showError
+                  : () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const LostAndFoundScreen(),
                         ),
-                showError
-              ],
+                      ),
             ),
             const SizedBox(height: 20),
             HomeCardNoOptions(
