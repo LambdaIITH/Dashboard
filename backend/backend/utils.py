@@ -1,5 +1,6 @@
 import os
 
+import aiosql
 import psycopg2
 from dotenv import load_dotenv
 
@@ -18,5 +19,8 @@ conn = psycopg2.connect(
     host=POSTGRES_HOST,
     port=POSTGRES_PORT,
 )
+
+print("Opened database successfully!")
+queries = aiosql.from_path("sql", "psycopg2")
 
 conn.autocommit = False

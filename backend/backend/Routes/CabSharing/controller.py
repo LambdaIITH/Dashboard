@@ -6,14 +6,13 @@ from Routes.Auth.cookie import get_user_id
 from fastapi import Depends, FastAPI, HTTPException, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from pytz import timezone
-from utils import conn
+from utils import conn, queries
 from queries.user import get_user_email
 import Routes.CabSharing.schemas as schemas
 
 from Routes.CabSharing.cab import (
     CustomFormatter,
     get_bookings,
-    queries,
     send_email,
     verify_exists,
 )

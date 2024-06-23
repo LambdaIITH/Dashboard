@@ -23,7 +23,7 @@ class User(BaseModel):
     email: str
     name: str
     cr: bool = False
-    phone: str | None = None
+    phone_number: Optional[str] 
 
     @classmethod
     def from_row(cls, row: tuple):

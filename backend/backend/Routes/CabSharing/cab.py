@@ -6,9 +6,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from typing import Literal
 
-import aiosql
 import html2text
-import psycopg2
 from dotenv import load_dotenv
 from fastapi import  HTTPException
 from pytz import timezone
@@ -58,8 +56,7 @@ GMAIL_PASSWORD = os.getenv("GMAIL_PASSWORD") or ""
 #     host=POSTGRES_HOST,
 #     port=POSTGRES_PORT,
 # )
-print("Opened database successfully!")
-queries = aiosql.from_path("sql", "psycopg2")
+
 
 
 # ------------------ AUTH ----------------------

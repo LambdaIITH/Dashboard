@@ -8,6 +8,7 @@ from Routes.TimeTable.custom import router as custom_router
 from Routes.TimeTable.changes import router as changes_router
 from Routes.Auth.controller import router as auth_router
 from Routes.CabSharing.controller import app as cab_router
+from Routes.User.controller import router as user_router
 from Routes.Auth.tokens import verify_token
 from fastapi.responses import JSONResponse
 
@@ -33,6 +34,7 @@ app.include_router(cr_router)
 app.include_router(custom_router)
 app.include_router(changes_router)
 app.include_router(cab_router)
+app.include_router(user_router)
 
 
 async def cookie_verification_middleware(request: Request, call_next):
