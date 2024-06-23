@@ -4,13 +4,13 @@ from typing import Dict, Any
 
 lost_table, lost_images_table = Table('lost'), Table('lost_images')
 
-def insert_in_lost_table( form_data: Dict[str, Any], user_id: str ): 
+def insert_in_lost_table( form_data: Dict[str, Any], user_id: int ): 
     query = Query.into(lost_table).columns('item_name', 'item_description', 'user_id').insert(
         form_data['item_name'], form_data['item_description'], user_id
     )
     
     sql_query = query.get_sql()
-    sql_query += " RETURNING id"
+    sql_query += " RETURNING *"
     
     return sql_query
 
@@ -47,25 +47,25 @@ def get_all_lost_items():
     return query
 
 
-def update_in_lost_table( item_id: str, form_data: Dict[str, Any]):
+def update_in_lost_table( item_id: int, form_data: Dict[str, Any]):
     query = Query.update(lost_table)
 
     for key, value in form_data.items():
         if key == 'item_name' or key == 'item_description':
             query = query.set(lost_table[key], value)
 
-    query = query.where(lost_table['id'] == item_id)
+    query = query.where(lost_table['id'] == item_id).get_sql()
+    query  += " RETURNING *"
+    return query
 
-    return query.get_sql()
-
-def get_particular_lost_item(item_id: str):
+def get_particular_lost_item(item_id: int):
     query = Query.from_(lost_table).select('*').where(lost_table['id'] == item_id)
     return str(query)
 
-def delete_an_item_images(item_id):
+def delete_an_item_images(item_id:int):
     query = Query.from_(lost_images_table).delete().where(lost_images_table['item_id'] == item_id)
     return str(query)
 
-def get_all_image_uris(item_id):
+def get_all_image_uris(item_id: int):
     query = Query.from_(lost_images_table).select('image_url').where(lost_images_table['item_id'] == item_id)
     return str(query)

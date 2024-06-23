@@ -64,7 +64,6 @@ async def cookie_verification_middleware(request: Request, call_next):
     set_cookie(response=response, key="session", value=token, days_expire=15)
     return response
 
-
 # @app.middleware("http")
 # async def apply_middleware(request: Request, call_next):
 #     excluded_routes = ["/auth/login", "/auth/access_token"]  # Add routes to exclude guard here

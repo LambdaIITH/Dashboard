@@ -7,7 +7,9 @@ from dotenv import load_dotenv
 from typing import List
 import boto3
 
-load_dotenv()
+from external_services import ElasticsearchManager, S3Manager
+
+
 
 DATABASE = os.getenv("DATABASE")
 POSTGRES_USER = os.getenv("POSTGRES_USER")
@@ -35,6 +37,9 @@ conn.autocommit = False
 s3 = boto3.client('s3', aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"), aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"))
 
 
+conn.autocommit = False
+
+
 # using amazon s3
 
         
@@ -60,5 +65,6 @@ class S3Manager:
                 
         
 S3Client = S3Manager()
+ESClient = ElasticsearchManager()
                                
         

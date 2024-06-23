@@ -3,7 +3,7 @@ import json
 from fastapi import APIRouter, HTTPException, status, UploadFile, File, Form
 from typing import Dict, Any, List
 from utils import *
-from models import LfResponse
+from models import LfItem, LfResponse
 from queries.found import *
 
 router = APIRouter(prefix="/found", tags=["found"])
@@ -11,8 +11,8 @@ router = APIRouter(prefix="/found", tags=["found"])
 # add found item 
 @router.post("/add_item")
 async def add_item( form_data: str = Form(...),
-                    user_id: str =Form(...),
-                    images: List[UploadFile] = File(default = None)
+                    user_id: int =Form(...),
+                    images: List[UploadFile] | None = File(default = None)
                     ):
     
     try:
@@ -20,14 +20,17 @@ async def add_item( form_data: str = Form(...),
        
         with conn.cursor() as cur:
             cur.execute( insert_in_found_table( form_data_dict, user_id ) )
-            item_id = cur.fetchone()[0]
+            item = LfItem.from_row(cur.fetchone())
             conn.commit()
         
+        # update in elasticsearch
+        ESClient.add_item(item.id, item.item_name, item.item_description, "found", item.created_at)
+        
         if images is not None:
-            image_paths = S3Client.uploadToCloud(images, item_id, "found")
+            image_paths = S3Client.uploadToCloud(images, item.id, "found")
 
             with conn.cursor() as cur:
-                cur.execute(insert_found_images(image_paths, item_id))
+                cur.execute(insert_found_images(image_paths, item.id))
                 conn.commit()
                 
         print("Data inserted successfully")
@@ -78,8 +81,19 @@ def show_found_items(id: int):
 
 # delete a found item 
 @router.delete( "/delete_item" )
-def delete_found_item( item_id: str = Form(...) ): 
+def delete_found_item( item_id: int = Form(...), user_id : int = Form(...) ): 
+    try: 
+        with conn.cursor() as cur: 
+            cur.execute( f"SELECT found.user_id FROM found WHERE found.id = {item_id}" )
+            authorized_id = cur.fetchone()[0] 
+            conn.commit()
         
+        authorized_id = str(authorized_id) 
+        if authorized_id != user_id: 
+            raise HTTPException( status_code=status.HTTP_401_UNAUTHORIZED , detail="User not Authorized" )
+    except Exception as e: 
+        raise HTTPException( status_code=500, detail= f"Error: {e}" )
+    
     try: 
         with conn.cursor() as cur: 
             query = f"DELETE from found WHERE found.id = {item_id}"
@@ -87,7 +101,7 @@ def delete_found_item( item_id: str = Form(...) ):
             conn.commit() 
         
             S3Client.deleteFromCloud( item_id, "found" )
-            
+            ESClient.delete_item( item_id, "found" )
         return {"message": "Item deleted successfully!"}
                
     except Exception as e: 
@@ -96,7 +110,7 @@ def delete_found_item( item_id: str = Form(...) ):
 
 # Update a found item    
 @router.put( "/edit_item" )
-def edit_selected_item( item_id: str = Form(...), user_id: str = Form(...), form_data:str = Form(...),images: List[UploadFile] = File(default = None) ):
+def edit_selected_item( item_id: int = Form(...), user_id: str = Form(...), form_data:str = Form(...),images: List[UploadFile] | None = File(default = None) ):
     # checking authorization
     try: 
         with conn.cursor() as cur: 
@@ -117,7 +131,14 @@ def edit_selected_item( item_id: str = Form(...), user_id: str = Form(...), form
 
         with conn.cursor() as cur:
             cur.execute( update_in_found_table( item_id, form_data_dict ) )
-            S3Client.deleteFromCloud( item_id, "found" )
+            row = cur.fetchone()
+            item = LfItem.from_row(row)
+            
+        
+            ESClient.delete_item(item_id, "found")
+            ESClient.add_item(item_id, item.item_name, item.item_description, "found", item.created_at)
+            
+            S3Client.deleteFromCloud( item_id, "found")
             cur.execute(delete_an_item_images(item_id))
             if images is not None:
                 image_paths = S3Client.uploadToCloud(images, item_id, "found")
@@ -130,3 +151,11 @@ def edit_selected_item( item_id: str = Form(...), user_id: str = Form(...), form
     except Exception as e: 
         raise HTTPException(status_code=500, detail=f"Error: {e}")          
 
+@router.get("/search")
+def search(query : str, max_results: int = 10):
+    try: 
+        response = ESClient.search_items(query, max_results, "found")
+        res = list(map(lambda x: {"id": x["_source"]["id"], "name": x["_source"]["name"]}, response))
+        return res
+    except Exception as e: 
+        raise HTTPException(status_code=500, detail=f"Error: {e}")

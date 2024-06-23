@@ -4,13 +4,13 @@ from typing import Dict, Any
 
 found_table, found_images_table = Table('found'), Table('found_images')
 
-def insert_in_found_table( form_data: Dict[str, Any], user_id: str ): 
+def insert_in_found_table( form_data: Dict[str, Any], user_id: int ): 
     query = Query.into(found_table).columns('item_name', 'item_description', 'user_id').insert(
         form_data['item_name'], form_data['item_description'], user_id
     )
     
     sql_query = query.get_sql()
-    sql_query += " RETURNING id"
+    sql_query += " RETURNING *"
     
     return sql_query
 
@@ -47,25 +47,26 @@ def get_all_found_items():
     return query
 
 
-def update_in_found_table( item_id: str, form_data: Dict[str, Any] ):
+def update_in_found_table( item_id: int, form_data: Dict[str, Any] ):
     query = Query.update(found_table)
 
     for key, value in form_data.items():
         if key == 'item_name' or key == 'item_description':
             query = query.set(found_table[key], value)
 
-    query = query.where(found_table['id'] == item_id)
+    query = query.where(found_table['id'] == item_id).get_sql()
+    query += " RETURNING *"
 
     return query.get_sql()
 
-def get_particular_found_item(item_id: str):
+def get_particular_found_item(item_id: int):
     query = Query.from_(found_table).select('*').where(found_table['id'] == item_id)
     return str(query)
 
-def delete_an_item_images(item_id):
+def delete_an_item_images(item_id: int):
     query = Query.from_(found_images_table).delete().where(found_images_table['item_id'] == item_id)
     return str(query)
 
-def get_all_image_uris(item_id):
+def get_all_image_uris(item_id : int):
     query = Query.from_(found_images_table).select('image_url').where(found_images_table['item_id'] == item_id)
     return str(query)
