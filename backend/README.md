@@ -23,7 +23,13 @@ poetry shell
 Once the virtual environment is activated, run the following command to start the server:
 
 ```bash
-cd dashboard-learning-backend
+cd backend
+uvicorn main:app --reload
+```
+
+if error occurs try: 
+```bash
+poetry install --no-root 
 uvicorn main:app --reload
 ```
 
