@@ -11,8 +11,8 @@ router = APIRouter(prefix="/lost", tags=["lost"])
 # add lost item 
 @router.post("/add_item")
 async def add_item( form_data: str = Form(...),
-                    user_id: str =Form(...),
-                    images: List[UploadFile] = File(default = None)
+                    user_id: int =Form(...),
+                    images: List[UploadFile] | None = File(default = None)
                     ):
     
     try:
@@ -20,15 +20,18 @@ async def add_item( form_data: str = Form(...),
        
         with conn.cursor() as cur:
             cur.execute( insert_in_lost_table( form_data_dict, user_id ) )
-            item_id = cur.fetchone()[0]
+            item = LfItem.from_row(cur.fetchone())
             conn.commit()
+        
+        # update in elasticsearch
+        ESClient.add_item(item.id, item.item_name, item.item_description, "lost", item.created_at)
         
         print( images ) 
         if images is not None:
-            image_paths = S3Client.uploadToCloud(images, item_id, "lost")
+            image_paths = S3Client.uploadToCloud(images, item.id, "lost")
 
             with conn.cursor() as cur:
-                cur.execute(insert_lost_images(image_paths, item_id))
+                cur.execute(insert_lost_images(image_paths, item.id))
                 conn.commit()
                 
         print("Data inserted successfully")
@@ -58,7 +61,7 @@ async def get_all_lost_item_names():
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="failed to fetch items")
          
 
-# show all lost items with images 
+# show some lost items with images 
 @router.get("/item/{id}")
 def show_lost_items(id: str):
     try:   
@@ -80,7 +83,18 @@ def show_lost_items(id: str):
 
 # delete a lost item 
 @router.delete( "/delete_item" )
-def delete_lost_item( item_id: str = Form(...) ):       
+def delete_lost_item( item_id: int = Form(...) , user_id: int = Form(...)):   
+    try: 
+        with conn.cursor() as cur: 
+            cur.execute( f"SELECT lost.user_id FROM lost WHERE lost.id = {item_id}" )
+            authorized_id = cur.fetchone()[0] 
+            conn.commit()
+        
+        if authorized_id != user_id: 
+            raise HTTPException( status_code=status.HTTP_401_UNAUTHORIZED , detail="User not Authorized" )
+    except Exception as e: 
+        raise HTTPException( status_code=500, detail= f"Error: {e}" )
+        
     try: 
         with conn.cursor() as cur: 
             query = f"DELETE from lost WHERE lost.id = {item_id}"
@@ -88,7 +102,7 @@ def delete_lost_item( item_id: str = Form(...) ):
             conn.commit() 
         
         S3Client.deleteFromCloud( item_id, "lost" )
-            
+        ESClient.delete_item( item_id, "lost" ) 
         return {"message": "Item deleted successfully!"}
                
     except Exception as e: 
@@ -97,7 +111,7 @@ def delete_lost_item( item_id: str = Form(...) ):
 
 # Update a lost item    
 @router.put( "/edit_item" )
-def edit_selected_item( item_id: str = Form(...), user_id: str = Form(...), form_data:str = Form(...),images: List[UploadFile] = File(default = None) ):
+def edit_selected_item( item_id: int = Form(...), user_id: int = Form(...), form_data:str = Form(...),images: List[UploadFile] | None = File(default = None) ):
     # checking authorization
     try: 
         with conn.cursor() as cur: 
@@ -105,7 +119,6 @@ def edit_selected_item( item_id: str = Form(...), user_id: str = Form(...), form
             authorized_id = cur.fetchone()[0] 
             conn.commit()
         
-        authorized_id = str(authorized_id) 
         if authorized_id != user_id: 
             raise HTTPException( status_code=status.HTTP_401_UNAUTHORIZED , detail="User not Authorized" )
     except Exception as e: 
@@ -118,10 +131,15 @@ def edit_selected_item( item_id: str = Form(...), user_id: str = Form(...), form
 
         with conn.cursor() as cur:
             cur.execute( update_in_lost_table( item_id, form_data_dict ) )
+            row = cur.fetchone()
+            item = LfItem.from_row(row)
+            
+        
+            ESClient.delete_item(item_id, "lost")
+            ESClient.add_item(item_id, item.item_name, item.item_description, "lost", item.created_at)
+            
             S3Client.deleteFromCloud( item_id, "lost" )
             cur.execute(delete_an_item_images(item_id))
-        
-            
             if images is not None:
                 image_paths = S3Client.uploadToCloud(images, item_id, "lost")
                 cur.execute(insert_lost_images(image_paths, item_id))
@@ -133,4 +151,12 @@ def edit_selected_item( item_id: str = Form(...), user_id: str = Form(...), form
         raise HTTPException(status_code=500, detail=f"Error: {e}")          
 
 
-
+# search lost items
+@router.get("/search")
+def search(query : str, max_results: int = 10):
+    try: 
+        response = ESClient.search_items(query, max_results, "lost")
+        res = list(map(lambda x: {"id": x["_source"]["id"], "name": x["_source"]["name"]}, response))
+        return res
+    except Exception as e: 
+        raise HTTPException(status_code=500, detail=f"Error: {e}")

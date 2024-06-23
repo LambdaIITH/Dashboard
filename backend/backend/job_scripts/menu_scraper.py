@@ -1,4 +1,5 @@
 import json
+import os
 import gspread
 import numpy
 import string
@@ -19,7 +20,8 @@ scope = [
     "https://www.googleapis.com/auth/drive",
     "https://spreadsheets.google.com/feeds",
 ]
-creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
+filename = os.path.join(os.path.dirname(__file__), "credentials.json")
+creds = ServiceAccountCredentials.from_json_keyfile_name(filename, scope)
 gc = gspread.authorize(creds)
 
 # gc = gspread.oauth()
@@ -217,5 +219,7 @@ json_data = {
     "UDH Additional": extra_items,
 }
 
-with open("mess.json", "w") as outfile:
+outname = os.path.dirname(__file__) + "/../Routes/MessMenu/mess.json"
+
+with open(outname, "w") as outfile:
     json.dump(json_data, outfile, indent=4)
