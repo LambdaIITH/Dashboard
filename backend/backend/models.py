@@ -21,6 +21,7 @@ class Course(BaseModel):
 class User(BaseModel):
     id: int
     email: str
+    name: str
     cr: bool = False
     phone: str | None = None
 

@@ -7,9 +7,10 @@ from fastapi import Depends, FastAPI, HTTPException, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from pytz import timezone
 from utils import conn
+from queries.user import get_user_email
+import Routes.CabSharing.schemas as schemas
 
-import schemas
-from cab import (
+from Routes.CabSharing.cab import (
     CustomFormatter,
     get_bookings,
     queries,
@@ -60,7 +61,10 @@ async def check_auth(user_id: str = Depends(get_user_id)):
     """
     Test Endpoint to validate user identity
     """
-    phone_number = queries
+    #get email
+    email = get_user_email(conn, user_id)
+    
+    phone_number = queries.get_phone_number(conn, email=email)
     return {"phone_number": phone_number}
 
 
@@ -85,11 +89,13 @@ async def check_auth(user_id: str = Depends(get_user_id)):
 
 @app.post("/bookings")
 async def create_booking(
-    booking: schemas.Booking, email: str = Depends(verify_auth_token)
+    booking: schemas.Booking, user_id: str = Depends(get_user_id)
 ):
     """
     Create a new Booking.
     """
+    #get email
+    email = get_user_email(conn, user_id)
     # get respected ids for locations
     from_id = queries.get_loc_id(conn, place=booking.from_loc)
     to_id = queries.get_loc_id(conn, place=booking.to_loc)
@@ -126,11 +132,13 @@ async def create_booking(
 async def update_booking(
     booking_id: int,
     patch: schemas.BookingUpdate,
-    email: str = Depends(verify_auth_token),
+    user_id: str = Depends(get_user_id),
 ):
     """
     Update a Booking Time. (currently unused in frontend, so doesn't send emails)
     """
+    #get email
+    email = get_user_email(conn, user_id)
 
     verify_exists(email)
 
@@ -160,10 +168,13 @@ async def update_booking(
 
 
 @app.get("/me/bookings")
-async def user_bookings(email: str = Depends(verify_auth_token)):
+async def user_bookings(user_id: str = Depends(get_user_id)):
     """
     Get Bookings where the authenticated user is a traveller
     """
+    #get email
+    email = get_user_email(conn, user_id)
+    
     res1 = queries.get_user_past_bookings(conn, email=email)
     res2 = queries.get_user_future_bookings(conn, email=email)
     user_bookings_dict = {}
@@ -174,10 +185,13 @@ async def user_bookings(email: str = Depends(verify_auth_token)):
 
 
 @app.get("/me/requests")
-async def user_requests(email: str = Depends(verify_auth_token)):
+async def user_requests(user_id: str = Depends(get_user_id)):
     """
     Get Pending requests sent by the authenticated user
     """
+    #get email
+    email = get_user_email(conn, user_id)
+    
     res = queries.get_user_pending_requests(conn, email=email)
     requested_bookings = get_bookings(res)
 
@@ -190,7 +204,7 @@ async def search_bookings(
     to_loc: Union[str, None] = None,
     start_time: Union[datetime, None] = None,
     end_time: Union[datetime, None] = None,
-    email: str = Depends(verify_auth_token),
+    user_id: str = Depends(get_user_id),
 ) -> List[Dict]:
     """
     Search Bookings by locations and time
@@ -229,11 +243,13 @@ async def search_bookings(
 async def request_to_join_booking(
     booking_id: int,
     join_booking: schemas.JoinBooking,
-    email: str = Depends(verify_auth_token),
+    user_id: str = Depends(get_user_id),
 ):
     """
     A function for a new person to place a request to join an existing booking
     """
+    #get email
+    email = get_user_email(conn, user_id)
 
     owner_email = queries.get_owner_email(conn, cab_id=booking_id)
     if owner_email is None:
@@ -290,10 +306,13 @@ async def request_to_join_booking(
 
 
 @app.delete("/bookings/{booking_id}/request")
-async def delete_request(booking_id: int, email: str = Depends(verify_auth_token)):
+async def delete_request(booking_id: int, user_id: str = Depends(get_user_id)):
     """
     To delete a person's request to join booking
     """
+    #get email
+    email = get_user_email(conn, user_id)
+    
     request_status = queries.get_request_status(
         conn, booking_id=booking_id, email=email
     )
@@ -313,11 +332,14 @@ async def delete_request(booking_id: int, email: str = Depends(verify_auth_token
 async def accept_request(
     booking_id: int,
     response: schemas.RequestResponse,
-    email: str = Depends(verify_auth_token),
+    user_id: str = Depends(get_user_id),
 ):
     """
     To accept a person's request to join booking
     """
+    #get email
+    email = get_user_email(conn, user_id)
+    
     owner_email = queries.get_owner_email(conn, cab_id=booking_id)
     if owner_email is None:
         raise HTTPException(status_code=400, detail="Booking does not exist")
@@ -386,11 +408,14 @@ async def accept_request(
 async def reject_request(
     booking_id: int,
     response: schemas.RequestResponse,
-    email: str = Depends(verify_auth_token),
+    user_id: str = Depends(get_user_id),
 ):
     """
     To reject a person's request to join booking
     """
+    #get email
+    email = get_user_email(conn, user_id)
+    
     owner_email = queries.get_owner_email(conn, cab_id=booking_id)
     if owner_email is None:
         raise HTTPException(status_code=400, detail="Ride does not exist")
@@ -422,11 +447,14 @@ async def reject_request(
 
 @app.delete("/bookings/{booking_id}")
 async def delete_existing_booking(
-    booking_id: int, email: str = Depends(verify_auth_token)
+    booking_id: int, user_id: str = Depends(get_user_id)
 ):
     """
     Delete a Particular booking
     """
+    #get email
+    email = get_user_email(conn, user_id)
+    
     owner_email = queries.get_owner_email(conn, cab_id=booking_id)
     if owner_email is None:
         raise HTTPException(status_code=400, detail="Booking does not exist")
@@ -449,10 +477,13 @@ async def delete_existing_booking(
 
 
 @app.delete("/bookings/{booking_id}/self")
-async def exit_booking(booking_id: int, email: str = Depends(verify_auth_token)):
+async def exit_booking(booking_id: int, user_id: str = Depends(get_user_id),):
     """
     For a user to exit from a booking (owner cannot exit)
     """
+    #get email
+    email = get_user_email(conn, user_id)
+    
     owner_email = queries.get_owner_email(conn, cab_id=booking_id)
     if owner_email is None:
         raise HTTPException(status_code=400, detail="Ride does not exist")

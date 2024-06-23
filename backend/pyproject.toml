@@ -16,6 +16,9 @@ google-auth = "^2.26.1"
 pypika = "^0.48.9"
 requests = "^2.31.0"
 pyjwt = "^2.8.0"
+html2text = "^2024.2.26"
+aiosql = "^10.2"
+gunicorn = "^22.0.0"
 
 
 [tool.poetry.group.dev.dependencies]

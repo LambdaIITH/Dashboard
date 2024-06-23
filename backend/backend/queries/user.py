@@ -11,10 +11,10 @@ def get_user(user_id: int):
              .where(users.id == user_id))
     return query.get_sql()
 
-def post_user(user: User):
+def post_user(email: str, name: str):
     query = (Query.into(users)
-             .columns(users.email, users.cr)
-             .insert(user.email, user.cr))
+             .columns(users.email, users.name)
+             .insert(email, name))
     return query.get_sql()
 
 def get_user_details(conn, user_id: int) -> Optional[Dict[str, str]]:
@@ -32,4 +32,17 @@ def get_user_details(conn, user_id: int) -> Optional[Dict[str, str]]:
             "name": user[1],
             "phone": user[2]
         }
+    return None
+
+def get_user_email(conn, user_id: int) -> Optional[Dict[str, str]]:
+    query = """
+    SELECT email
+    FROM users
+    WHERE id = %s
+    """
+    with conn.cursor() as cursor:
+        cursor.execute(query, (user_id,))
+        user = cursor.fetchone()
+    if user:
+        return user[0]
     return None

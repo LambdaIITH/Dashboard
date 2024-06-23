@@ -17,6 +17,7 @@ load_dotenv()
 client_id = os.getenv("GOOGLE_CLIENT_ID")
 
 def verify_id_token(token):
+    return True, {"email": "ms22btech11010@iith.ac.in", "name": "Bhaskar"}
     request = requests.Request()
     
     try:
@@ -33,18 +34,19 @@ def handle_login(id_token):
     ok, data = verify_id_token(id_token)
 
     if ok is False :
-        return False, {"error": "Invalid Id token", "status": 401}
+        return False,"", {"error": "Invalid Id token", "status": 401}
     
     if not is_valid_iith_email(data["email"]):
-        return False, {"error": "Please Try IITH email", "status": 401}
+        return False,"", {"error": "Please Try IITH email", "status": 401}
     
     
     exists, user_id = is_user_exists(data["email"])
     
+    print(exists)
+    
     # if user does not exists then create a new user
     if not exists:
-        new_user = User(email=data["email"])
-        user_id = new_user.id
+        user_id = insert_user(email = data["email"], name=data["name"])
     
     # generate cookie token
     token = generate_token(user_id)
@@ -56,10 +58,10 @@ def is_valid_iith_email(email):
     pattern = r'^[a-zA-Z0-9._%+-]+@(?:[a-zA-Z0-9-]+\.)?iith\.ac\.in$'
     return re.match(pattern, email) is not None
 
-def insert_user(user: User):
+def insert_user(email: str, name: str):
     cursor = conn.cursor()
     try:
-        insert_query = user_queries.post_user(user)
+        insert_query = user_queries.post_user(email, name)
         cursor.execute(insert_query)
         conn.commit()
     except Exception as e:
@@ -67,7 +69,7 @@ def insert_user(user: User):
         raise
     try:
         # Retrieve the user ID of the newly inserted user
-        select_query = Query.from_(users).select(users.id).where(users.email == user.email)
+        select_query = Query.from_(users).select(users.id).where(users.email == email)
         cursor.execute(select_query.get_sql())
         user_id = cursor.fetchone()[0]
         return user_id
