@@ -1,3 +1,4 @@
+from models import User
 from pypika import Table, Query, Field, Column
 from models import Timetable
 from typing import Dict, List, Optional

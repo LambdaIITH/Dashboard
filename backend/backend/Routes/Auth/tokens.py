@@ -2,7 +2,8 @@ import os
 import jwt
 from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
-
+from queries import user as user_queries
+from utils import conn
 
 load_dotenv()
 secret = os.getenv("TOKEN_SECRET")
