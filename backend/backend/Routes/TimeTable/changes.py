@@ -9,6 +9,8 @@ from queries import course as course_queries
 from queries import user as user_queries
 from queries import changes as changes_accepted_queries
 from typing import List, Dict
+from Routes.Auth.cookie import get_user_id
+from fastapi import Request
 
 router = APIRouter(prefix="/changes", tags=["user-changes"])
 
@@ -18,7 +20,8 @@ def get_required_details_from_course(row: tuple):
 
 
 @router.get('/')
-async def get_all_changes_to_be_accepted(user_id: int, acad_period: str) -> List[Slot_Change]:
+async def get_all_changes_to_be_accepted(request: Request, acad_period: str) -> List[Slot_Change]:
+    user_id = get_user_id(request)
     try:
         query = timetable_queries.get_registered_course_details(
             user_id, acad_period)
@@ -62,8 +65,10 @@ async def get_all_changes_to_be_accepted(user_id: int, acad_period: str) -> List
             status_code=500, detail=f"Internal Server Error : {e}")
 
 
-@router.delete('/{user_id}')
-async def delete_change(change: Changes_Accepted):
+@router.delete('/')
+async def delete_change(request: Request, change: Changes_Accepted)  -> Dict[str, str]:
+    user_id = get_user_id(request)
+    change.user_id = user_id
     try:
         query = changes_accepted_queries.exists(change)
 
@@ -96,8 +101,9 @@ async def delete_change(change: Changes_Accepted):
             status_code=500, detail=f"Internal Server Error : {type(e)}")
 
 
-@router.post('/{user_id}')
-async def accept_change(change: Changes_Accepted):
+@router.post('/')
+async def accept_change(request: Request, change: Changes_Accepted) -> Dict[str, str]:
+    user_id = get_user_id(request)
     try:
         query = changes_accepted_queries.exists(change)
 

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from utils import conn
 from models import Course, User, Slot_Change
 from constants import slots
@@ -6,12 +6,14 @@ from constants import slots
 from psycopg2.errors import ForeignKeyViolation
 from queries import custom as custom_queries
 from typing import List, Dict
-
+from Routes.Auth.cookie import get_user_id
 router = APIRouter(prefix="/custom", tags=["custom-changes"])
 
 
 @router.post("/")
-def post_custom_slot(slot: Slot_Change):
+def post_custom_slot(request: Request,slot: Slot_Change):
+    user_id = get_user_id(request)
+    slot.user_id = user_id
     try:
         if slot.custom_slot == {}:
             slot.custom_slot = None
@@ -35,7 +37,8 @@ def post_custom_slot(slot: Slot_Change):
 
 
 @router.get("/")
-def get_custom_slots(user_id: str, acad_period: str) -> List[Slot_Change]:
+def get_custom_slots(request: Request, acad_period: str) -> List[Slot_Change]:
+    user_id = get_user_id(request)
     try:
         with conn.cursor() as cur:
             query = custom_queries.get_all_custom_courses(user_id, acad_period)
@@ -49,7 +52,9 @@ def get_custom_slots(user_id: str, acad_period: str) -> List[Slot_Change]:
 
 
 @router.delete("/")
-def delete_custom_slot(slot: Slot_Change):
+def delete_custom_slot(request: Request, slot: Slot_Change):
+    user_id = get_user_id(request)
+    slot.user_id = user_id
     try:
         # course = get_course(slot.course_code, slot.acad_period)
 
@@ -64,7 +69,9 @@ def delete_custom_slot(slot: Slot_Change):
 
 
 @router.patch("/")
-def patch_custom_slot(slot: Slot_Change):
+def patch_custom_slot(request: Request, slot: Slot_Change):
+    user_id = get_user_id(request)
+    slot.user_id = user_id
     try:
         if slot.custom_slot == {}:
             slot.custom_slot = None

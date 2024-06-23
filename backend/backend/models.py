@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
 
 
 class Course(BaseModel):
@@ -10,7 +10,7 @@ class Course(BaseModel):
     segment: str
     slot: str
     credits: int
-    custom_slot:  Dict | None = None
+    custom_slot:  Optional[Dict] = None
     
     @classmethod
     def from_row(cls,row: tuple):
@@ -42,44 +42,46 @@ class Register(BaseModel):
 class Slot_Change(BaseModel):
     course_code: str
     acad_period:str
-    user_id: int
-    slot: str |None = None
-    custom_slot : Dict | None = None
+    user_id: Optional[int] = None
+    slot: Optional[str] = None
+    custom_slot : Optional[Dict] = None
     
     @classmethod
     def from_row(cls, row: tuple):
-        return Slot_Change(course_code = row[0], acad_period = row[1], user_id = row[2],  slot = row[3], custom_slot = row[4])
+        return Slot_Change(course_code = row[0], acad_period = row[1], user_id = None,  slot = row[3], custom_slot = row[4])
  
 class cr_Slot_Change(BaseModel):
     course_code: str
     acad_period:str
-    user_id: int | None = None
-    cr_name: str | None = None
-    slot: str |None = None
-    custom_slot : Dict | None = None
+    user_id: Optional[int] = None
+    cr_name: Optional[str] = None
+    slot: Optional[str] = None
+    custom_slot : Optional[Dict] = None
     
     @classmethod
-    def from_row(cls, row: tuple, cr_name :str = None):
-        return cr_Slot_Change(course_code = row[0], acad_period = row[1], user_id = row[2], cr_name = cr_name, slot = row[3], custom_slot = row[4])
+    def from_row(cls, row: tuple):
+        return cr_Slot_Change(course_code = row[0], acad_period = row[1], user_id = row[2], cr_name = None, slot = row[3], custom_slot = row[4])
     
     def from_row_with_name(cls, row:tuple, cr_name: str):
+        """
+            will be used for responses
+        """
         return cr_Slot_Change(course_code = row[0], acad_period = row[1], user_id = None, cr_name = cr_name, slot = row[3], custom_slot = row[4])
     
         
 
 class Timetable(BaseModel):
-    user_id: int
     acad_period: str
     course_codes: List[str]
     
 class Changes_Accepted(BaseModel):
-    user_id: int
+    user_id: Optional[int] = None
     course_code: str
     acad_period: str
     cr_id: int
 
     @classmethod
-    def from_row(cls, row: tuple):
+    def from_row(cls, row: Tuple[int, str, str, int]):
         return Changes_Accepted(user_id=row[0], course_code=row[1], acad_period=row[2], cr_id=row[3])
 
 class Takes(BaseModel):
@@ -87,8 +89,8 @@ class Takes(BaseModel):
     course_name: str
     acad_period: str
     segment: str
-    slot: str | None = None
-    timings: Dict | None = None
+    slot: Optional[str] = None
+    timings: Optional[Dict] = None
 
     @classmethod
     def from_row_type1(cls, row: tuple):
@@ -96,12 +98,12 @@ class Takes(BaseModel):
 
 
 class LfItem(BaseModel):
-    id: int | None = None
+    id: int 
     item_name: str
     item_description: str 
     created_at: datetime
-    image_urls: List[str] | None = None 
-    user_id: int | None = None
+    image_urls: List[str] 
+    user_id: int 
     
     @classmethod
     def from_row(cls, row: tuple):

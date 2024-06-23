@@ -26,6 +26,7 @@ elasticsearch = "^8.14.0"
 html2text = "^2024.2.26"
 aiosql = "^10.2"
 gunicorn = "^22.0.0"
+pytz = "^2024.1"
 
 
 [tool.poetry.group.dev.dependencies]
