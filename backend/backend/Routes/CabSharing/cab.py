@@ -12,7 +12,7 @@ from fastapi import  HTTPException
 from pytz import timezone
 from uvicorn.workers import UvicornWorker
 
-from utils import conn
+from utils import conn, queries
 
 
 class MyUvicornWorker(UvicornWorker):

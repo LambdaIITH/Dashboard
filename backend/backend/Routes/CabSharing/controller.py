@@ -31,25 +31,6 @@ console_handler.setFormatter(CustomFormatter())
 
 logger.addHandler(console_handler)
 
-
-# app = FastAPI()
-
-# origins = [
-#     "https://iith.dev",
-#     "https://iithdashboard.com",
-#     "http://localhost",
-#     "http://localhost:3000",
-# ]
-
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=origins,
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
-
-
 @app.get("/")
 async def read_root():
     return {"Hello": "World"}
@@ -65,26 +46,6 @@ async def check_auth(user_id: str = Depends(get_user_id)):
     
     phone_number = queries.get_phone_number(conn, email=email)
     return {"phone_number": phone_number}
-
-
-# @app.post("/me")
-# async def create_user(
-#     details: schemas.UserDetails, emailname=Depends(verify_auth_token_with_name)
-# ):
-#     """
-#     Create a new User.
-#     """
-#     email, name = emailname
-#     try:
-#         queries.insert_user(
-#             conn, email=email, name=name, phone_number=details.phone_number
-#         )
-#         conn.commit()
-#     except Exception as e:
-#         logger.error(e, exc_info=True)
-#         conn.rollback()
-#         raise HTTPException(status_code=500, detail="Internal Server Error")
-
 
 @app.post("/bookings")
 async def create_booking(
