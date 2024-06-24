@@ -23,11 +23,11 @@ class User(BaseModel):
     email: str
     name: str
     cr: bool = False
-    phone_number: Optional[str] 
+    phone_number: Optional[str] = None
 
     @classmethod
     def from_row(cls, row: tuple):
-        return cls(id=row[0], email=row[1], cr=row[2], phone=row[3])
+        return cls(id=row[0], email=row[1], name = row[2],  cr=row[3], phone=row[4])
 
 
 class Register(BaseModel):
@@ -48,7 +48,7 @@ class Slot_Change(BaseModel):
     
     @classmethod
     def from_row(cls, row: tuple):
-        return Slot_Change(course_code = row[0], acad_period = row[1], user_id = None,  slot = row[3], custom_slot = row[4])
+        return Slot_Change(course_code = row[0], acad_period = row[1], user_id = row[2],  slot = row[3], custom_slot = row[4])
  
 class cr_Slot_Change(BaseModel):
     course_code: str
@@ -71,6 +71,7 @@ class cr_Slot_Change(BaseModel):
         
 
 class Timetable(BaseModel):
+    user_id: Optional[int] = None
     acad_period: str
     course_codes: List[str]
     
@@ -102,7 +103,7 @@ class LfItem(BaseModel):
     item_name: str
     item_description: str 
     created_at: datetime
-    image_urls: List[str] 
+    image_urls: Optional[List[str]] = None 
     user_id: int 
     
     @classmethod
@@ -131,6 +132,11 @@ class image_info(BaseModel):
     def from_row(cls, row:tuple):
         return image_info(id = row[0], image_url= row[1],  item_id = row[3])
 
+
+class Slot_Key(BaseModel):
+    course_code: str
+    acad_period: str
+    user_id: Optional[int] = None
 # class Changes_tobe_Accepted(BaseModel):
 #     course_code: str
 #     course_name: str

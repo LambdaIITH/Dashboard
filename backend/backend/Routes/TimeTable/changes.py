@@ -53,14 +53,11 @@ async def get_all_changes_to_be_accepted(request: Request, acad_period: str) -> 
 
 
     except (ForeignKeyViolation, InFailedSqlTransaction) as e:  # if some course doesn't exist
-        conn.rollback()
         raise HTTPException(
-            status_code=404, detail=f"Foreign Key Violdated : {e}")
+            status_code=404, detail=f"Foreign Key Violdated")
     except HTTPException as e:
-        conn.rollback()
         raise e
     except Exception as e:
-        conn.rollback()
         raise HTTPException(
             status_code=500, detail=f"Internal Server Error : {e}")
 
@@ -77,7 +74,7 @@ async def delete_change(request: Request, change: Changes_Accepted)  -> Dict[str
             cur.execute(query)
             row_count=cur.rowcount
             if row_count==0:
-                raise HTTPException(status_code=404, detail=f"The user is not seeing changes from this cr")
+                raise HTTPException(status_code=404, detail=f"such a CR change doesn't exist")
             
             query = changes_accepted_queries.delete_change(change)
             cur.execute(query)
@@ -87,47 +84,49 @@ async def delete_change(request: Request, change: Changes_Accepted)  -> Dict[str
         return {'message':'change successfully deleted'}
     
     except (HTTPException) as e:
-        conn.rollback()
         raise e
 
     except (ForeignKeyViolation, InFailedSqlTransaction) as e:  # if some course doesn't exist
-        conn.rollback()
         raise HTTPException(
             status_code=404, detail=f"Accepted Change not Found : {e}")
 
     except Exception as e:
-        conn.rollback()
         raise HTTPException(
             status_code=500, detail=f"Internal Server Error : {type(e)}")
 
 
 @router.post('/')
 async def accept_change(request: Request, change: Changes_Accepted) -> Dict[str, str]:
+    """
+    This route acts to accept both new cr changes or update existing cr changes
+    """
     user_id = get_user_id(request)
+    change.user_id =user_id
     try:
-        query = changes_accepted_queries.exists(change)
+        query = changes_accepted_queries.exists(change) # check if the change already exists
 
         with conn.cursor() as cur:
             cur.execute(query)
             
             row_count=cur.rowcount
-            if row_count!=0:
+            cur.fetchall()
+            if row_count!=0: # update the new cr if change already exists
                 query = changes_accepted_queries.update_change(change)
                 cur.execute(query)
                 conn.commit()
                 return {'message':'Change successfully updated'}
             
-            query = changes_accepted_queries.accept_change(change)
+            query = changes_accepted_queries.accept_change(change) # add the new cr_id to change
             cur.execute(query)
             conn.commit()
         
         return {'message':'Change successfully accepted'}
 
+    except HTTPException as e:
+        raise e
     except (ForeignKeyViolation, InFailedSqlTransaction) as e:  # if some course doesn't exist
-        conn.rollback()
-        raise HTTPException(status_code=404, detail=f"User not Found : {e}")
-
+        raise HTTPException(status_code=404, detail=f"Foreign Key Violated")
+    
     except Exception as e:
-        conn.rollback()
         raise HTTPException(
-            status_code=500, detail=f"Internal Server Error : {type(e)} {e}")
+            status_code=500, detail=f"Internal Server Error : {e}")

@@ -65,6 +65,7 @@ async def update_timetable(request: Request, timetable: Timetable):
 
     try:
         user_id = get_user_id(request)
+        timetable.user_id = user_id
         acad_period = timetable.acad_period
         query = timetable_queries.get_allRegisteredCourses(user_id, acad_period)
         timetable.course_codes = list(set(timetable.course_codes))  # having unique courses
@@ -97,9 +98,7 @@ async def update_timetable(request: Request, timetable: Timetable):
             conn.commit()
         return {"message": "Courses Updated Successfully"}
     except HTTPException as e:
-        conn.rollback()
         raise e
 
     except Exception as e:
-        conn.rollback()
         raise HTTPException(status_code=500, detail=f"Internal Server Error : {type(e)} : {e}")

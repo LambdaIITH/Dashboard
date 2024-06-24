@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Request
 from utils import conn
-from models import Course, User, Slot_Change
+from models import  Slot_Change, Slot_Key
 from constants import slots
 
 from psycopg2.errors import ForeignKeyViolation
@@ -52,16 +52,20 @@ def get_custom_slots(request: Request, acad_period: str) -> List[Slot_Change]:
 
 
 @router.delete("/")
-def delete_custom_slot(request: Request, slot: Slot_Change):
+def delete_custom_slot(request: Request, slot: Slot_Key):
     user_id = get_user_id(request)
     slot.user_id = user_id
     try:
-        # course = get_course(slot.course_code, slot.acad_period)
-
         with conn.cursor() as cur:
-            query = custom_queries.delete_course(slot)
+            query = custom_queries.delete_course(slot.course_code, slot.acad_period, slot.user_id)
+            
             cur.execute(query)
-        conn.commit()
+            del_count = cur.rowcount
+            if del_count == 0:
+                raise HTTPException(status_code=404, detail="Custom slot doesn't exist")
+            
+            conn.commit()
+            
         return {"message": "Course successfully deleted"}
     except Exception as e:
         conn.rollback()
@@ -83,7 +87,10 @@ def patch_custom_slot(request: Request, slot: Slot_Change):
         with conn.cursor() as cur:
             query = custom_queries.update_course(slot)
             cur.execute(query)
-        conn.commit()
+            id = cur.fetchone()
+            if id is None:
+                raise HTTPException(status_code=404, detail="Custom slot doesn't exist")
+            conn.commit()
             
         return {"message": "Course successfully Updated"}
     except Exception as e:

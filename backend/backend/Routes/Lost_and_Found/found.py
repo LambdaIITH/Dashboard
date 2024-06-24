@@ -13,7 +13,7 @@ router = APIRouter(prefix="/found", tags=["found"])
 @router.post("/add_item")
 async def add_item( request: Request,
                     form_data: str = Form(...),
-                    images: List[UploadFile] | None = File(default = None)
+                    images: List[UploadFile]  = File(default = None)
                     )  -> Dict[str, Any]:
     
     try:
@@ -112,7 +112,7 @@ def delete_found_item( request: Request, item_id: int = Form(...)) -> Dict[str, 
 
 # Update a found item    
 @router.put( "/edit_item" )
-def edit_selected_item( request: Request, item_id: int = Form(...),  form_data:str = Form(...),images: List[UploadFile] | None = File(default = None) ) -> Dict[str, str]:
+def edit_selected_item( request: Request, item_id: int = Form(...),  form_data:str = Form(...),images: List[UploadFile]  = File(default = None) ) -> Dict[str, str]:
     # checking authorization
     user_id = get_user_id(request)
     try: 

@@ -13,32 +13,8 @@ from constants import slots
 from Routes.Auth.cookie import get_user_id
 router = APIRouter(prefix="/cr", tags=["cr-changes"])
 
-# def get_course(course_code: str, acad_period: str) -> Course:
-#     try:
-#         query = course_queries.get_course(course_code, acad_period)
 
-#         with conn.cursor() as cur:
-#             cur.execute(query)
-
-#             if cur.rowcount == 0:
-#                 raise HTTPException(status_code=404, detail="Foreign Key Violdated")
-
-#             if cur.rowcount > 1:
-#                 raise HTTPException(
-#                     status_code=500, detail="Multiple courses found")
-
-#             row = cur.fetchone()
-#             # true since rowcount > 0 (adding because of linter warning)
-#             assert row is not None
-
-#             return Course.from_row(row)
-
-#     except Exception as e:
-#         raise HTTPException(
-#             status_code=500, detail=f'Internal Server Error: {e}')
-
-
-def check_user_is_cr(user_id: int):
+def check_user_is_cr(user_id: int) -> User:
     """
         Check if the user is CR and return the user object
     """
@@ -48,7 +24,6 @@ def check_user_is_cr(user_id: int):
         if cur.rowcount == 0:
             raise HTTPException(status_code=404, detail='User doesn\'t exist')
         row = cur.fetchone()
-
         user = User.from_row(row)
         if user.cr == False:
             raise HTTPException(
@@ -71,23 +46,15 @@ def post_change_as_cr(request: Request, slot: Slot_Change) -> Dict[str, str]:
         with conn.cursor() as cur:
             query = cr_queries.post_change(slot)
             cur.execute(query)
-            conn.commit()
+        conn.commit()
 
         return {"message": "Change successfully posted"}
 
     
     except ForeignKeyViolation as e:
-        conn.rollback()
         raise HTTPException(
-            status_code=404, detail=f'Foreign Key Violdated: {e}')
-    except UniqueViolation as e: # if error comes from unique constraint, pass to 
-        conn.rollback()
-        return patch_change_slot(slot)
-    except HTTPException as e:
-        conn.rollback()
-        raise e
+            status_code=404, detail=f'Foreign Key Violated')
     except Exception as e:
-        conn.rollback()
         raise HTTPException(
             status_code=500, detail=f'Internal Server Error: {e}')
 
@@ -111,21 +78,20 @@ def patch_change_slot( request : Request, slot: Slot_Change) -> Dict[str, str]:
         with conn.cursor() as cur:
             query = cr_queries.update_CR_change(slot)
             cur.execute(query)
+            if cur.rowcount == 0:
+                raise HTTPException(status_code=404, detail="No Changes Made: No such CR change exists")
             conn.commit()
         
         return {"message": "Change successfully posted"}
 
     except ForeignKeyViolation as e:
-        conn.rollback()
         raise HTTPException(
             status_code=404, detail=f'Foreign Key Violdated: {e}')
     except HTTPException as e:
-        conn.rollback()
         raise e
     except Exception as e:
-        conn.rollback()
         raise HTTPException(
-            status_code=500, detail=f'Internal Server Error: {type(e)} {e}')
+            status_code=500, detail=f'Internal Server Error: {e}')
 
 
 @router.delete('/')
@@ -146,10 +112,8 @@ def delete_change_slot(request: Request, course_code: str, acad_period: str) -> 
         return {"message": "Change successfully deleted"}
 
     except HTTPException as e:
-        conn.rollback()
         raise e
     except Exception as e:
-        conn.rollback()
         raise HTTPException(
             status_code=500, detail=f'Internal Server Error: {type(e)} {e}')
 
