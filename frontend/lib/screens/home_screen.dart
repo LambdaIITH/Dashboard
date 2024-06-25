@@ -4,6 +4,8 @@ import 'package:frontend/screens/lost_and_found_screen.dart';
 import 'package:frontend/screens/time_table_screen.dart';
 import 'package:frontend/widgets/home_card_no_options.dart';
 import 'package:frontend/widgets/home_screen_appbar.dart';
+import 'package:frontend/widgets/home_screen_bus_timings.dart';
+import 'package:frontend/widgets/home_screen_mess_menu.dart';
 
 class HomeScreen extends StatefulWidget {
   final String user;
@@ -44,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 20),
             HomeCardNoOptions(
               title: 'Time Table',
-              image: 'assets/icons/calendar.svg',
+              child: 'assets/icons/calendar.svg',
               onTap: () {
                 widget.user == 'guest'
                     ? showError()
@@ -54,9 +56,13 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
             const SizedBox(height: 20),
+            const HomeScreenBusTimings(),
+            const SizedBox(height: 20),
+            const HomeScreenMessMenu(),
+            const SizedBox(height: 20),
             HomeCardNoOptions(
               title: 'Lost & Found',
-              image: 'assets/icons/magnifying-icon.svg',
+              child: 'assets/icons/magnifying-icon.svg',
               onTap: widget.user == 'guest'
                   ? showError
                   : () => Navigator.of(context).push(
@@ -68,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 20),
             HomeCardNoOptions(
               title: 'Cab Sharing',
-              image: 'assets/icons/cab-sharing-icon.svg',
+              child: 'assets/icons/cab-sharing-icon.svg',
               onTap: () {
                 widget.user == 'guest'
                     ? showError()

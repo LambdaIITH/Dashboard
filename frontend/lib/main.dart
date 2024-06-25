@@ -29,7 +29,8 @@ class _MyAppState extends State<MyApp> {
   //        nextPage: LoginScreenWrapper(
     //    timeDilationFactor: 4.0,
      // )),
-       home: BusTimingsScreen(),
+       home: HomeScreen(user: ''),
+      //  home: BusTimingsScreen(),
       // home: MessMenuScreen(),
     );
   }

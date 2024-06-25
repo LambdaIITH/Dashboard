@@ -6,13 +6,15 @@ import 'package:google_fonts/google_fonts.dart';
 
 class HomeCardNoOptions extends StatelessWidget {
   final String title;
-  final String image;
-  final void Function()? onTap;
+  final dynamic child;
+  final bool isimage;
+  final void Function() onTap;
   const HomeCardNoOptions({
     super.key,
     required this.title,
-    required this.image,
-    this.onTap,
+    required this.child,
+    required this.onTap,
+    this.isimage = true,
   });
 
   @override
@@ -21,7 +23,8 @@ class HomeCardNoOptions extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Container(
-        height: 140,
+        height: isimage ? 140 : 180,
+
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(10),
@@ -48,14 +51,19 @@ class HomeCardNoOptions extends StatelessWidget {
                 ),
               ),
             ),
-            Positioned(
-              bottom: -13,
-              right: -7,
-              child: SvgPicture.asset(
-                image,
-                width: min(0.5 * screenWidth, 200),
-              ),
-            ),
+            isimage
+                ? Positioned(
+                    bottom: -13,
+                    right: -7,
+                    child: SvgPicture.asset(
+                      child,
+                      width: min(0.5 * screenWidth, 200),
+                    ),
+                  )
+                : Positioned(
+                    bottom: 13,
+                    child: SizedBox(width: 350, child: child),
+                  ),
           ],
         ),
       ),
