@@ -78,7 +78,7 @@ class HomeScreenBusTimings extends StatelessWidget {
       child: Row(
         children: [
           SizedBox(
-            width: 0.3 * screenWidth,
+            // width: 0.3 * screenWidth,
             child: NormalText(text: from),
           ),
           const Icon(Icons.arrow_forward_rounded),

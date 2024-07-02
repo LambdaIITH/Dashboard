@@ -1,46 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/models/mess_menu_model.dart';
 import 'package:frontend/widgets/mess_menu_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
-List breakfast = [
-      'Aloo Paratha',
-      'Pudina Chutney',
-      'Curd',
-      'Butter',
-      'Milk',
-      'Tea',
-      'Bournvita',
-      'Egg/Banana'
-];
-
-List lunch = [
-      'Plain Roti',
-      'Masoor Dal',
-      'Aloo-methi',
-      'Rice',
-      'Curd',
-      'Papad',
-      'Sambar',
-      'Salad'
-];
-List snacks = [
-      'Ginger tea',
-      'milk'
-];
-List dinner = [
-      'Plain Roti',
-      'Rajma',
-      'Chicken/Paneer biryani',
-      'Veg korma',
-      'Buttermilk',
-      'Papad',
-      'Rice',
-      'Salad'
-];
-
 class MessMenuScreen extends StatelessWidget {
-  const MessMenuScreen({super.key});
+  final MessMenuModel messMenu;
+  const MessMenuScreen({
+    super.key,
+    required this.messMenu,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -63,9 +32,13 @@ class MessMenuScreen extends StatelessWidget {
           },
         ),
       ),
-      body: const SafeArea(
+      body: SafeArea(
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-         Expanded(child: SingleChildScrollView(child: MessMenuPage())),
+          Expanded(
+              child: SingleChildScrollView(
+                  child: MessMenuPage(
+            messMenu: messMenu,
+          ))),
         ]),
       ),
     );
@@ -73,7 +46,11 @@ class MessMenuScreen extends StatelessWidget {
 }
 
 class MessMenuPage extends StatefulWidget {
-  const MessMenuPage({super.key});
+  final MessMenuModel messMenu;
+  const MessMenuPage({
+    super.key,
+    required this.messMenu,
+  });
 
   @override
   State<MessMenuPage> createState() => _MessMenuPageState();
@@ -95,31 +72,24 @@ class _MessMenuPageState extends State<MessMenuPage> {
     )
   ];
 
-String getCurrentDay() {
-  DateTime now = DateTime.now();
-  String day = DateFormat('EEEE').format(now);
-  return day;
-}
+  String getCurrentDay() {
+    DateTime now = DateTime.now();
+    String day = DateFormat('EEEE').format(now);
+    return day;
+  }
 
   @override
   void initState() {
     whichDay = getCurrentDay();
-    // _loadMessPreference();
     super.initState();
   }
 
-  // _loadMessPreference() async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   int whichMess = prefs.getInt('messPref') ?? 0;
-  //   setState(() {
-  //     for (var i = 0; i < selectedOption.length; i++) {
-  //       selectedOption[i] = i == whichMess;
-  //     }
-  //   });
-  // }
-
   @override
   Widget build(BuildContext context) {
+    final meals = selectedOption[0]
+        ? widget.messMenu.udh[whichDay]
+        : widget.messMenu.ldh[whichDay];
+
     return Column(
       children: [
         Row(
@@ -187,26 +157,29 @@ String getCurrentDay() {
             const SizedBox(
               height: 40.0,
             ),
-            ShowMessMenu(
-              whichMeal: 'Breakfast',
-              time: '7:30AM-10:30AM',
-              meals: breakfast,
-            ),
-            ShowMessMenu(
-              whichMeal: 'Lunch',
-              time: '12:30PM-2:45PM',
-              meals: lunch,
-            ),
-            ShowMessMenu(
-              whichMeal: 'Snacks',
-              time: '5:00PM-6:00PM',
-              meals: snacks,
-            ),
-            ShowMessMenu(
-              whichMeal: 'Dinner',
-              time: '7:30PM-9:30PM',
-              meals: dinner,
-            ),
+            if (meals != null) ...[
+              ShowMessMenu(
+                whichMeal: 'Breakfast',
+                time: '7:30AM-10:30AM',
+                meals: meals.breakfast,
+              ),
+              ShowMessMenu(
+                whichMeal: 'Lunch',
+                time: '12:30PM-2:45PM',
+                meals: meals.lunch,
+              ),
+              ShowMessMenu(
+                whichMeal: 'Snacks',
+                time: '5:00PM-6:00PM',
+                meals: meals.snacks,
+              ),
+              ShowMessMenu(
+                whichMeal: 'Dinner',
+                time: '7:30PM-9:30PM',
+                meals: meals.dinner,
+              ),
+            ] else
+              const Center(child: Text('No meals available for today')),
           ],
         ),
       ],

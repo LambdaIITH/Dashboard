@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rounded_expansion_tile/rounded_expansion_tile.dart';
 
-class ShowMessMenu extends StatelessWidget {
+class HomeMessMenu extends StatelessWidget {
   final String whichMeal;
   final String time;
   final List<String> meals;
-  const ShowMessMenu({
+  const HomeMessMenu({
     super.key,
     required this.whichMeal,
     required this.meals,
@@ -16,7 +16,7 @@ class ShowMessMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+      padding: const EdgeInsets.fromLTRB(12, 0, 12, 5),
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
@@ -25,9 +25,12 @@ class ShowMessMenu extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xff000000).withOpacity(0.15),
-              offset: const Offset(0.0, 4.0),
-              blurRadius: 3.0,
+              color: const Color(0xff000000).withOpacity(0.25),
+              offset: const Offset(
+                0,
+                1,
+              ),
+              blurRadius: 1.0,
               spreadRadius: 0.0,
             ),
           ],
@@ -37,13 +40,13 @@ class ShowMessMenu extends StatelessWidget {
           rotateTrailing: true,
           duration: const Duration(milliseconds: 400),
           title: Padding(
-            padding: const EdgeInsets.all(9),
+            padding: const EdgeInsets.all(2),
             child: RichText(
               text: TextSpan(
                 text: whichMeal,
                 style: GoogleFonts.inter(
                   color: Colors.black,
-                  fontSize: 20,
+                  fontSize: 19,
                   fontWeight: FontWeight.w500,
                 ),
                 children: [
@@ -63,14 +66,14 @@ class ShowMessMenu extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(35, 0, 9, 3),
+                padding: const EdgeInsets.fromLTRB(24, 0, 9, 3),
                 child: Text.rich(
                   TextSpan(
                     children: messMenu(),
                   ),
                   style: GoogleFonts.inter(
                     color: const Color(0xff292929),
-                    fontSize: 16.0,
+                    fontSize: 15.0,
                     fontWeight: FontWeight.w400,
                   ),
                 ),
