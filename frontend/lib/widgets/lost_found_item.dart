@@ -25,15 +25,16 @@ class LostFoundItem extends StatelessWidget {
             images: images,
             itemName: itemName,
             itemDescription:
-                'Green highlighter found near the canteen on 20th october.',
+                'Green highlighter found near the canteen on 20th October.',
             lostOrFound: lostOrFound,
           ),
         ),
       ),
       child: Container(
+        width: 160, // Fixed height
         clipBehavior: Clip.hardEdge,
         decoration: const BoxDecoration(
-          color: Colors.white,
+          color: Color.fromARGB(255, 210, 47, 47),
           boxShadow: [
             BoxShadow(
               color: Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
@@ -47,9 +48,12 @@ class LostFoundItem extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CustomCarousel(
-              images: images,
-              fromMemory: false,
+            // Using Expanded to ensure the Carousel takes the available space
+            Expanded(
+              child: CustomCarousel(
+                images: images,
+                fromMemory: false,
+              ),
             ),
             const SizedBox(height: 10),
             Padding(

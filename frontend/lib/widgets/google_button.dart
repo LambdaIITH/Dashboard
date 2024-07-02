@@ -33,14 +33,14 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
     );
   }
 
-  Future<void> signInWithGoogle() async {
+  Future<bool> signInWithGoogle() async {
     timeDilation =
         1.5; //MAKE IT 1.0 IF YOU THINK ANY SCREEN IS TAKING LONG TIME TO LOAD
     FirebaseAuth auth = FirebaseAuth.instance;
     try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
-        return;
+        return false;
       }
 
       if (mounted) {
@@ -62,11 +62,22 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
 
       printInChunks(googleAuth.idToken ?? '');
 
-      var user = await ApiServices().authUser(googleAuth.idToken ?? 'aa45');
-      print(user!.id);
+      var result = await ApiServices().login(googleAuth.idToken ?? 'aa45');
+      if (result['status'] == 401) {
+        showSnackBar(result['error']);
+        return false;
+      }
+      if (result['user'] ==null) {
+        showSnackBar('Failed to sign in with Google.');
+        return false;
+      }
+      // successfully logged in
+
+      return true;
       
     } catch (error) {
       showSnackBar('Failed to sign in with Google.');
+      return false;
     }
   }
 
@@ -96,10 +107,10 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () async {
-            await signInWithGoogle();
+            bool status = await signInWithGoogle();
             bool isLoggedIn = await checkLoggedIn();
 
-            if (isLoggedIn) {
+            if (isLoggedIn && status) {
               var email = FirebaseAuth.instance.currentUser?.email ?? '';
 
               if (email.isEmpty) {
@@ -121,6 +132,9 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
                   Navigator.of(context).pop(); //POP THE LOADING SCREEN
                 }
               }
+            }else{
+              await logout();
+              Navigator.of(context).pop(); //POP THE LOADING SCREEN
             }
           },
           borderRadius: BorderRadius.circular(12),

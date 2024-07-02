@@ -26,7 +26,7 @@ class NextBusCard extends StatelessWidget {
             // border: Border.all(color: Colors.black,width: 1.3),
           ),
           alignment: Alignment.center,
-          width: double.infinity,
+        width: double.infinity,
           // height: 141.0,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
