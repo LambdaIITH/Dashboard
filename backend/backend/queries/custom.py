@@ -54,4 +54,6 @@ def update_course(slot: Slot_Change):
         )
     )
 
-    return query.get_sql()
+    q = query.get_sql()
+    q += " RETURNING user_id"
+    return q

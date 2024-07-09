@@ -1,7 +1,8 @@
 import os, shutil
 import json
-from fastapi import APIRouter, HTTPException, status, UploadFile, File, Form
+from fastapi import APIRouter, HTTPException, Request, status, UploadFile, File, Form
 from typing import Dict, Any, List
+from Routes.Auth.cookie import get_user_id
 from utils import *
 from queries.lost import *
 from models import LfItem, LfResponse
@@ -10,14 +11,15 @@ router = APIRouter(prefix="/lost", tags=["lost"])
 
 # add lost item 
 @router.post("/add_item")
-async def add_item( form_data: str = Form(...),
-                    user_id: int =Form(...),
-                    images: List[UploadFile] | None = File(default = None)
-                    ):
+async def add_item( request: Request,
+                   form_data: str = Form(...), 
+                    images: List[UploadFile] = File(default = None),
+                    
+                    ) -> Dict[str, Any]:
     
     try:
         form_data_dict = json.loads(form_data)
-       
+        user_id = get_user_id(request)
         with conn.cursor() as cur:
             cur.execute( insert_in_lost_table( form_data_dict, user_id ) )
             item = LfItem.from_row(cur.fetchone())
@@ -47,7 +49,7 @@ async def add_item( form_data: str = Form(...),
 
 # show all lost item names  sorted by created_at
 @router.get("/all")
-async def get_all_lost_item_names():
+async def get_all_lost_item_names() -> List[Dict[str, Any]]:
     try:   
         with conn.cursor() as cur: 
             cur.execute("SELECT id, item_name FROM lost ORDER BY created_at DESC")
@@ -63,7 +65,7 @@ async def get_all_lost_item_names():
 
 # show some lost items with images 
 @router.get("/item/{id}")
-def show_lost_items(id: str):
+def show_lost_items(id: str) -> LfResponse:
     try:   
         with conn.cursor() as cur: 
             cur.execute(get_particular_lost_item(id))
@@ -82,9 +84,11 @@ def show_lost_items(id: str):
 
 
 # delete a lost item 
-@router.delete( "/delete_item" )
-def delete_lost_item( item_id: int = Form(...) , user_id: int = Form(...)):   
+@router.delete( "/delete_item" ) 
+def delete_lost_item(request: Request, item_id: int = Form(...) ) -> Dict[str, str]:   
+    user_id = get_user_id(request)
     try: 
+        
         with conn.cursor() as cur: 
             cur.execute( f"SELECT lost.user_id FROM lost WHERE lost.id = {item_id}" )
             authorized_id = cur.fetchone()[0] 
@@ -111,8 +115,9 @@ def delete_lost_item( item_id: int = Form(...) , user_id: int = Form(...)):
 
 # Update a lost item    
 @router.put( "/edit_item" )
-def edit_selected_item( item_id: int = Form(...), user_id: int = Form(...), form_data:str = Form(...),images: List[UploadFile] | None = File(default = None) ):
+def edit_selected_item(request: Request, item_id: int = Form(...),  form_data:str = Form(...),images: List[UploadFile]  = File(default = None) ) -> Dict[str, str]:
     # checking authorization
+    user_id = get_user_id(request)
     try: 
         with conn.cursor() as cur: 
             cur.execute( f"SELECT lost.user_id FROM lost WHERE lost.id = {item_id}" )
@@ -153,7 +158,7 @@ def edit_selected_item( item_id: int = Form(...), user_id: int = Form(...), form
 
 # search lost items
 @router.get("/search")
-def search(query : str, max_results: int = 10):
+def search(query : str, max_results: int = 10) -> List[Dict[str, Any]] :
     try: 
         response = ESClient.search_items(query, max_results, "lost")
         res = list(map(lambda x: {"id": x["_source"]["id"], "name": x["_source"]["name"]}, response))

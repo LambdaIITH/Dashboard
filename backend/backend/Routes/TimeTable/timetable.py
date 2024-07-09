@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from utils import conn
 from models import Timetable, Course, Takes
 from queries import timetable as timetable_queries
@@ -7,7 +7,7 @@ from queries import custom as custom_queries
 from queries import changes as changes_queries
 from psycopg2.errors import ForeignKeyViolation, InFailedSqlTransaction
 from typing import List
-
+from Routes.Auth.cookie import get_user_id
 router = APIRouter(prefix="/timetable", tags=["timetable"])
 
 
@@ -16,7 +16,8 @@ def get_required_details_from_course(row: tuple):
 
 
 @router.get("/{user_id}")
-async def get_timetable(user_id: int, acad_period: str) -> List[Takes]:
+async def get_timetable(request: Request, acad_period: str) -> List[Takes]:
+    user_id = get_user_id(request)
     try:
         query = timetable_queries.get_registered_course_details(user_id, acad_period)
 
@@ -60,10 +61,11 @@ async def get_timetable(user_id: int, acad_period: str) -> List[Takes]:
 
 
 @router.post("/")  # the route also works to update the timetable
-async def update_timetable(timetable: Timetable):
+async def update_timetable(request: Request, timetable: Timetable):
 
     try:
-        user_id = timetable.user_id
+        user_id = get_user_id(request)
+        timetable.user_id = user_id
         acad_period = timetable.acad_period
         query = timetable_queries.get_allRegisteredCourses(user_id, acad_period)
         timetable.course_codes = list(set(timetable.course_codes))  # having unique courses
@@ -74,6 +76,8 @@ async def update_timetable(timetable: Timetable):
             removal = [course for course in timetable.course_codes if course  in courses]
             
             removal = list(set(removal))
+            
+            
             for course in removal:
                 courses.remove(course)
                 timetable.course_codes.remove(course)
@@ -94,9 +98,7 @@ async def update_timetable(timetable: Timetable):
             conn.commit()
         return {"message": "Courses Updated Successfully"}
     except HTTPException as e:
-        conn.rollback()
         raise e
 
     except Exception as e:
-        conn.rollback()
         raise HTTPException(status_code=500, detail=f"Internal Server Error : {type(e)} : {e}")

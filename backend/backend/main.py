@@ -9,9 +9,8 @@ from Routes.TimeTable.custom import router as custom_router
 from Routes.TimeTable.changes import router as changes_router
 from Routes.MessMenu.mess_menu import router as mess_menu_router
 from Routes.Auth.controller import router as auth_router
-# from Routes.Auth.tokens import verify_access_token
-# from Routes.Lost_and_Found.found import router as found_router
-# from Routes.Lost_and_Found.lost import router as lost_router
+from Routes.Lost_and_Found.found import router as found_router
+from Routes.Lost_and_Found.lost import router as lost_router
 from Routes.Auth.controller import router as auth_router
 from Routes.CabSharing.controller import app as cab_router
 from Routes.User.controller import router as user_router
@@ -72,7 +71,7 @@ async def cookie_verification_middleware(request: Request, call_next):
 
 @app.middleware("http")
 async def apply_middleware(request: Request, call_next):
-    excluded_routes = ["/auth/login", "/auth/logout", "/"]  # Add routes to exclude guard here
+    excluded_routes = ["/auth/login", "/auth/logout", "/docs", "/openapi.json"]  # Add routes to exclude guard here
 
     if request.url.path not in excluded_routes:
         return await cookie_verification_middleware(request, call_next)

@@ -1,7 +1,8 @@
 import os, shutil
 import json
-from fastapi import APIRouter, HTTPException, status, UploadFile, File, Form
+from fastapi import APIRouter, HTTPException, Request, status, UploadFile, File, Form
 from typing import Dict, Any, List
+from Routes.Auth.cookie import get_user_id
 from utils import *
 from models import LfItem, LfResponse
 from queries.found import *
@@ -10,14 +11,14 @@ router = APIRouter(prefix="/found", tags=["found"])
 
 # add found item 
 @router.post("/add_item")
-async def add_item( form_data: str = Form(...),
-                    user_id: int =Form(...),
-                    images: List[UploadFile] | None = File(default = None)
-                    ):
+async def add_item( request: Request,
+                    form_data: str = Form(...),
+                    images: List[UploadFile]  = File(default = None)
+                    )  -> Dict[str, Any]:
     
     try:
         form_data_dict = json.loads(form_data)
-       
+        user_id = get_user_id(request)
         with conn.cursor() as cur:
             cur.execute( insert_in_found_table( form_data_dict, user_id ) )
             item = LfItem.from_row(cur.fetchone())
@@ -46,7 +47,7 @@ async def add_item( form_data: str = Form(...),
 
 # show all found item names 
 @router.get("/all")
-async def get_all_found_item_names():
+async def get_all_found_item_names() -> List[Dict[str, Any]]:
     try:   
         with conn.cursor() as cur: 
             cur.execute("SELECT id,item_name FROM found ORDER BY created_at DESC")
@@ -63,7 +64,7 @@ async def get_all_found_item_names():
 
 # show found item with images 
 @router.get("/item/{id}")
-def show_found_items(id: int):
+def show_found_items(id: int) -> LfResponse:
     try:   
         with conn.cursor() as cur: 
             cur.execute(get_particular_found_item(id))
@@ -81,7 +82,8 @@ def show_found_items(id: int):
 
 # delete a found item 
 @router.delete( "/delete_item" )
-def delete_found_item( item_id: int = Form(...), user_id : int = Form(...) ): 
+def delete_found_item( request: Request, item_id: int = Form(...)) -> Dict[str, str]: 
+    user_id = get_user_id(request)
     try: 
         with conn.cursor() as cur: 
             cur.execute( f"SELECT found.user_id FROM found WHERE found.id = {item_id}" )
@@ -110,8 +112,9 @@ def delete_found_item( item_id: int = Form(...), user_id : int = Form(...) ):
 
 # Update a found item    
 @router.put( "/edit_item" )
-def edit_selected_item( item_id: int = Form(...), user_id: str = Form(...), form_data:str = Form(...),images: List[UploadFile] | None = File(default = None) ):
+def edit_selected_item( request: Request, item_id: int = Form(...),  form_data:str = Form(...),images: List[UploadFile]  = File(default = None) ) -> Dict[str, str]:
     # checking authorization
+    user_id = get_user_id(request)
     try: 
         with conn.cursor() as cur: 
             cur.execute( f"SELECT found.user_id FROM found WHERE found.id = {item_id}" )
@@ -151,8 +154,8 @@ def edit_selected_item( item_id: int = Form(...), user_id: str = Form(...), form
     except Exception as e: 
         raise HTTPException(status_code=500, detail=f"Error: {e}")          
 
-@router.get("/search")
-def search(query : str, max_results: int = 10):
+@router.get("/search") 
+def search(query : str, max_results: int = 10) -> List[Dict[str, Any]]:
     try: 
         response = ESClient.search_items(query, max_results, "found")
         res = list(map(lambda x: {"id": x["_source"]["id"], "name": x["_source"]["name"]}, response))
