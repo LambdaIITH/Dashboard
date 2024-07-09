@@ -18,6 +18,7 @@ def generate_token(user_id):
         secret, 
         algorithm="HS256"
     )
+    print(token)
     return token
 
 def verify_token(token):

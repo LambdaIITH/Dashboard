@@ -27,3 +27,9 @@ def login(login_request: LoginRequest, response: Response):
         return response
     else:
         raise HTTPException(status_code=401, detail=msg)
+    
+@router.get("/logout")
+def logout(response: Response):
+    response = JSONResponse(content={"detail": "Logged out"}, status_code=200)
+    set_cookie(response, key="session", value="lambda-iith", days_expire=0)
+    return response
