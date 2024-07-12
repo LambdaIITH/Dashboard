@@ -18,6 +18,22 @@ To activate the virtual environment:
 poetry shell
 ```
 
+## Using the elastic Search Container
+
+Elastic Search container must be run before using the server.
+
+```bash
+
+# store all the exports from env only
+export ELASTIC_PASSWORD="PASSWORD"  
+export ELASTIC_USERNAME="USERNAME"
+export ELASTIC_PORT=1234
+export ELASTIC_HOST=localhost
+
+
+sudo docker network create elastic
+sudo docker run -p $ELASTIC_HOST:$ELASTIC_PORT:$ELASTIC_PORT -d --name elasticsearch --network elastic-net \\n  -e ELASTIC_PASSWORD=$ELASTIC_PASSWORD \\n  -e "discovery.type=single-node" \\n  -e "xpack.security.http.ssl.enabled=false" \\n  -e "xpack.license.self_generated.type=trial" \\n  docker.elastic.co/elasticsearch/elasticsearch:8.14.1
+```
 ## Running the server
 
 Once the virtual environment is activated, run the following command to start the server:
