@@ -31,7 +31,7 @@ export ELASTIC_PORT=1234
 export ELASTIC_HOST=localhost
 
 
-sudo docker network create elastic
+sudo docker network create elastic-net
 sudo docker run -p $ELASTIC_HOST:$ELASTIC_PORT:$ELASTIC_PORT -d --name elasticsearch --network elastic-net \\n  -e ELASTIC_PASSWORD=$ELASTIC_PASSWORD \\n  -e "discovery.type=single-node" \\n  -e "xpack.security.http.ssl.enabled=false" \\n  -e "xpack.license.self_generated.type=trial" \\n  docker.elastic.co/elasticsearch/elasticsearch:8.14.1
 ```
 ## Running the server
