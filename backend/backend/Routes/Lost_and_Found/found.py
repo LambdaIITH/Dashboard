@@ -6,6 +6,8 @@ from Routes.Auth.cookie import get_user_id
 from utils import *
 from models import LfItem, LfResponse
 from queries.found import *
+from utils import S3Client, ESClient
+
 
 router = APIRouter(prefix="/found", tags=["found"])
 
@@ -22,7 +24,6 @@ async def add_item( request: Request,
         with conn.cursor() as cur:
             cur.execute( insert_in_found_table( form_data_dict, user_id ) )
             item = LfItem.from_row(cur.fetchone())
-            conn.commit()
         
         # update in elasticsearch
         ESClient.add_item(item.id, item.item_name, item.item_description, "found", item.created_at)
@@ -32,9 +33,8 @@ async def add_item( request: Request,
 
             with conn.cursor() as cur:
                 cur.execute(insert_found_images(image_paths, item.id))
-                conn.commit()
+        conn.commit()
                 
-        print("Data inserted successfully")
         return {"message": "Data inserted successfully"}
 
 
@@ -53,9 +53,6 @@ async def get_all_found_item_names() -> List[Dict[str, Any]]:
             cur.execute("SELECT id,item_name FROM found ORDER BY created_at DESC")
             rows = cur.fetchall()
             rows =list( map(lambda x: {"id" : x[0], "name" : x[1]},rows))
-            
-            print(rows) 
-            
             return rows        
        
     except Exception as e: 
@@ -76,7 +73,6 @@ def show_found_items(id: int) -> LfResponse:
             return res
         
     except Exception as e:
-        print(e)
         raise HTTPException(status_code=500, detail="Failed to fetch items")
 
 
@@ -88,7 +84,6 @@ def delete_found_item( request: Request, item_id: int = Form(...)) -> Dict[str, 
         with conn.cursor() as cur: 
             cur.execute( f"SELECT found.user_id FROM found WHERE found.id = {item_id}" )
             authorized_id = cur.fetchone()[0] 
-            conn.commit()
         
         authorized_id = str(authorized_id) 
         if authorized_id != user_id: 
@@ -99,14 +94,14 @@ def delete_found_item( request: Request, item_id: int = Form(...)) -> Dict[str, 
     try: 
         with conn.cursor() as cur: 
             query = f"DELETE from found WHERE found.id = {item_id}"
-            cur.execute( query )
-            conn.commit() 
-        
-            S3Client.deleteFromCloud( item_id, "found" )
-            ESClient.delete_item( item_id, "found" )
+            cur.execute( query )        
+        S3Client.deleteFromCloud( item_id, "found" )
+        ESClient.delete_item( item_id, "found" )
+        conn.commit()
         return {"message": "Item deleted successfully!"}
                
     except Exception as e: 
+        conn.rollback()
         raise HTTPException(status_code=500, detail="Failed to fetch items")
 
 
@@ -119,7 +114,6 @@ def edit_selected_item( request: Request, item_id: int = Form(...),  form_data:s
         with conn.cursor() as cur: 
             cur.execute( f"SELECT found.user_id FROM found WHERE found.id = {item_id}" )
             authorized_id = cur.fetchone()[0] 
-            conn.commit()
         
         authorized_id = str(authorized_id) 
         if authorized_id != user_id: 
@@ -152,6 +146,7 @@ def edit_selected_item( request: Request, item_id: int = Form(...),  form_data:s
             
         return {"message": "item updated"}
     except Exception as e: 
+        conn.rollback()
         raise HTTPException(status_code=500, detail=f"Error: {e}")          
 
 @router.get("/search") 

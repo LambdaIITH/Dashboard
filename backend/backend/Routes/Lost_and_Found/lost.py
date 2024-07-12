@@ -6,7 +6,7 @@ from Routes.Auth.cookie import get_user_id
 from utils import *
 from queries.lost import *
 from models import LfItem, LfResponse
-
+from utils import S3Client, ESClient
 router = APIRouter(prefix="/lost", tags=["lost"])
 
 # add lost item 
@@ -23,27 +23,22 @@ async def add_item( request: Request,
         with conn.cursor() as cur:
             cur.execute( insert_in_lost_table( form_data_dict, user_id ) )
             item = LfItem.from_row(cur.fetchone())
-            conn.commit()
         
         # update in elasticsearch
         ESClient.add_item(item.id, item.item_name, item.item_description, "lost", item.created_at)
         
-        print( images ) 
         if images is not None:
             image_paths = S3Client.uploadToCloud(images, item.id, "lost")
 
             with conn.cursor() as cur:
                 cur.execute(insert_lost_images(image_paths, item.id))
-                conn.commit()
-                
-        print("Data inserted successfully")
+        conn.commit()
         return {"message": "Data inserted successfully"}
 
 
     except Exception as e: 
         conn.rollback()
         error_message = f"An error occurred: {e}"
-        print(error_message)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=error_message)
 
 
@@ -55,8 +50,6 @@ async def get_all_lost_item_names() -> List[Dict[str, Any]]:
             cur.execute("SELECT id, item_name FROM lost ORDER BY created_at DESC")
             rows = cur.fetchall()
             rows =list( map(lambda x: {"id" : x[0], "name" : x[1]},rows))
-            print(rows) 
-            
             return rows        
        
     except Exception as e: 
@@ -74,12 +67,10 @@ def show_lost_items(id: str) -> LfResponse:
             lost_images = cur.fetchall()
             image_urls = list(map(lambda x: x[0], lost_images))
             res = LfResponse.from_row(lost_item, image_urls)
-            
             return res
 
         
     except Exception as e:
-        print(e)
         raise HTTPException(status_code=500, detail="Failed to fetch items")
 
 
@@ -92,7 +83,6 @@ def delete_lost_item(request: Request, item_id: int = Form(...) ) -> Dict[str, s
         with conn.cursor() as cur: 
             cur.execute( f"SELECT lost.user_id FROM lost WHERE lost.id = {item_id}" )
             authorized_id = cur.fetchone()[0] 
-            conn.commit()
         
         if authorized_id != user_id: 
             raise HTTPException( status_code=status.HTTP_401_UNAUTHORIZED , detail="User not Authorized" )
@@ -103,10 +93,11 @@ def delete_lost_item(request: Request, item_id: int = Form(...) ) -> Dict[str, s
         with conn.cursor() as cur: 
             query = f"DELETE from lost WHERE lost.id = {item_id}"
             cur.execute( query )
-            conn.commit() 
         
         S3Client.deleteFromCloud( item_id, "lost" )
         ESClient.delete_item( item_id, "lost" ) 
+        conn.commit() 
+        
         return {"message": "Item deleted successfully!"}
                
     except Exception as e: 
@@ -122,7 +113,6 @@ def edit_selected_item(request: Request, item_id: int = Form(...),  form_data:st
         with conn.cursor() as cur: 
             cur.execute( f"SELECT lost.user_id FROM lost WHERE lost.id = {item_id}" )
             authorized_id = cur.fetchone()[0] 
-            conn.commit()
         
         if authorized_id != user_id: 
             raise HTTPException( status_code=status.HTTP_401_UNAUTHORIZED , detail="User not Authorized" )
@@ -153,6 +143,7 @@ def edit_selected_item(request: Request, item_id: int = Form(...),  form_data:st
             
         return {"message": "item updated"}
     except Exception as e: 
+        conn.rollback()
         raise HTTPException(status_code=500, detail=f"Error: {e}")          
 
 

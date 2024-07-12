@@ -43,8 +43,8 @@ app.include_router(cr_router)
 app.include_router(custom_router)
 app.include_router(changes_router)
 app.include_router(mess_menu_router)
-# app.include_router(found_router)
-# app.include_router(lost_router)
+app.include_router(found_router)
+app.include_router(lost_router)
 app.include_router(cab_router)
 app.include_router(user_router)
 
@@ -62,7 +62,6 @@ async def cookie_verification_middleware(request: Request, call_next):
         request.state.user_id = data["sub"]  # Store user_id in request state
     else:
         return JSONResponse(status_code=401, content={"detail": "Session cookie is missing"})
-    
     response = await call_next(request)
     
     #updating the cookie

@@ -19,7 +19,8 @@ class ElasticsearchManager:
         self.es = Elasticsearch([{"host": elastic_host, "port": elastic_port, "scheme": "http"}], basic_auth=(elastic_username, elastic_password), request_timeout= 2)
         self.indices = ["lost", "found"]
         self.setup_indices()
-        print(self.works())
+        if self.works():
+            print("Connected to Elastic Search Service")
         
         
     def works(self):
@@ -76,6 +77,7 @@ class S3Manager:
         self.s3 = boto3.client('s3', aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"), aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"))
         self.bucket_name = os.getenv("BUCKET_NAME")
         self.resource_uri =  os.getenv('RESOURCE_URI')
+        print("Connected to S3 Service")
     def uploadToCloud(self, images: List[UploadFile], item_id: int, item_type: str) -> List[str]:
         uris = []
         for i, image in enumerate(images):

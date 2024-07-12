@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from typing import List
 import boto3
 
-# from external_services import ElasticsearchManager, S3Manager
+from external_services import ElasticsearchManager, S3Manager
 
 load_dotenv()
 
@@ -61,7 +61,7 @@ conn.autocommit = False
 #                 self.s3.delete_object(Bucket=self.bucket_name, Key=item['Key'])
                 
         
-# S3Client = S3Manager()
-# ESClient = ElasticsearchManager()
+S3Client = S3Manager()
+ESClient = ElasticsearchManager()
                                
         
