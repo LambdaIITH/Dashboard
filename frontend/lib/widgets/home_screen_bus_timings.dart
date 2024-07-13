@@ -196,6 +196,10 @@ class _HomeScreenBusTimingsState extends State<HomeScreenBusTimings> {
       return noBusses("Failed to fetch bus schedule", context);
     }
 
+    if (busOneTime == -1 && busTwoTime==-1) {
+      return noBusses("No upcoming buses available", context);
+    }
+
     return InkWell(
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute(

@@ -7,15 +7,18 @@ import 'package:google_fonts/google_fonts.dart';
 class SplashScreen extends StatefulWidget {
   const SplashScreen(
       {super.key,
+      this.isLoading = true,
       required this.nextPage,
       this.delay =
           const Duration(milliseconds: 900 /*TODO: change accordingly*/)});
   final Widget nextPage;
   final Duration delay;
+  final bool isLoading;
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
 }
+
 class _SplashScreenState extends State<SplashScreen> {
   openNextPage() {
     Future.delayed(widget.delay, () {
@@ -27,7 +30,9 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    openNextPage();
+    if (!widget.isLoading) {
+      openNextPage();
+    }
   }
 
   @override

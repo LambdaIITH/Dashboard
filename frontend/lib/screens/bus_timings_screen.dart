@@ -248,21 +248,29 @@ class _BusSchedulePageState extends State<BusSchedulePage> {
         ),
         !fullSchedule
             ? Expanded(
-                child: ListView.builder(
-                  itemCount: nextBuses?.length ?? 0,
-                  itemBuilder: (context, index) {
-                    final bus = nextBuses![index];
-                    return Padding(
-                      padding: const EdgeInsets.only(top: 10),
-                      child: NextBusCard(
-                        from: bus.isFromIITH ? 'Hostel Circle' : 'Maingate',
-                        destination:
-                            bus.isFromIITH ? 'Maingate' : 'Hostel Circle',
-                        waitingTime: bus.timeDifference,
+                child: nextBuses == null || nextBuses?.length == 0
+                    ? Text(
+                        "No upcoming buses available",
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                        ),
+                      )
+                    : ListView.builder(
+                        itemCount: nextBuses?.length ?? 0,
+                        itemBuilder: (context, index) {
+                          final bus = nextBuses![index];
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 10),
+                            child: NextBusCard(
+                              from:
+                                  bus.isFromIITH ? 'Hostel Circle' : 'Maingate',
+                              destination:
+                                  bus.isFromIITH ? 'Maingate' : 'Hostel Circle',
+                              waitingTime: bus.timeDifference,
+                            ),
+                          );
+                        },
                       ),
-                    );
-                  },
-                ),
               )
             : Expanded(
                 child: Column(

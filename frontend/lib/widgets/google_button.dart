@@ -34,8 +34,7 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
   }
 
   Future<bool> signInWithGoogle() async {
-    timeDilation =
-        1.5; //MAKE IT 1.0 IF YOU THINK ANY SCREEN IS TAKING LONG TIME TO LOAD
+    timeDilation = 1;
     FirebaseAuth auth = FirebaseAuth.instance;
     try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
@@ -64,7 +63,6 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
 
       var result = await ApiServices().login(googleAuth.idToken ?? 'aa45');
 
-      print(result);
       if (result['status'] == 401) {
         showSnackBar(result['error']);
         return false;
@@ -76,7 +74,6 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
       // successfully logged in
 
       return true;
-      
     } catch (error) {
       print(error);
       showSnackBar('Failed to sign in with Google.');
@@ -135,7 +132,7 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
                   Navigator.of(context).pop(); //POP THE LOADING SCREEN
                 }
               }
-            }else{
+            } else {
               await logout();
               Navigator.of(context).pop(); //POP THE LOADING SCREEN
             }

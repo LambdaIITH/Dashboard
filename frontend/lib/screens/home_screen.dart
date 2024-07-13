@@ -5,7 +5,6 @@ import 'package:frontend/models/mess_menu_model.dart';
 import 'package:frontend/models/user_model.dart';
 import 'package:frontend/screens/cab_sharing_screen.dart';
 import 'package:frontend/screens/lost_and_found_screen.dart';
-import 'package:frontend/screens/time_table_screen.dart';
 import 'package:frontend/services/api_service.dart';
 import 'package:frontend/utils/bus_schedule.dart';
 import 'package:frontend/utils/loading_widget.dart';
@@ -127,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    timeDilation = 1.5;
+    timeDilation = 1;
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: const Color(0xfffcfcfc),

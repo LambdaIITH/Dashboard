@@ -3,6 +3,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:frontend/models/booking_model.dart';
@@ -43,6 +44,7 @@ class ApiServices {
 
   Future<void> googleLogout() async {
     await _googleSignIn.signOut();
+    await FirebaseAuth.instance.signOut();
   }
 
   void showError(BuildContext context) {
@@ -59,6 +61,10 @@ class ApiServices {
   Future<void> logout(BuildContext context) async {
     await googleLogout();
     showError(context);
+  }
+
+  Future<void> serverLogout() async {
+    await dio.get('/auth/logout');
   }
 
   Future<Map<String, dynamic>> login(String idToken) async {

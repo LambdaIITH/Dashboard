@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -7,6 +8,7 @@ import 'package:frontend/screens/home_screen.dart';
 import 'package:frontend/screens/login_screen.dart';
 import 'package:frontend/screens/splash_screen.dart';
 import 'package:frontend/services/api_service.dart';
+import 'package:frontend/utils/loading_widget.dart';
 // import 'package:frontend/screens/mess_menu_screen.dart';
 // import 'package:frontend/screens/login_screen.dart';
 // import 'package:frontend/screens/splash_screen.dart';
@@ -32,14 +34,49 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  bool isLoading = true;
+  bool isLoggedIn = false;
+
+  getAuthStatus() {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user = auth.currentUser;
+
+    setState(() {
+      if (user == null) {
+        isLoading = false;
+      } else {
+        isLoggedIn = true;
+      }
+      isLoading = false;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getAuthStatus();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-     home: SplashScreen(
-         nextPage: LoginScreenWrapper(
-       timeDilationFactor: 4.0,
-     )),
+      home: isLoading
+          ? SplashScreen(nextPage: Container())
+          : isLoggedIn
+              ? const SplashScreen(
+                  nextPage: HomeScreen(user: "user"),
+                  isLoading: false,
+                )
+              : const SplashScreen(
+                  isLoading: false,
+                  nextPage: LoginScreenWrapper(
+                    timeDilationFactor: 4.0,
+                  )),
+      // home: SplashScreen(
+      //     nextPage: LoginScreenWrapper(
+      //   timeDilationFactor: 4.0,
+      // )),
       //  home: HomeScreen(user: ''),
       //  home: BusTimingsScreen(),
       // home: MessMenuScreen(),
