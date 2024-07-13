@@ -3,11 +3,11 @@ import 'package:google_fonts/google_fonts.dart';
 
 class NextBusCard extends StatelessWidget {
   final String from;
-  final String destinantion;
+  final String destination;
   final String waitingTime;
 
   const NextBusCard(
-      {super.key, required this.from, required this.destinantion, required this.waitingTime});
+      {super.key, required this.from, required this.destination, required this.waitingTime});
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +56,7 @@ class NextBusCard extends StatelessWidget {
                   const SizedBox(width: 10),
                   Flexible(
                     child: Text(
-                      destinantion,
+                      destination,
                       style: GoogleFonts.inter(
                         fontSize: 16.0,
                         fontWeight: FontWeight.w600,

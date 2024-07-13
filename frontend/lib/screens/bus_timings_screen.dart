@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:frontend/utils/bus_schedule.dart';
 import 'package:frontend/utils/loading_widget.dart';
@@ -41,6 +43,17 @@ class BusTimingsScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+class NextBusModel {
+  final bool isFromIITH;
+  final String time;
+  final String timeDifference;
+
+  NextBusModel(
+      {required this.isFromIITH,
+      required this.time,
+      required this.timeDifference});
 }
 
 class BusSchedulePage extends StatefulWidget {
@@ -98,9 +111,112 @@ class _BusSchedulePageState extends State<BusSchedulePage> {
     )
   ];
 
-  getNextTwoBusesFromMaingate() {
+  List<NextBusModel> getNextTwoBusesFromMaingate() {
     List<String> allBuses = widget.busSchedule.toIITH;
-    DateTime.now();
+    DateTime now = DateTime.now();
+
+    List<DateTime> busTimes = allBuses.map((time) {
+      List<String> parts = time.split(':');
+      int hour = int.parse(parts[0]);
+      int minute = int.parse(parts[1]);
+      return DateTime(now.year, now.month, now.day, hour, minute);
+    }).toList();
+
+    List<DateTime> nextBuses =
+        busTimes.where((busTime) => busTime.isAfter(now)).toList();
+    nextBuses.sort();
+
+    List<NextBusModel> nextTwoBuses = nextBuses.take(2).map((busTime) {
+      Duration difference = busTime.difference(
+          DateTime(now.year, now.month, now.day, now.hour, now.minute));
+      int minutes = difference.inMinutes;
+      String formattedDifference = "$minutes minutes";
+      return NextBusModel(
+        isFromIITH: false,
+        time:
+            "${busTime.hour.toString().padLeft(2, '0')}:${busTime.minute.toString().padLeft(2, '0')}",
+        timeDifference: formattedDifference,
+      );
+    }).toList();
+
+    return nextTwoBuses;
+  }
+
+  List<NextBusModel> getNextTwoBusesFromHostelCircle() {
+    List<String> allBuses = widget.busSchedule.fromIITH;
+    DateTime now = DateTime.now();
+
+    List<DateTime> busTimes = allBuses.map((time) {
+      List<String> parts = time.split(':');
+      int hour = int.parse(parts[0]);
+      int minute = int.parse(parts[1]);
+      return DateTime(now.year, now.month, now.day, hour, minute);
+    }).toList();
+
+    List<DateTime> nextBuses =
+        busTimes.where((busTime) => busTime.isAfter(now)).toList();
+    nextBuses.sort();
+
+    List<NextBusModel> nextTwoBuses = nextBuses.take(2).map((busTime) {
+      Duration difference = busTime.difference(
+          DateTime(now.year, now.month, now.day, now.hour, now.minute));
+      int minutes = difference.inMinutes;
+      String formattedDifference = "$minutes minutes";
+      return NextBusModel(
+        isFromIITH: true,
+        time:
+            "${busTime.hour.toString().padLeft(2, '0')}:${busTime.minute.toString().padLeft(2, '0')}",
+        timeDifference: formattedDifference,
+      );
+    }).toList();
+
+    return nextTwoBuses;
+  }
+
+  List<NextBusModel> getNextBuses() {
+    List<NextBusModel> maingateBuses = getNextTwoBusesFromMaingate();
+    List<NextBusModel> hostelCircleBuses = getNextTwoBusesFromHostelCircle();
+
+    List<NextBusModel> combinedBuses = [];
+    combinedBuses.addAll(maingateBuses);
+    combinedBuses.addAll(hostelCircleBuses);
+
+    combinedBuses.sort((a, b) => a.time.compareTo(b.time));
+
+    return combinedBuses;
+  }
+
+  List<NextBusModel>? nextBuses;
+  Timer? _timer;
+
+  void setInitialTimer() {
+    DateTime now = DateTime.now();
+    int secondsUntilNextMinute = 60 - now.second;
+    _timer = Timer(Duration(seconds: secondsUntilNextMinute), () {
+      updateNextBuses();
+      _timer = Timer.periodic(const Duration(minutes: 1), (timer) {
+        updateNextBuses();
+      });
+    });
+  }
+
+  void updateNextBuses() {
+    setState(() {
+      nextBuses = getNextBuses();
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    updateNextBuses();
+    setInitialTimer();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -131,43 +247,21 @@ class _BusSchedulePageState extends State<BusSchedulePage> {
           children: fullScheduleWidget,
         ),
         !fullSchedule
-            ? const Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(top: 10),
-                        child: NextBusCard(
-                            from: 'Main Gate',
-                            destinantion: 'Hostel Circle',
-                            waitingTime: '10 Minutes'),
+            ? Expanded(
+                child: ListView.builder(
+                  itemCount: nextBuses?.length ?? 0,
+                  itemBuilder: (context, index) {
+                    final bus = nextBuses![index];
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: NextBusCard(
+                        from: bus.isFromIITH ? 'Hostel Circle' : 'Maingate',
+                        destination:
+                            bus.isFromIITH ? 'Maingate' : 'Hostel Circle',
+                        waitingTime: bus.timeDifference,
                       ),
-                      Padding(
-                        padding: EdgeInsets.only(top: 10),
-                        child: NextBusCard(
-                            from: 'Hostel Circle',
-                            destinantion: 'Main Gate',
-                            waitingTime: '13 Minutes'),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(top: 10),
-                        child: NextBusCard(
-                            from: 'New Hostel',
-                            destinantion: 'Hostel Circle',
-                            waitingTime: '9 Minutes'),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(top: 10),
-                        child: NextBusCard(
-                            from: 'Hostel Circle',
-                            destinantion: 'New Hostel',
-                            waitingTime: '15 Minutes'),
-                      ),
-                      SizedBox(
-                        height: 10.0,
-                      )
-                    ],
-                  ),
+                    );
+                  },
                 ),
               )
             : Expanded(
