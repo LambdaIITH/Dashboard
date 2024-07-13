@@ -88,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 20),
             isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : HomeScreenMessMenu(messMenu: messMenu!),
+                : HomeScreenMessMenu(messMenu: messMenu),
             const SizedBox(height: 20),
             HomeCardNoOptions(
               title: 'Lost & Found',

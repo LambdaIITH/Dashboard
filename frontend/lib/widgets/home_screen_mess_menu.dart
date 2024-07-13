@@ -7,16 +7,20 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 class HomeScreenMessMenu extends StatelessWidget {
-  final MessMenuModel messMenu;
+  final MessMenuModel? messMenu;
   const HomeScreenMessMenu({
     super.key,
-    required this.messMenu,
+    this.messMenu,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (messMenu == null) {
+      return noMealToday("Failed to fetch mess menu", context);
+    }
+
     final String today = DateFormat('EEEE').format(DateTime.now());
-    final meals = messMenu.ldh[today]; // or use messMenu.udh[today]
+    final meals = messMenu?.ldh[today]; // or use messMenu.udh[today]
 
     if (meals == null) {
       return noMealToday("Failed to fetch mess menu", context);
@@ -52,10 +56,15 @@ class HomeScreenMessMenu extends StatelessWidget {
     }
 
     return InkWell(
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(
-            builder: (context) => MessMenuScreen(messMenu: messMenu)),
-      ),
+      onTap: () {
+        if (messMenu == null) {
+          return;
+        }
+        Navigator.of(context).push(
+          MaterialPageRoute(
+              builder: (context) => MessMenuScreen(messMenu: messMenu!)),
+        );
+      },
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -100,10 +109,15 @@ class HomeScreenMessMenu extends StatelessWidget {
 
   Widget noMealToday(String msg, BuildContext context) {
     return InkWell(
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(
-            builder: (context) => MessMenuScreen(messMenu: messMenu)),
-      ),
+      onTap: () {
+        if (messMenu == null) {
+          return;
+        }
+        Navigator.of(context).push(
+          MaterialPageRoute(
+              builder: (context) => MessMenuScreen(messMenu: messMenu!)),
+        );
+      },
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,

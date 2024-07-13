@@ -81,7 +81,7 @@ class ApiServices {
   Future<MessMenuModel?> getMessMenu(BuildContext context) async {
     try {
       debugPrint("Making request to: ${dio.options.baseUrl}/mess_menu");
-      final response = await dio.get('/mess_menu');
+      final response = await dio.get('/mess_menu/');
 
       if (response.statusCode == 401) {
         await logout(context);
