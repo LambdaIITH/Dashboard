@@ -1,12 +1,26 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/login_screen.dart';
+import 'package:frontend/services/analytics_service.dart';
 import 'package:frontend/services/api_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  final analyticsService = FirebaseAnalyticsService();
+
+  @override
+  void initState() {
+    super.initState();
+    analyticsService.logScreenView(screenName: "Profile Screen");
+  }
 
   Future<void> _showLogoutDialog(BuildContext context) async {
     return showDialog<void>(
@@ -32,6 +46,7 @@ class ProfileScreen extends StatelessWidget {
             TextButton(
               child: const Text('Logout'),
               onPressed: () {
+                analyticsService.logEvent(name: "Logout");
                 Navigator.of(context).pop();
                 logout(context);
               },

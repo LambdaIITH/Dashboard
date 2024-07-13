@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/models/mess_menu_model.dart';
+import 'package:frontend/services/analytics_service.dart';
 import 'package:frontend/widgets/mess_menu_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -78,10 +79,13 @@ class _MessMenuPageState extends State<MessMenuPage> {
     return day;
   }
 
+  final analyticsService = FirebaseAnalyticsService();
+  
   @override
   void initState() {
     whichDay = getCurrentDay();
     super.initState();
+    analyticsService.logScreenView(screenName: "Mess Menu Screen");
   }
 
   @override

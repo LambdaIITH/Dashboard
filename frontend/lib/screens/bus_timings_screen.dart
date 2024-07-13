@@ -7,6 +7,8 @@ import 'package:frontend/widgets/bus_timing_list_widget.dart';
 import 'package:frontend/widgets/next_bus_card_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../services/analytics_service.dart';
+
 class BusTimingsScreen extends StatelessWidget {
   const BusTimingsScreen({super.key, required this.busSchedule});
   final BusSchedule busSchedule;
@@ -206,11 +208,14 @@ class _BusSchedulePageState extends State<BusSchedulePage> {
     });
   }
 
+  final analyticsService = FirebaseAnalyticsService();
+
   @override
   void initState() {
     super.initState();
     updateNextBuses();
     setInitialTimer();
+    analyticsService.logScreenView(screenName: "Bus Schedule Screen");
   }
 
   @override

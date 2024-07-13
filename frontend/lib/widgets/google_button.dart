@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:frontend/screens/home_screen.dart';
+import 'package:frontend/services/analytics_service.dart';
 import 'package:frontend/services/api_service.dart';
 import 'package:frontend/utils/loading_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -15,6 +16,7 @@ class CustomGoogleButton extends StatefulWidget {
 }
 
 class _CustomGoogleButtonState extends State<CustomGoogleButton> {
+  final analyticsService = FirebaseAnalyticsService();
   final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ["email"]);
 
   Future<bool> checkLoggedIn() async {
@@ -72,10 +74,10 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
         return false;
       }
       // successfully logged in
+      analyticsService.logEvent(name: "Google Login");
 
       return true;
     } catch (error) {
-      print(error);
       showSnackBar('Failed to sign in with Google.');
       return false;
     }

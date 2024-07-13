@@ -7,6 +7,7 @@ import 'package:frontend/screens/bus_timings_screen.dart';
 import 'package:frontend/screens/home_screen.dart';
 import 'package:frontend/screens/login_screen.dart';
 import 'package:frontend/screens/splash_screen.dart';
+import 'package:frontend/services/analytics_service.dart';
 import 'package:frontend/services/api_service.dart';
 import 'package:frontend/utils/loading_widget.dart';
 // import 'package:frontend/screens/mess_menu_screen.dart';
@@ -51,6 +52,8 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  final FirebaseAnalyticsService _analyticsService = FirebaseAnalyticsService();
+
   @override
   void initState() {
     super.initState();
@@ -61,11 +64,14 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      navigatorObservers: [_analyticsService.getAnalyticsObserver()],
       home: isLoading
           ? SplashScreen(nextPage: Container())
           : isLoggedIn
               ? const SplashScreen(
-                  nextPage: HomeScreen(isGuest: false,),
+                  nextPage: HomeScreen(
+                    isGuest: false,
+                  ),
                   isLoading: false,
                 )
               : const SplashScreen(

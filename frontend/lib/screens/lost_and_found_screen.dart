@@ -1,11 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/constants/enums/lost_and_found.dart';
+import 'package:frontend/services/analytics_service.dart';
 import 'package:frontend/utils/bold_text.dart';
 import 'package:frontend/widgets/lost_found_add_item.dart';
 import 'package:frontend/widgets/lost_found_item.dart';
 
-class LostAndFoundScreen extends StatelessWidget {
+class LostAndFoundScreen extends StatefulWidget {
   const LostAndFoundScreen({super.key});
+
+  @override
+  State<LostAndFoundScreen> createState() => _LostAndFoundScreenState();
+}
+
+class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
+
+  final analyticsService = FirebaseAnalyticsService();
 
   double getAspectRatio(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -21,6 +30,12 @@ class LostAndFoundScreen extends StatelessWidget {
     } else {
       return 0.6;
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    analyticsService.logScreenView(screenName: "Lost And Found Screen");
   }
 
   @override

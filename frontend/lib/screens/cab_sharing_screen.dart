@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/cab_add_screen.dart';
+import 'package:frontend/services/analytics_service.dart';
 import 'package:frontend/widgets/cab_details.dart';
 import 'package:frontend/widgets/cab_search_form.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -15,6 +16,13 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
   String? selectedOption;
   String? selectedOption2;
   bool isTabOneSelected = true;
+  final analyticsService = FirebaseAnalyticsService();
+
+  @override
+  void initState() {
+    super.initState();
+    analyticsService.logScreenView(screenName: "Cab Share Screen");
+  }
 
   final List<Widget> tabNames = [
     Text(

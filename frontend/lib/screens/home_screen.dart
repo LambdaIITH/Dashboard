@@ -5,6 +5,7 @@ import 'package:frontend/models/mess_menu_model.dart';
 import 'package:frontend/models/user_model.dart';
 import 'package:frontend/screens/cab_sharing_screen.dart';
 import 'package:frontend/screens/lost_and_found_screen.dart';
+import 'package:frontend/services/analytics_service.dart';
 import 'package:frontend/services/api_service.dart';
 import 'package:frontend/utils/bus_schedule.dart';
 import 'package:frontend/utils/loading_widget.dart';
@@ -115,6 +116,8 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  final analyticsService = FirebaseAnalyticsService();
+
   @override
   void initState() {
     super.initState();
@@ -125,6 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     fetchMessMenu();
     fetchBus();
+    analyticsService.logScreenView(screenName: "HomeScreen");
   }
 
   @override
@@ -142,10 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     const SizedBox(height: 24),
                     HomeScreenAppBar(
-                      image: image,
-                      user: userModel,
-                      isGuest: widget.isGuest
-                    ),
+                        image: image, user: userModel, isGuest: widget.isGuest),
                     const SizedBox(height: 28),
                     // HomeCardNoOptions(
                     //   title: 'Time Table',
