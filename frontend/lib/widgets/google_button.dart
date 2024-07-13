@@ -63,11 +63,13 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
       printInChunks(googleAuth.idToken ?? '');
 
       var result = await ApiServices().login(googleAuth.idToken ?? 'aa45');
+
+      print(result);
       if (result['status'] == 401) {
         showSnackBar(result['error']);
         return false;
       }
-      if (result['user'] ==null) {
+      if (result['user'] == null) {
         showSnackBar('Failed to sign in with Google.');
         return false;
       }
@@ -76,6 +78,7 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
       return true;
       
     } catch (error) {
+      print(error);
       showSnackBar('Failed to sign in with Google.');
       return false;
     }

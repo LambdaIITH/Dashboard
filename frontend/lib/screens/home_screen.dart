@@ -1,6 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:frontend/models/mess_menu_model.dart';
+import 'package:frontend/models/user_model.dart';
 import 'package:frontend/screens/cab_sharing_screen.dart';
 import 'package:frontend/screens/lost_and_found_screen.dart';
 import 'package:frontend/screens/time_table_screen.dart';
@@ -39,7 +41,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   MessMenuModel? messMenu;
   BusSchedule? busSchedule;
+  UserModel? userModel;
   bool isLoading = true;
+  String image = '';
 
   void fetchMessMenu() async {
     final response = await ApiServices().getMessMenu(context);
@@ -71,8 +75,37 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void fetchUser() async {
+    final response = await ApiServices().getUserDetails(context);
+    if (response == null) {
+      setState(() {
+        changeState();
+      });
+      return;
+    }
+    setState(() {
+      userModel = response;
+      changeState();
+    });
+  }
+
+  void fetchUserProfile() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      setState(() {
+        image = user.photoURL ?? '';
+        changeState();
+      });
+    } else {
+      showError(msg: "User not logged in");
+      setState(() {
+        changeState();
+      });
+    }
+  }
+
   int status = 0;
-  int totalOperation = 2;
+  int totalOperation = 4;
 
   void changeState() {
     setState(() {
@@ -88,6 +121,8 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     fetchMessMenu();
     fetchBus();
+    fetchUser();
+    fetchUserProfile();
   }
 
   @override
@@ -98,59 +133,64 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: const Color(0xfffcfcfc),
       body: isLoading
           ? const CustomLoadingScreen()
-          : Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: ListView(
-                children: [
-                  const SizedBox(height: 10),
-                  const HomeScreenAppBar(),
-                  const SizedBox(height: 20),
-                  HomeCardNoOptions(
-                    title: 'Time Table',
-                    child: 'assets/icons/calendar.svg',
-                    onTap: () {
-                      widget.user == 'guest'
-                          ? showError()
-                          : Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => const TimeTableScreen(),
-                            ));
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  HomeScreenBusTimings(
-                    busSchedule: busSchedule,
-                  ),
-                  const SizedBox(height: 20),
-                  HomeScreenMessMenu(messMenu: messMenu),
-                  const SizedBox(height: 20),
-                  HomeCardNoOptions(
-                    title: 'Lost & Found',
-                    child: 'assets/icons/magnifying-icon.svg',
-                    onTap: widget.user == 'guest'
-                        ? showError
-                        : () => Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    const LostAndFoundScreen(),
+          : SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: ListView(
+                  children: [
+                    const SizedBox(height: 24),
+                    HomeScreenAppBar(
+                      image: image,
+                      user: userModel,
+                    ),
+                    const SizedBox(height: 28),
+                    // HomeCardNoOptions(
+                    //   title: 'Time Table',
+                    //   child: 'assets/icons/calendar.svg',
+                    //   onTap: () {
+                    //     widget.user == 'guest'
+                    //         ? showError()
+                    //         : Navigator.of(context).push(MaterialPageRoute(
+                    //             builder: (context) => const TimeTableScreen(),
+                    //           ));
+                    //   },
+                    // ),
+                    // const SizedBox(height: 20),
+                    HomeScreenBusTimings(
+                      busSchedule: busSchedule,
+                    ),
+                    const SizedBox(height: 20),
+                    HomeScreenMessMenu(messMenu: messMenu),
+                    const SizedBox(height: 20),
+                    HomeCardNoOptions(
+                      title: 'Cab Sharing',
+                      child: 'assets/icons/cab-sharing-icon.svg',
+                      onTap: () {
+                        widget.user == 'guest'
+                            ? showError()
+                            : Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => const CabSharingScreen(),
+                              ));
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    HomeCardNoOptions(
+                      title: 'Lost & Found',
+                      child: 'assets/icons/magnifying-icon.svg',
+                      onTap: widget.user == 'guest'
+                          ? showError
+                          : () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const LostAndFoundScreen(),
+                                ),
                               ),
-                            ),
-                  ),
-                  const SizedBox(height: 20),
-                  HomeCardNoOptions(
-                    title: 'Cab Sharing',
-                    child: 'assets/icons/cab-sharing-icon.svg',
-                    onTap: () {
-                      widget.user == 'guest'
-                          ? showError()
-                          : Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => const CabSharingScreen(),
-                            ));
-                    },
-                  ),
-                  const SizedBox(
-                    height: 50,
-                  )
-                ],
+                    ),
+                    const SizedBox(
+                      height: 50,
+                    )
+                  ],
+                ),
               ),
             ),
     );

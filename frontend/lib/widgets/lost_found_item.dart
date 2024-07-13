@@ -34,7 +34,7 @@ class LostFoundItem extends StatelessWidget {
         width: 160, // Fixed height
         clipBehavior: Clip.hardEdge,
         decoration: const BoxDecoration(
-          color: Color.fromARGB(255, 210, 47, 47),
+          color: Colors.white,
           boxShadow: [
             BoxShadow(
               color: Color.fromRGBO(51, 51, 51, 0.10), // Shadow color

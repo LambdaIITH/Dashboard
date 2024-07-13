@@ -1,5 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -65,10 +67,8 @@ class ApiServices {
       final response =
           await dio.post('/auth/login', data: {'id_token': idToken});
       final data = response.data;
-      final userModel = UserModel(
-        id: data['id'],
-        email: data['email'],
-      );
+      final userModel =
+          UserModel(id: data['id'], email: data['email'], name: '');
       return {'user': userModel, 'status': response.statusCode};
     } on DioException catch (e) {
       if (e.response != null && e.response?.statusCode == 401) {
@@ -109,6 +109,29 @@ class ApiServices {
 
       final data = response.data;
       return BusSchedule.fromJson(data);
+    } catch (e) {
+      debugPrint("Failed to fetch bus schedule: $e");
+      return null;
+    }
+  }
+
+  Future<UserModel?> getUserDetails(BuildContext context) async {
+    try {
+      debugPrint("Making request to: ${dio.options.baseUrl}/user");
+      final response = await dio.get('/user/');
+
+      if (response.statusCode == 401) {
+        await logout(context);
+        return null;
+      }
+
+      final data = response.data;
+      return UserModel(
+          email: data['email'],
+          name: data['name'],
+          cr: data['cr'],
+          phone: data['phone'],
+          id: data['id']);
     } catch (e) {
       debugPrint("Failed to fetch bus schedule: $e");
       return null;
@@ -343,5 +366,4 @@ class ApiServices {
   }
 
   // ====================CAB SHARING ENDS===================================
-
 }
