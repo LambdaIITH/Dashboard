@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/models/user_model.dart';
+import 'package:frontend/screens/login_screen.dart';
 import 'package:frontend/screens/profile_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class HomeScreenAppBar extends StatelessWidget {
-  const HomeScreenAppBar({super.key, required this.user, required this.image});
+  const HomeScreenAppBar(
+      {super.key,
+      required this.user,
+      required this.image,
+      required this.isGuest});
   final UserModel? user;
   final String image;
+  final bool isGuest;
 
   String getGreeting() {
     final hour = DateTime.now().hour;
@@ -50,20 +56,36 @@ class HomeScreenAppBar extends StatelessWidget {
             ],
           ),
         ),
-        InkWell(
-          borderRadius: BorderRadius.circular(100),
-          onTap: () {
-            if (user == null) {
-              return;
-            }
-            Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => const ProfileScreen(),
-            ));
-          },
-          child: ClipOval(
-            child: CircleAvatar(radius: 24, child: Image.network(image)),
-          ),
-        )
+        isGuest
+            ? InkWell(
+                onTap: () {
+                  Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (ctx) => LoginScreen()),
+                      (Route<dynamic> route) => false);
+                },
+                child: Container(
+                  padding: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                      // color: Colors.orange,
+                      borderRadius: BorderRadius.circular(500)),
+                  child: Icon(Icons.logout_rounded),
+                ),
+              )
+            : InkWell(
+                borderRadius: BorderRadius.circular(100),
+                onTap: () {
+                  if (user == null) {
+                    return;
+                  }
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => const ProfileScreen(),
+                  ));
+                },
+                child: ClipOval(
+                  child: CircleAvatar(radius: 24, child: Image.network(image)),
+                ),
+              )
       ],
     );
   }

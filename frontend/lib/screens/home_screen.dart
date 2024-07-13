@@ -14,10 +14,10 @@ import 'package:frontend/widgets/home_screen_bus_timings.dart';
 import 'package:frontend/widgets/home_screen_mess_menu.dart';
 
 class HomeScreen extends StatefulWidget {
-  final String user;
+  final bool isGuest;
   const HomeScreen({
     super.key,
-    required this.user,
+    required this.isGuest,
   });
 
   @override
@@ -104,7 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   int status = 0;
-  int totalOperation = 4;
+  int totalOperation = 2;
 
   void changeState() {
     setState(() {
@@ -118,10 +118,13 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    if (!widget.isGuest) {
+      totalOperation = totalOperation + 2;
+      fetchUser();
+      fetchUserProfile();
+    }
     fetchMessMenu();
     fetchBus();
-    fetchUser();
-    fetchUserProfile();
   }
 
   @override
@@ -141,6 +144,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     HomeScreenAppBar(
                       image: image,
                       user: userModel,
+                      isGuest: widget.isGuest
                     ),
                     const SizedBox(height: 28),
                     // HomeCardNoOptions(
@@ -165,7 +169,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       title: 'Cab Sharing',
                       child: 'assets/icons/cab-sharing-icon.svg',
                       onTap: () {
-                        widget.user == 'guest'
+                        widget.isGuest
                             ? showError()
                             : Navigator.of(context).push(MaterialPageRoute(
                                 builder: (context) => const CabSharingScreen(),
@@ -176,7 +180,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     HomeCardNoOptions(
                       title: 'Lost & Found',
                       child: 'assets/icons/magnifying-icon.svg',
-                      onTap: widget.user == 'guest'
+                      onTap: widget.isGuest
                           ? showError
                           : () => Navigator.of(context).push(
                                 MaterialPageRoute(

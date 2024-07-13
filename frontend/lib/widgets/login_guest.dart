@@ -21,7 +21,7 @@ class ContinueAsGuest extends StatelessWidget {
             //TODO: handle this
             Navigator.of(context).pushReplacement(MaterialPageRoute(
               builder: (context) => const HomeScreen(
-                user: 'guest',
+                isGuest: true,
               ),
             ));
           },

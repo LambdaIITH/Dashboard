@@ -65,7 +65,7 @@ class _MyAppState extends State<MyApp> {
           ? SplashScreen(nextPage: Container())
           : isLoggedIn
               ? const SplashScreen(
-                  nextPage: HomeScreen(user: "user"),
+                  nextPage: HomeScreen(isGuest: false,),
                   isLoading: false,
                 )
               : const SplashScreen(

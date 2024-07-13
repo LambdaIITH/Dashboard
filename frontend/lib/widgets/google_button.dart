@@ -123,7 +123,7 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
                 if (splitted.length > 1 && splitted[1].contains("iith.ac.in")) {
                   Navigator.of(context).pushReplacement(MaterialPageRoute(
                     builder: (context) => const HomeScreen(
-                      user: 'someuser',
+                      isGuest: false,
                     ),
                   ));
                 } else {
