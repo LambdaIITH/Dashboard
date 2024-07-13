@@ -1,18 +1,80 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/bus_timings_screen.dart';
+import 'package:frontend/utils/bus_schedule.dart';
 import 'package:frontend/utils/normal_text.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class HomeScreenBusTimings extends StatelessWidget {
-  const HomeScreenBusTimings({
-    super.key,
-  });
+  const HomeScreenBusTimings({super.key, required this.busSchedule});
+  final BusSchedule? busSchedule;
+
+  Widget noBusses(String msg, BuildContext context) {
+    return InkWell(
+      onTap: () {
+        if (busSchedule == null) {
+          return;
+        }
+        Navigator.of(context).push(
+          MaterialPageRoute(
+              builder: (context) =>
+                  BusTimingsScreen(busSchedule: busSchedule!)),
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: const [
+            BoxShadow(
+              color: Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
+              offset: Offset(0, 4), // Offset in the x, y direction
+              blurRadius: 10.0,
+              spreadRadius: 0.0,
+            ),
+          ],
+        ),
+        clipBehavior: Clip.hardEdge,
+        child: Column(
+          children: [
+            Align(
+              alignment: Alignment.topLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 18, top: 15),
+                child: Text(
+                  'Bus Timings',
+                  style: GoogleFonts.inter().copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 28,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              msg,
+              style: GoogleFonts.inter(
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 10),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (busSchedule == null) {
+      return noBusses("Failed to fetch bus schedule", context);
+    }
+
     return InkWell(
       onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(builder: (context) => const BusTimingsScreen()),
+        MaterialPageRoute(
+            builder: (context) => BusTimingsScreen(
+                  busSchedule: busSchedule!,
+                )),
       ),
       child: Container(
         decoration: BoxDecoration(

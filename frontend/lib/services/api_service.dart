@@ -8,6 +8,7 @@ import 'package:frontend/models/mess_menu_model.dart';
 import 'package:frontend/models/user_model.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
+import 'package:frontend/utils/bus_schedule.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -92,6 +93,24 @@ class ApiServices {
       return MessMenuModel.fromJson(data);
     } catch (e) {
       debugPrint("Failed to fetch mess menu: $e");
+      return null;
+    }
+  }
+
+  Future<BusSchedule?> getBusSchedule(BuildContext context) async {
+    try {
+      debugPrint("Making request to: ${dio.options.baseUrl}/bus_schedule");
+      final response = await dio.get('/bus_schedule/');
+
+      if (response.statusCode == 401) {
+        await logout(context);
+        return null;
+      }
+
+      final data = response.data;
+      return BusSchedule.fromJson(data);
+    } catch (e) {
+      debugPrint("Failed to fetch bus schedule: $e");
       return null;
     }
   }
