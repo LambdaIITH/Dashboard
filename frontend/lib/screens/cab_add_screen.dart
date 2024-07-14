@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/models/booking_model.dart';
+import 'package:frontend/models/travellers.dart';
+import 'package:frontend/models/user_model.dart';
 import 'package:frontend/screens/cab_add_success.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:frontend/services/api_service.dart';
 
 class CabAddScreen extends StatefulWidget {
   const CabAddScreen({Key? key}) : super(key: key);
@@ -15,6 +19,21 @@ class _CabAddScreenState extends State<CabAddScreen> {
   TimeOfDay? selectedStartTime;
   TimeOfDay? selectedEndTime;
   String? seats;
+
+  List<String> locations = [
+    'IITH',
+    'RGIA',
+    'Secun. Railway Stn.',
+    "Lingampally Stn.",
+    "Kacheguda Stn.",
+    "Hyd. Deccan Stn."
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    getUserDetails();
+  }
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -51,6 +70,91 @@ class _CabAddScreenState extends State<CabAddScreen> {
         selectedEndTime = picked;
       });
     }
+  }
+
+  // API Service
+  ApiServices apiServices = ApiServices();
+
+  UserModel? userDetails;
+  void getUserDetails() async {
+    final user = await apiServices.getUserDetails(context);
+    userDetails = user;
+  }
+
+  void createCab() async {
+    if (selectedStartTime == null ||
+        selectedEndTime == null ||
+        seats == null ||
+        selectedFromPlace == null ||
+        selectedToPlace == null ||
+        userDetails == null) {
+      return;
+    }
+    final BookingModel bookingModel = BookingModel(
+      id: 0,
+      startTime: DateTime(
+        selectedDate.year,
+        selectedDate.month,
+        selectedDate.day,
+        selectedStartTime!.hour,
+        selectedStartTime!.minute,
+      ),
+      endTime: DateTime(
+        selectedDate.year,
+        selectedDate.month,
+        selectedDate.day,
+        selectedEndTime!.hour,
+        selectedEndTime!.minute,
+      ),
+      capacity: int.parse(seats!),
+      fromLoc: selectedFromPlace!,
+      toLoc: selectedToPlace!,
+      ownerEmail: userDetails!.email,
+      travellers: [
+        TravellersModel(
+          name: userDetails!.name,
+          email: userDetails!.email,
+          phoneNumber: userDetails!.phone ?? '',
+          comments: 'From the test APP',
+        ),
+      ],
+      requests: [],
+    );
+    try {
+      final res = await apiServices.createBooking(bookingModel);
+      if (!mounted) return;
+      if (res["error"] == null) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const CabAddSuccess()),
+        );
+      } else {
+        showErrorDialog(context, res["error"]);
+      }
+    } catch (e) {
+      if (!mounted) return;
+      showErrorDialog(context, e.toString());
+    }
+  }
+
+  void showErrorDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Error'),
+        content: Text(message),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('OK'),
+            onPressed: () {
+              if (Navigator.of(context).canPop()) {
+                Navigator.of(context).pop();
+              }
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -109,12 +213,14 @@ class _CabAddScreenState extends State<CabAddScreen> {
                           vertical: 25.0,
                         ),
                       ),
-                      items:
-                          ['Campus', 'RGIA', 'Airport'].map((String location) {
+                      items: locations.map((String location) {
+                        String displayText = location.length > 7
+                            ? '${location.substring(0, 7)}..'
+                            : location;
                         return DropdownMenuItem<String>(
                           value: location,
                           child: Text(
-                            location,
+                            displayText,
                             style: GoogleFonts.inter(
                               fontSize: 17,
                               fontWeight: FontWeight.w500,
@@ -169,15 +275,14 @@ class _CabAddScreenState extends State<CabAddScreen> {
                           vertical: 25.0,
                         ),
                       ),
-                      items: [
-                        'Campus',
-                        'RGIA',
-                        'Airport',
-                      ].map((String location) {
+                      items: locations.map((String location) {
+                        String displayText = location.length > 7
+                            ? '${location.substring(0, 7)}..'
+                            : location;
                         return DropdownMenuItem<String>(
                           value: location,
                           child: Text(
-                            location,
+                            displayText,
                             style: GoogleFonts.inter(
                               fontSize: 17,
                               fontWeight: FontWeight.w500,
@@ -431,12 +536,13 @@ class _CabAddScreenState extends State<CabAddScreen> {
                   //   ),
                   // ),
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const CabAddSuccess(),
-                      ),
-                    );
+                    // Navigator.push(
+                    //   context,
+                    //   MaterialPageRoute(
+                    //     builder: (context) => const CabAddSuccess(),
+                    //   ),
+                    // );
+                    createCab();
                   },
                   child: Container(
                     decoration: BoxDecoration(

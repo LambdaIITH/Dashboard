@@ -1,10 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/cab_sharing_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class CabAddSuccess extends StatelessWidget {
   const CabAddSuccess({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(seconds: 2), () {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const CabSharingScreen(),
+          ),
+        );
+      });
+    });
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(15.0),
