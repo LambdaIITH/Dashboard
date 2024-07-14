@@ -131,6 +131,19 @@ class _HomeScreenState extends State<HomeScreen> {
     analyticsService.logScreenView(screenName: "HomeScreen");
   }
 
+  Future<void> _refresh() async {
+    setState(() {
+      isLoading = true;
+      status = 0;
+    });
+    if (!widget.isGuest) {
+      fetchUser();
+      fetchUserProfile();
+    }
+    fetchMessMenu();
+    fetchBus();
+  }
+
   @override
   Widget build(BuildContext context) {
     timeDilation = 1;
@@ -142,58 +155,49 @@ class _HomeScreenState extends State<HomeScreen> {
           : SafeArea(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: ListView(
-                  children: [
-                    const SizedBox(height: 24),
-                    HomeScreenAppBar(
-                        image: image, user: userModel, isGuest: widget.isGuest),
-                    const SizedBox(height: 28),
-                    // HomeCardNoOptions(
-                    //   title: 'Time Table',
-                    //   child: 'assets/icons/calendar.svg',
-                    //   onTap: () {
-                    //     widget.user == 'guest'
-                    //         ? showError()
-                    //         : Navigator.of(context).push(MaterialPageRoute(
-                    //             builder: (context) => const TimeTableScreen(),
-                    //           ));
-                    //   },
-                    // ),
-                    // const SizedBox(height: 20),
-                    HomeScreenBusTimings(
-                      busSchedule: busSchedule,
-                    ),
-                    const SizedBox(height: 20),
-                    HomeScreenMessMenu(messMenu: messMenu),
-                    const SizedBox(height: 20),
-                    HomeCardNoOptions(
-                      title: 'Cab Sharing',
-                      child: 'assets/icons/cab-sharing-icon.svg',
-                      onTap: () {
-                        widget.isGuest
-                            ? showError()
-                            : Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => const CabSharingScreen(),
-                              ));
-                      },
-                    ),
-                    const SizedBox(height: 20),
-                    HomeCardNoOptions(
-                      title: 'Lost & Found',
-                      child: 'assets/icons/magnifying-icon.svg',
-                      onTap: widget.isGuest
-                          ? showError
-                          : () => Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const LostAndFoundScreen(),
+                child: RefreshIndicator(
+                  onRefresh: _refresh,
+                  child: ListView(
+                    children: [
+                      const SizedBox(height: 24),
+                      HomeScreenAppBar(
+                          image: image, user: userModel, isGuest: widget.isGuest),
+                      const SizedBox(height: 28),
+                      HomeScreenBusTimings(
+                        busSchedule: busSchedule,
+                      ),
+                      const SizedBox(height: 20),
+                      HomeScreenMessMenu(messMenu: messMenu),
+                      const SizedBox(height: 20),
+                      HomeCardNoOptions(
+                        title: 'Cab Sharing',
+                        child: 'assets/icons/cab-sharing-icon.svg',
+                        onTap: () {
+                          widget.isGuest
+                              ? showError()
+                              : Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => const CabSharingScreen(),
+                                ));
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      HomeCardNoOptions(
+                        title: 'Lost & Found',
+                        child: 'assets/icons/magnifying-icon.svg',
+                        onTap: widget.isGuest
+                            ? showError
+                            : () => Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const LostAndFoundScreen(),
+                                  ),
                                 ),
-                              ),
-                    ),
-                    const SizedBox(
-                      height: 50,
-                    )
-                  ],
+                      ),
+                      const SizedBox(
+                        height: 50,
+                      )
+                    ],
+                  ),
                 ),
               ),
             ),

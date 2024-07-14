@@ -1,9 +1,12 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:dio/browser.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:frontend/models/booking_model.dart';
@@ -21,20 +24,25 @@ class ApiServices {
 
   ApiServices._internal();
 
-  final dio = Dio();
   PersistCookieJar? cookieJar;
   String backendUrl = dotenv.env["BACKEND_URL"] ?? "";
 
+  Dio getClient() => Dio()
+    ..httpClientAdapter = BrowserHttpClientAdapter(withCredentials: true);
+
+  Dio dio = Dio();
+
   Future<void> configureDio() async {
+    dio = getClient();
     dio.options.baseUrl = backendUrl;
 
-    // initialize cookie jar
-    var appDocDir = await getApplicationDocumentsDirectory();
-    var cookiePath = "${appDocDir.path}/.cookies/";
-    cookieJar = PersistCookieJar(storage: FileStorage(cookiePath));
-
-    // add cookie manager to Dio
-    dio.interceptors.add(CookieManager(cookieJar!));
+    if (!kIsWeb) {
+      // Initialize cookie jar for non-web platforms
+      var appDocDir = await getApplicationDocumentsDirectory();
+      var cookiePath = "${appDocDir.path}/.cookies/";
+      cookieJar = PersistCookieJar(storage: FileStorage(cookiePath));
+      dio.interceptors.add(CookieManager(cookieJar!));
+    }
 
     debugPrint("Dio configured with base URL: ${dio.options.baseUrl}");
   }
@@ -75,6 +83,7 @@ class ApiServices {
       final data = response.data;
       final userModel =
           UserModel(id: data['id'], email: data['email'], name: '');
+      print(response.extra);
       return {'user': userModel, 'status': response.statusCode};
     } on DioException catch (e) {
       if (e.response != null && e.response?.statusCode == 401) {

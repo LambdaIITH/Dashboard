@@ -35,6 +35,61 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
     );
   }
 
+  Future<void> silentLogin() async {
+    try {
+      final GoogleSignInAccount? googleUser =
+          await _googleSignIn.signInSilently();
+      if (googleUser == null) {
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      await FirebaseAuth.instance.signInWithCredential(credential);
+
+      var result = await ApiServices().login(googleAuth.idToken ?? 'aa45');
+
+      if (result['status'] == 401) {
+        showSnackBar(result['error']);
+        return;
+      }
+      if (result['user'] == null) {
+        showSnackBar('Failed to sign in with Google.');
+        return;
+      }
+      // successfully logged in
+      analyticsService.logEvent(name: "Google Login");
+
+      var email = FirebaseAuth.instance.currentUser?.email ?? '';
+
+      if (email.isEmpty) {
+        await logout();
+        showSnackBar('Error!');
+      } else {
+        // verifying iith users
+        var splitted = email.split('@');
+        if (splitted.length > 1 && splitted[1].contains("iith.ac.in")) {
+          Navigator.of(context).pushReplacement(MaterialPageRoute(
+            builder: (context) => const HomeScreen(
+              isGuest: false,
+            ),
+          ));
+        } else {
+          await logout();
+          showSnackBar('Please login with IITH email-ID');
+        }
+      }
+    } catch (error) {
+      showSnackBar('Failed to sign in with Google.');
+    }
+  }
+
   Future<bool> signInWithGoogle() async {
     timeDilation = 1;
     FirebaseAuth auth = FirebaseAuth.instance;
@@ -61,8 +116,6 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
 
       await auth.signInWithCredential(credential);
 
-      printInChunks(googleAuth.idToken ?? '');
-
       var result = await ApiServices().login(googleAuth.idToken ?? 'aa45');
 
       if (result['status'] == 401) {
@@ -87,13 +140,19 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
     await _googleSignIn.signOut();
   }
 
-  void printInChunks(String longString, {int chunkSize = 500}) {
-    for (int i = 0; i < longString.length; i += chunkSize) {
-      int end = (i + chunkSize < longString.length)
-          ? i + chunkSize
-          : longString.length;
-      debugPrint(longString.substring(i, end));
-    }
+  // void printInChunks(String longString, {int chunkSize = 500}) {
+  //   for (int i = 0; i < longString.length; i += chunkSize) {
+  //     int end = (i + chunkSize < longString.length)
+  //         ? i + chunkSize
+  //         : longString.length;
+  //     debugPrint(longString.substring(i, end));
+  //   }
+  // }
+
+  @override
+  void initState() {
+    super.initState();
+    silentLogin(); 
   }
 
   @override
