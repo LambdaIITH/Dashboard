@@ -1,41 +1,129 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/services/api_service.dart';
 import 'package:google_fonts/google_fonts.dart';
+import "package:intl/intl.dart";
+import 'package:frontend/models/booking_model.dart';
 
 class CabCard extends StatefulWidget {
-  const CabCard({super.key});
+  final bool isExpanded;
+  final BookingModel cab;
+
+  const CabCard({
+    super.key,
+    this.isExpanded = false,
+    required this.cab,
+  });
 
   @override
   State<CabCard> createState() => _CabCardState();
 }
 
 class _CabCardState extends State<CabCard> {
-  bool _isExpanded = false;
-  String note =
-      "If anyone is travelling on same date and time from RGIA to IITH can contact me";
-  String date = "Wed, 12th May 2021";
-  String startTime = "01:00PM";
-  String endTime = "02:00PM";
+  late bool _isExpanded;
+  late String note;
+  late String date;
+  late String startTime;
+  late String endTime;
+  // late String id;
+  late int bookingId;
+  late String availableSeats;
+  late String startLocation;
+  late String endLocation;
+  late List<Map<String, String>> travellers;
+
+  String convertDateFormat(DateTime inputDate) {
+    String formattedDate = DateFormat('E, d MMM y').format(inputDate);
+    return formattedDate;
+  }
+
+  String formatTime(DateTime inputTime) {
+    String formattedTime = DateFormat('hh:mm a').format(inputTime);
+    return formattedTime;
+  }
+
+  // bool _isExpanded = false;
+  // String note =
+  //     "If anyone is travelling on same date and time from RGIA to IITH can contact me";
+  // String date = "Wed, 12th May 2021";
+  // String startTime = "01:00PM";
+  // String endTime = "02:00PM";
   String id = "RD00BGSF11001";
-  String availableSeats = "2";
-  String startLocation = "RGIA";
-  String endLocation = "IITH";
-  List<Map<String, String>> travellers = [
-    {
-      'name': 'Shyam Kumar',
-      'email': 'ms22btech11010@iith.ac.in',
-    },
-    {
-      'name': 'Ram Kumar',
-      'email': 'ma22btech11010@iith.ac.in',
-    },
-    {
-      'name': 'Shyam Kumar',
-      'email': 'ma22btech11010@iith.ac.in',
-    },
-  ];
+  // String availableSeats = "2";
+  // String startLocation = "RGIA";
+  // String endLocation = "IITH";
+  // List<Map<String, String>> travellers = [
+  //   {
+  //     'name': 'Shyam Kumar',
+  //     'email': 'ms22btech11010@iith.ac.in',
+  //   },
+  //   {
+  //     'name': 'Ram Kumar',
+  //     'email': 'ma22btech11010@iith.ac.in',
+  //   },
+  //   {
+  //     'name': 'Shyam Kumar',
+  //     'email': 'ma22btech11010@iith.ac.in',
+  //   },
+  // ];
+
+  // From the API service
+  ApiServices apiServices = ApiServices();
+
+  void joinCab(BuildContext context) async {
+    try {
+      final res = await apiServices.requestToJoinBooking(bookingId, "context");
+      if (res["status"] == "success") {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Successfully joined the cab"),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+      else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(res['error']),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Error while joining cab: $e"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _isExpanded = widget.isExpanded;
+  }
 
   @override
   Widget build(BuildContext context) {
+    final cab = widget.cab;
+    note = cab.travellers[0].comments;
+    date = convertDateFormat(cab.startTime);
+    startTime = formatTime(cab.startTime);
+    endTime = formatTime(cab.endTime);
+    // id = cab.id.toString();
+    availableSeats = (cab.capacity - cab.travellers.length).toString();
+    startLocation = cab.fromLoc;
+    endLocation = cab.toLoc;
+    bookingId = cab.id;
+    travellers = cab.travellers
+        .map(
+          (traveller) => {
+            'name': traveller.name,
+            'email': traveller.email,
+          },
+        )
+        .toList();
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -78,26 +166,24 @@ class _CabCardState extends State<CabCard> {
                     ),
                     Align(
                       alignment: Alignment.centerRight,
-                      child: Expanded(
-                        child: RichText(
-                          text: TextSpan(
-                            text: 'Available Seats  ',
-                            style: GoogleFonts.inter(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: const Color(0xffADADAD),
-                            ),
-                            children: <TextSpan>[
-                              TextSpan(
-                                text: availableSeats,
-                                style: GoogleFonts.inter(
-                                  fontSize: 26,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ],
+                      child: RichText(
+                        text: TextSpan(
+                          text: 'Available Seats  ',
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xffADADAD),
                           ),
+                          children: <TextSpan>[
+                            TextSpan(
+                              text: availableSeats,
+                              style: GoogleFonts.inter(
+                                fontSize: 26,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -213,7 +299,11 @@ class _CabCardState extends State<CabCard> {
                             child: Align(
                               alignment: Alignment.centerRight,
                               child: ElevatedButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  joinCab(
+                                    context,
+                                  );
+                                },
                                 style: TextButton.styleFrom(
                                   backgroundColor:
                                       const Color.fromRGBO(254, 114, 76, 0.70),
@@ -303,6 +393,69 @@ class _CabCardState extends State<CabCard> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class Cab {
+  final int id;
+  final String startTime;
+  final String endTime;
+  final int capacity;
+  final String from;
+  final String to;
+  final String ownerEmail;
+  final List<Traveller> travellers;
+  final List<Traveller> requests;
+
+  Cab({
+    required this.id,
+    required this.startTime,
+    required this.endTime,
+    required this.capacity,
+    required this.from,
+    required this.to,
+    required this.ownerEmail,
+    required this.travellers,
+    required this.requests,
+  });
+
+  factory Cab.fromJson(Map<String, dynamic> json) {
+    return Cab(
+      id: json['id'],
+      startTime: json['start_time'],
+      endTime: json['end_time'],
+      capacity: json['capacity'],
+      from: json['from_'],
+      to: json['to'],
+      ownerEmail: json['owner_email'],
+      travellers: List<Traveller>.from(
+          json['travellers'].map((x) => Traveller.fromJson(x))),
+      requests: List<Traveller>.from(
+          json['requests'].map((x) => Traveller.fromJson(x))),
+    );
+  }
+}
+
+class Traveller {
+  final String email;
+  final String comments;
+  final String name;
+  final String phoneNumber;
+
+  Traveller({
+    required this.email,
+    required this.comments,
+    required this.name,
+    required this.phoneNumber,
+  });
+
+  factory Traveller.fromJson(Map<String, dynamic> json) {
+    return Traveller(
+      email: json['email'],
+      comments: json['comments'],
+      name: json['name'],
+      phoneNumber: json['phone_number'],
     );
   }
 }
