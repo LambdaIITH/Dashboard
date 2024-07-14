@@ -1,9 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/cab_add_screen.dart';
 import 'package:frontend/services/analytics_service.dart';
 import 'package:frontend/widgets/cab_details.dart';
 import 'package:frontend/widgets/cab_search_form.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:frontend/services/api_service.dart';
+import 'package:frontend/models/booking_model.dart';
 
 class CabSharingScreen extends StatefulWidget {
   const CabSharingScreen({Key? key}) : super(key: key);
@@ -22,6 +26,8 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
   void initState() {
     super.initState();
     analyticsService.logScreenView(screenName: "Cab Share Screen");
+    getAllCabs();
+    getUserCabs();
   }
 
   final List<Widget> tabNames = [
@@ -43,36 +49,140 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
     ),
   ];
 
+  void updateSearchForm({
+    required DateTime searchSelectedDate,
+    required String? searchSelectedOption,
+    required String? searchSelectedOption2,
+  }) {
+    setState(() {
+      selectedDate = searchSelectedDate;
+      selectedOption = searchSelectedOption;
+      selectedOption2 = searchSelectedOption2;
+    });
+    searchCabs();
+  }
+
+  // From the API service
+  ApiServices apiServices = ApiServices();
+
+  List<BookingModel> allBookings = [];
+  void getAllCabs() async {
+    final cabs = await apiServices.getBookings(context);
+    setState(() {
+      allBookings = cabs;
+    });
+  }
+
+  void searchCabs() async {
+    if (selectedOption == null || selectedOption2 == null) {
+      return;
+    }
+    var startTime = selectedDate.toIso8601String();
+    final cabs = await apiServices.getBookings(
+      context,
+      fromLoc: selectedOption,
+      toLoc: selectedOption2,
+      startTime: startTime,
+    );
+    setState(() {
+      allBookings = cabs;
+    });
+  }
+
+  List<BookingModel> userBookings = [];
+  void getUserCabs() async {
+    final cabs = await apiServices.getUserBookings(context);
+    setState(() {
+      userBookings = cabs;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget allRides = Column(
       children: [
-        const CabSearch(),
-        const SizedBox(height: 25.0),
-        Expanded(
-          child: ListView.builder(
-            itemCount: 5,
-            itemBuilder: (ctx, inx) => const Padding(
-              padding: EdgeInsets.only(bottom: 12),
-              child: CabCard(),
-            ),
-          ),
+        CabSearch(
+          initialSelectedDate: selectedDate,
+          initialSelectedOption: selectedOption,
+          initialSelectedOption2: selectedOption2,
+          onSearch: updateSearchForm,
         ),
+        const SizedBox(height: 25.0),
+        allBookings.isEmpty
+            ? const Text(
+                'No rides found',
+                style: TextStyle(
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black,
+                ),
+              )
+            : Expanded(
+                child: ListView.builder(
+                  itemCount: allBookings.length,
+                  itemBuilder: (ctx, inx) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: CabCard(
+                      cab: allBookings[inx],
+                    ),
+                  ),
+                ),
+              ),
+        allBookings.isNotEmpty
+            ? Text(
+                'End of List',
+                style: GoogleFonts.inter(
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black,
+                ),
+              )
+            : const SizedBox(),
+        const SizedBox(height: 25.0),
       ],
     );
 
-    Widget myRides = Column(
-      children: [
-        Expanded(
-          child: ListView.builder(
-            itemCount: 1,
-            itemBuilder: (ctx, inx) => const Padding(
-              padding: EdgeInsets.only(bottom: 12),
-              child: CabCard(),
-            ),
-          ),
+    Widget myRides = RefreshIndicator(
+      onRefresh: () {
+        return Future.delayed(
+          const Duration(seconds: 1),
+          () {
+            getUserCabs();
+          },
+        );
+      },
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Column(
+          children: [
+            // TODO : Add both past and future rides
+            userBookings.isNotEmpty
+                ? ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: userBookings.length,
+                    itemBuilder: (ctx, inx) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: CabCard(
+                        cab: userBookings[inx],
+                      ),
+                    ),
+                  )
+                : SizedBox(
+                    width: double.infinity,
+                    child: Text(
+                      'You have no rides',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                        fontSize: 18.0,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black,
+                      ),
+                    ),
+                  )
+          ],
         ),
-      ],
+      ),
     );
 
     return Scaffold(
