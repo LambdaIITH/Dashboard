@@ -6,13 +6,14 @@ class HomeMessMenu extends StatelessWidget {
   final String whichMeal;
   final String time;
   final List<String> meals;
+  final List<String> extras;
   const HomeMessMenu({
     super.key,
     required this.whichMeal,
     required this.meals,
     required this.time,
+    required this.extras,
   });
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -67,15 +68,40 @@ class HomeMessMenu extends StatelessWidget {
               width: double.infinity,
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(24, 0, 9, 3),
-                child: Text.rich(
-                  TextSpan(
-                    children: messMenu(),
-                  ),
-                  style: GoogleFonts.inter(
-                    color: const Color(0xff292929),
-                    fontSize: 15.0,
-                    fontWeight: FontWeight.w400,
-                  ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text.rich(
+                      TextSpan(
+                        children: messMenu(meals),
+                      ),
+                      style: GoogleFonts.inter(
+                        color: const Color(0xff292929),
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    Text(
+                      'Extras:',
+                      style: GoogleFonts.inter(
+                        color: const Color(0xff292929),
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    Text.rich(
+                      TextSpan(
+                        children: messMenu(extras),
+                      ),
+                      style: GoogleFonts.inter(
+                        color: const Color(0xff292929),
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -85,16 +111,18 @@ class HomeMessMenu extends StatelessWidget {
     );
   }
 
-  List<TextSpan> messMenu() {
+  List<TextSpan> messMenu(List<String> data) {
     List<TextSpan> spans = [];
-    for (int i = 0; i < meals.length; i++) {
+    for (int i = 0; i < data.length; i++) {
       spans.add(
         TextSpan(
           text: '${i + 1}. ',
-          style: const TextStyle(fontWeight: FontWeight.w900),
+          style: const TextStyle(
+              fontWeight: FontWeight.w900,
+              color: Color.fromARGB(255, 69, 69, 69)),
         ),
       );
-      spans.add(TextSpan(text: '${meals[i]}\t\t'));
+      spans.add(TextSpan(text: '${data[i]}\t\t'));
     }
     spans.add(const TextSpan(text: '\n'));
     return spans;

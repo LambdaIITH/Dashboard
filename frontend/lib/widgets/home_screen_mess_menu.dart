@@ -20,6 +20,7 @@ class HomeScreenMessMenu extends StatelessWidget {
 
     final String today = DateFormat('EEEE').format(DateTime.now());
     final meals = messMenu?.ldh[today]; // or use messMenu.udh[today]
+    final additional = messMenu?.ldhAdditional[today];
 
     if (meals == null) {
       return noMealToday("Failed to fetch mess menu", context);
@@ -28,6 +29,7 @@ class HomeScreenMessMenu extends StatelessWidget {
     final currentTime = TimeOfDay.now();
     String currentMeal;
     List<String> currentMealData;
+    List<String> extras;
     String mealTime;
 
     if (currentTime.hour < 10 ||
@@ -35,21 +37,25 @@ class HomeScreenMessMenu extends StatelessWidget {
       currentMeal = 'Breakfast';
       currentMealData = meals.breakfast;
       mealTime = '7:30AM-10:30AM';
+      extras = additional?.breakfast ?? [];
     } else if (currentTime.hour < 14 ||
         (currentTime.hour == 14 && currentTime.minute <= 45)) {
       currentMeal = 'Lunch';
       currentMealData = meals.lunch;
       mealTime = '12:30PM-2:45PM';
+      extras = additional?.lunch ?? [];
     } else if (currentTime.hour < 17 ||
         (currentTime.hour == 17 && currentTime.minute <= 0)) {
       currentMeal = 'Snacks';
       currentMealData = meals.snacks;
       mealTime = '5:00PM-6:00PM';
+      extras = additional?.snacks ?? [];
     } else if (currentTime.hour < 24 ||
         (currentTime.hour == 24 && currentTime.minute <= 0)) {
       currentMeal = 'Dinner';
       currentMealData = meals.dinner;
       mealTime = '7:30PM-9:30PM';
+      extras = additional?.dinner ?? [];
     } else {
       return noMealToday('No meals available for today', context);
     }
@@ -95,6 +101,7 @@ class HomeScreenMessMenu extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             HomeMessMenu(
+              extras: extras,
               whichMeal: currentMeal,
               meals: currentMealData,
               time: mealTime,

@@ -80,7 +80,7 @@ class _MessMenuPageState extends State<MessMenuPage> {
   }
 
   final analyticsService = FirebaseAnalyticsService();
-  
+
   @override
   void initState() {
     whichDay = getCurrentDay();
@@ -93,6 +93,8 @@ class _MessMenuPageState extends State<MessMenuPage> {
     final meals = selectedOption[0]
         ? widget.messMenu.udh[whichDay]
         : widget.messMenu.ldh[whichDay];
+
+    final extras = widget.messMenu.udhAdditional[whichDay];
 
     return Column(
       children: [
@@ -163,21 +165,25 @@ class _MessMenuPageState extends State<MessMenuPage> {
             ),
             if (meals != null) ...[
               ShowMessMenu(
+                extras: extras?.breakfast ?? [],
                 whichMeal: 'Breakfast',
                 time: '7:30AM-10:30AM',
                 meals: meals.breakfast,
               ),
               ShowMessMenu(
+                extras: extras?.lunch ?? [],
                 whichMeal: 'Lunch',
                 time: '12:30PM-2:45PM',
                 meals: meals.lunch,
               ),
               ShowMessMenu(
+                extras: extras?.snacks ?? [],
                 whichMeal: 'Snacks',
                 time: '5:00PM-6:00PM',
                 meals: meals.snacks,
               ),
               ShowMessMenu(
+                extras: extras?.dinner ?? [],
                 whichMeal: 'Dinner',
                 time: '7:30PM-9:30PM',
                 meals: meals.dinner,
