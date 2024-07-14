@@ -7,6 +7,7 @@ import 'package:frontend/screens/cab_sharing_screen.dart';
 import 'package:frontend/screens/lost_and_found_screen.dart';
 import 'package:frontend/services/analytics_service.dart';
 import 'package:frontend/services/api_service.dart';
+import 'package:frontend/services/shared_service.dart';
 import 'package:frontend/utils/bus_schedule.dart';
 import 'package:frontend/utils/loading_widget.dart';
 import 'package:frontend/widgets/home_card_no_options.dart';
@@ -48,8 +49,10 @@ class _HomeScreenState extends State<HomeScreen> {
   void fetchMessMenu() async {
     final response = await ApiServices().getMessMenu(context);
     if (response == null) {
-      showError(msg: "Failed To Fetch Mess Menu");
+      showError(msg: "Server Refresh Failed...");
+      final res = await SharedService().getMessMenu();
       setState(() {
+        messMenu = res;
         changeState();
       });
       return;
@@ -58,13 +61,18 @@ class _HomeScreenState extends State<HomeScreen> {
       messMenu = response;
       changeState();
     });
+
+    //save mess menu
+    await SharedService().saveMessMenu(response);
   }
 
-  void fetchBus() async {
+  Future<void> fetchBus() async {
     final response = await ApiServices().getBusSchedule(context);
     if (response == null) {
-      showError(msg: "Failed To Fetch Bus Schedule");
+      showError(msg: "Server Refresh Failed...");
+      final res = await SharedService().getBusSchedule();
       setState(() {
+        busSchedule = res;
         changeState();
       });
       return;
@@ -73,9 +81,12 @@ class _HomeScreenState extends State<HomeScreen> {
       busSchedule = response;
       changeState();
     });
+
+    //save bus schedule
+    await SharedService().saveBusSchedule(response);
   }
 
-  void fetchUser() async {
+  Future<void> fetchUser() async {
     final response = await ApiServices().getUserDetails(context);
     if (response == null) {
       setState(() {
@@ -104,6 +115,29 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  getUserData() async {
+    final user = await SharedService().getUserDetails();
+    if (user['name'] == null || user['email'] == null) {
+      await fetchUser();
+      fetchUserProfile();
+    } else {
+      UserModel userM = UserModel(
+          email: user['email'] ?? 'user@iith.ac.in',
+          name: user['name'] ?? 'User');
+      setState(() {
+        userModel = userM;
+        image = user['image'] ?? image;
+        changeState();
+        changeState();
+      });
+    }
+  }
+
+  saveUserData(String name, String email, String image) async {
+    final ss = SharedService();
+    await ss.saveUserDetails(name: name, email: email, imageUrl: image);
+  }
+
   int status = 0;
   int totalOperation = 2;
 
@@ -129,6 +163,10 @@ class _HomeScreenState extends State<HomeScreen> {
     fetchMessMenu();
     fetchBus();
     analyticsService.logScreenView(screenName: "HomeScreen");
+    if (status >= totalOperation) {
+      saveUserData(userModel?.name ?? 'User',
+          userModel?.email ?? 'user@iith.ac.in', image);
+    }
   }
 
   Future<void> _refresh() async {
@@ -161,7 +199,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       const SizedBox(height: 24),
                       HomeScreenAppBar(
-                          image: image, user: userModel, isGuest: widget.isGuest),
+                          image: image,
+                          user: userModel,
+                          isGuest: widget.isGuest),
                       const SizedBox(height: 28),
                       HomeScreenBusTimings(
                         busSchedule: busSchedule,
@@ -176,7 +216,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           widget.isGuest
                               ? showError()
                               : Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (context) => const CabSharingScreen(),
+                                  builder: (context) =>
+                                      const CabSharingScreen(),
                                 ));
                         },
                       ),

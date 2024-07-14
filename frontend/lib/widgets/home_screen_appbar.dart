@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/models/user_model.dart';
 import 'package:frontend/screens/login_screen.dart';
@@ -83,7 +84,8 @@ class HomeScreenAppBar extends StatelessWidget {
                   ));
                 },
                 child: ClipOval(
-                  child: CircleAvatar(radius: 24, child: Image.network(image)),
+                  child: CircleAvatar(
+                      radius: 24, child: CachedNetworkImage(imageUrl: image)),
                 ),
               )
       ],

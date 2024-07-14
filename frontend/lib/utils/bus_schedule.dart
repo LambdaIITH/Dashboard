@@ -10,5 +10,11 @@ class BusSchedule {
       toIITH: List<String>.from(json['Hostel Circle-Hospital-Maingate']),
     );
   }
-}
 
+  Map<String, dynamic> toJson() {
+    return {
+      'Maingate-Hospital-Hostel Circle': fromIITH,
+      'Hostel Circle-Hospital-Maingate': toIITH,
+    };
+  }
+}

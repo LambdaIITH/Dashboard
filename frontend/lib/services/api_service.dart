@@ -3,7 +3,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:dio/browser.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -18,6 +17,8 @@ import 'package:frontend/utils/bus_schedule.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'dio_non_web_config.dart' if (dart.library.html) 'dio_web_config.dart';
+
 class ApiServices {
   static final ApiServices _instance = ApiServices._internal();
   factory ApiServices() => _instance;
@@ -27,14 +28,13 @@ class ApiServices {
   PersistCookieJar? cookieJar;
   String backendUrl = dotenv.env["BACKEND_URL"] ?? "";
 
-  Dio getClient() => Dio()
-    ..httpClientAdapter = BrowserHttpClientAdapter(withCredentials: true);
-
   Dio dio = Dio();
 
   Future<void> configureDio() async {
-    dio = getClient();
-    dio.options.baseUrl = backendUrl;
+    final dioConfig = DioConfig();
+    final client = dioConfig.getClient();
+    client.options.baseUrl = backendUrl;
+    dio = client;
 
     if (!kIsWeb) {
       // Initialize cookie jar for non-web platforms
