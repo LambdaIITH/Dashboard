@@ -155,10 +155,22 @@ class ApiServices {
 
   // ====================CAB SHARING STARTS===================================
 
-  Future<List<BookingModel>> getBookings(BuildContext context) async {
+  Future<List<BookingModel>> getBookings(BuildContext context,
+      {String? fromLoc,
+      String? toLoc,
+      String? startTime,
+      String? endTime}) async {
     try {
-      debugPrint("Making request to: ${dio.options.baseUrl}/cabshare/bookings");
-      final response = await dio.get('/cabshare/bookings');
+      final queryParams = <String, dynamic>{};
+      if (fromLoc != null) queryParams['from_loc'] = fromLoc;
+      if (toLoc != null) queryParams['to_loc'] = toLoc;
+      if (startTime != null) queryParams['start_time'] = startTime;
+      if (endTime != null) queryParams['end_time'] = endTime;
+
+      debugPrint(
+          "Making request to: ${dio.options.baseUrl}/cabshare/bookings with params: $queryParams");
+      final response = await dio.get('/cabshare/bookings',
+          queryParameters: queryParams.isEmpty ? null : queryParams);
 
       if (response.statusCode == 401) {
         await logout(context);
@@ -179,7 +191,11 @@ class ApiServices {
         '/cabshare/bookings',
         data: booking.toJson(),
       );
-      return {'booking': response.data, 'status': response.statusCode};
+      return {
+        'booking': response.data,
+        'status': response.statusCode,
+        'error': null
+      };
     } on DioException catch (e) {
       if (e.response != null) {
         return {
@@ -223,13 +239,14 @@ class ApiServices {
       debugPrint(
           "Making request to: ${dio.options.baseUrl}/cabshare/me/bookings");
       final response = await dio.get('/cabshare/me/bookings');
+      print(response.data);
 
       if (response.statusCode == 401) {
         await logout(context);
         return [];
       }
 
-      final data = response.data as List;
+      final data = response.data["future_bookings"] as List;
       return data.map((booking) => BookingModel.fromJson(booking)).toList();
     } catch (e) {
       debugPrint("Failed to fetch user bookings: $e");
@@ -261,7 +278,7 @@ class ApiServices {
     try {
       final response = await dio.post(
         '/cabshare/bookings/$bookingId/request',
-        data: {'comments': comments},
+        data: {'comments': comments, 'status': "success"},
       );
       return {'status': response.statusCode};
     } on DioException catch (e) {
