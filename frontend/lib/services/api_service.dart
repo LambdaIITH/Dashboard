@@ -1,7 +1,5 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'dart:convert';
-import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -83,7 +81,6 @@ class ApiServices {
       final data = response.data;
       final userModel =
           UserModel(id: data['id'], email: data['email'], name: '');
-      print(response.extra);
       return {'user': userModel, 'status': response.statusCode};
     } on DioException catch (e) {
       if (e.response != null && e.response?.statusCode == 401) {
@@ -239,7 +236,6 @@ class ApiServices {
       debugPrint(
           "Making request to: ${dio.options.baseUrl}/cabshare/me/bookings");
       final response = await dio.get('/cabshare/me/bookings');
-      print(response.data);
 
       if (response.statusCode == 401) {
         await logout(context);
@@ -278,7 +274,7 @@ class ApiServices {
     try {
       final response = await dio.post(
         '/cabshare/bookings/$bookingId/request',
-        data: {'comments': comments, 'status': "success"},
+        data: {'comments': comments},
       );
       return {'status': response.statusCode};
     } on DioException catch (e) {

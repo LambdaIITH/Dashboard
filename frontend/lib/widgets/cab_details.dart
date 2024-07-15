@@ -7,12 +7,13 @@ import 'package:frontend/models/booking_model.dart';
 class CabCard extends StatefulWidget {
   final bool isExpanded;
   final BookingModel cab;
+  final String usersEmail;
 
-  const CabCard({
-    super.key,
-    this.isExpanded = false,
-    required this.cab,
-  });
+  const CabCard(
+      {super.key,
+      this.isExpanded = false,
+      required this.cab,
+      required this.usersEmail});
 
   @override
   State<CabCard> createState() => _CabCardState();
@@ -41,30 +42,16 @@ class _CabCardState extends State<CabCard> {
     return formattedTime;
   }
 
-  // bool _isExpanded = false;
-  // String note =
-  //     "If anyone is travelling on same date and time from RGIA to IITH can contact me";
-  // String date = "Wed, 12th May 2021";
-  // String startTime = "01:00PM";
-  // String endTime = "02:00PM";
-  String id = "RD00BGSF11001";
-  // String availableSeats = "2";
-  // String startLocation = "RGIA";
-  // String endLocation = "IITH";
-  // List<Map<String, String>> travellers = [
-  //   {
-  //     'name': 'Shyam Kumar',
-  //     'email': 'ms22btech11010@iith.ac.in',
-  //   },
-  //   {
-  //     'name': 'Ram Kumar',
-  //     'email': 'ma22btech11010@iith.ac.in',
-  //   },
-  //   {
-  //     'name': 'Shyam Kumar',
-  //     'email': 'ma22btech11010@iith.ac.in',
-  //   },
-  // ];
+  void showMessage(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        duration: const Duration(milliseconds: 500),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+  }
 
   // From the API service
   ApiServices apiServices = ApiServices();
@@ -72,30 +59,77 @@ class _CabCardState extends State<CabCard> {
   void joinCab(BuildContext context) async {
     try {
       final res = await apiServices.requestToJoinBooking(bookingId, "context");
-      if (res["status"] == "success") {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Successfully joined the cab"),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-      else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(res['error']),
-            backgroundColor: Colors.red,
-          ),
-        );
+      if (res["status"] == 200) {
+        showMessage("Successfully sent the cab join request");
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(
+        //     content: Text("Successfully joined the cab"),
+        //     backgroundColor: Colors.green,
+        //   ),
+        // );
+      } else {
+        showMessage(res['error']);
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(
+        //     content: Text(res['error']),
+        //     backgroundColor: Colors.red,
+        //   ),
+        // );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Error while joining cab: $e"),
-          backgroundColor: Colors.red,
-        ),
-      );
+      showMessage('Something went wrong');
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(
+      //     content: Text("Error while joining cab"),
+      //     backgroundColor: Colors.red,
+      //   ),
+      // );
     }
+  }
+
+  void profileDialog(String name, String email) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Traveller Profile',
+              style:
+                  GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.bold)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Name: $name',
+                  style: GoogleFonts.inter(
+                      fontSize: 16, fontWeight: FontWeight.w500)),
+              const SizedBox(height: 10),
+              Text('Email: $email',
+                  style: GoogleFonts.inter(
+                      fontSize: 16, fontWeight: FontWeight.w500)),
+            ],
+          ),
+          actions: <Widget>[
+            InkWell(
+              onTap: () {
+                Navigator.pop(context);
+              },
+              child: Container(
+                alignment: Alignment.topCenter,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: const Color.fromRGBO(254, 114, 76, 0.70),
+                ),
+                // onPressed: () => Navigator.of(context).pop(),
+                child: Text('Close',
+                    style: GoogleFonts.inter(
+                        fontSize: 14, fontWeight: FontWeight.w600)),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -146,7 +180,7 @@ class _CabCardState extends State<CabCard> {
           ],
           borderRadius: BorderRadius.circular(10.0),
         ),
-        padding: const EdgeInsets.fromLTRB(15, 10, 15, 12),
+        padding: const EdgeInsets.fromLTRB(15, 16, 15, 12),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
@@ -154,31 +188,45 @@ class _CabCardState extends State<CabCard> {
               children: [
                 Row(
                   children: [
-                    Expanded(
-                      child: Text(
-                        id,
-                        style: GoogleFonts.inter(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          date,
+                          style: GoogleFonts.inter(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black,
+                          ),
                         ),
-                      ),
+                        const SizedBox(height: 3.0),
+                        Text(
+                          "$startTime - $endTime",
+                          style: GoogleFonts.inter(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
                     ),
+                    const Spacer(),
                     Align(
                       alignment: Alignment.centerRight,
                       child: RichText(
                         text: TextSpan(
                           text: 'Available Seats  ',
                           style: GoogleFonts.inter(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xffADADAD),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                            color: const Color.fromARGB(255, 77, 77, 77),
                           ),
                           children: <TextSpan>[
                             TextSpan(
                               text: availableSeats,
                               style: GoogleFonts.inter(
-                                fontSize: 26,
+                                fontSize: 24,
                                 fontWeight: FontWeight.w700,
                                 color: Colors.black,
                               ),
@@ -192,78 +240,54 @@ class _CabCardState extends State<CabCard> {
                 Row(
                   children: [
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      flex: 50,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          const SizedBox(height: 5.0),
-                          Row(
-                            children: [
-                              Text(
-                                startLocation,
+                          Flexible(
+                            child: Text(startLocation,
                                 style: GoogleFonts.inter(
-                                  fontSize: 20,
+                                  fontSize: 18,
                                   fontWeight: FontWeight.w600,
-                                  color: const Color(0xffADADAD),
+                                  color: Colors.black,
                                 ),
-                              ),
-                              const SizedBox(width: 10.0),
-                              const Icon(
-                                Icons.arrow_forward,
-                                color: Color(0xffADADAD),
-                                size: 20,
-                              ),
-                              const SizedBox(width: 10.0),
-                              Text(
-                                endLocation,
-                                style: GoogleFonts.inter(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w600,
-                                  color: const Color(0xffADADAD),
-                                ),
-                              ),
-                            ],
+                                overflow: TextOverflow.ellipsis),
                           ),
-                          const SizedBox(height: 5.0),
-                          Column(
-                            children: [
-                              Text(
-                                date,
-                                style: GoogleFonts.inter(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.black,
-                                ),
+                          const SizedBox(width: 8.0),
+                          const Icon(
+                            Icons.arrow_forward,
+                            color: Colors.black,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8.0),
+                          Flexible(
+                            flex: 1,
+                            child: Text(
+                              endLocation,
+                              style: GoogleFonts.inter(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black,
                               ),
-                              const SizedBox(height: 3.0),
-                              Text(
-                                "$startTime - $endTime",
-                                style: GoogleFonts.inter(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ],
-                          )
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                         ],
                       ),
                     ),
+                    const Spacer(flex: 1),
                     Align(
                       alignment: Alignment.centerRight,
-                      child: _isExpanded
-                          ? const Icon(
-                              Icons.keyboard_arrow_up_rounded,
-                              color: Colors.black,
-                              size: 50,
-                            )
-                          : const Icon(
-                              Icons.keyboard_arrow_down_rounded,
-                              color: Colors.black,
-                              size: 50,
-                            ),
+                      child: Icon(
+                        _isExpanded
+                            ? Icons.keyboard_arrow_up_rounded
+                            : Icons.keyboard_arrow_down_rounded,
+                        color: const Color(0xffADADAD),
+                        size: 50,
+                      ),
                     )
                   ],
-                ),
+                )
               ],
             ),
             AnimatedSize(
@@ -294,38 +318,39 @@ class _CabCardState extends State<CabCard> {
                               ),
                             ),
                           ),
-                          Expanded(
-                            flex: 1,
-                            child: Align(
-                              alignment: Alignment.centerRight,
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  joinCab(
-                                    context,
-                                  );
-                                },
-                                style: TextButton.styleFrom(
-                                  backgroundColor:
-                                      const Color.fromRGBO(254, 114, 76, 0.70),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16.0,
-                                    vertical: 3.0,
+                          if (widget.cab.ownerEmail != widget.usersEmail)
+                            Expanded(
+                              flex: 1,
+                              child: Align(
+                                alignment: Alignment.centerRight,
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    joinCab(
+                                      context,
+                                    );
+                                  },
+                                  style: TextButton.styleFrom(
+                                    backgroundColor: const Color.fromRGBO(
+                                        254, 114, 76, 0.70),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16.0,
+                                      vertical: 3.0,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10.0),
+                                    ),
                                   ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                  ),
-                                ),
-                                child: Text(
-                                  "Join Cab",
-                                  style: GoogleFonts.inter(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.black,
+                                  child: Text(
+                                    "Join",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
                         ],
                       ),
                       const SizedBox(height: 15.0),
@@ -356,24 +381,38 @@ class _CabCardState extends State<CabCard> {
                                     child: Row(
                                       children: [
                                         Expanded(
-                                          flex: 1,
                                           child: Text(
                                             traveller['name']!,
                                             style: GoogleFonts.inter(
-                                              fontSize: 14,
+                                              fontSize: 12,
                                               fontWeight: FontWeight.w500,
                                               color: Colors.black,
                                             ),
+                                            overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
-                                        Expanded(
-                                          flex: 2,
-                                          child: Text(
-                                            traveller['email']!,
-                                            style: GoogleFonts.inter(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w500,
-                                              color: const Color(0xff454545),
+                                        InkWell(
+                                          onTap: () {
+                                            profileDialog(traveller['name']!,
+                                                traveller['email']!);
+                                          },
+                                          child: Container(
+                                            // width: 48,
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 12, vertical: 5),
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              color: const Color.fromRGBO(
+                                                  254, 114, 76, 0.70),
+                                            ),
+                                            child: Text(
+                                              'View Profile',
+                                              style: GoogleFonts.inter(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w600,
+                                                color: Colors.black,
+                                              ),
                                             ),
                                           ),
                                         ),

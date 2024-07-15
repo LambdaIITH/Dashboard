@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:frontend/utils/bus_schedule.dart';
-import 'package:frontend/utils/loading_widget.dart';
 import 'package:frontend/widgets/bus_timing_list_widget.dart';
 import 'package:frontend/widgets/next_bus_card_widget.dart';
 import 'package:google_fonts/google_fonts.dart';

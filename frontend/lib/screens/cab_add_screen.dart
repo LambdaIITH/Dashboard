@@ -7,7 +7,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:frontend/services/api_service.dart';
 
 class CabAddScreen extends StatefulWidget {
-  const CabAddScreen({Key? key}) : super(key: key);
+  final String usersEmail;
+  const CabAddScreen({Key? key, required this.usersEmail}) : super(key: key);
   @override
   State<CabAddScreen> createState() => _CabAddScreenState();
 }
@@ -126,7 +127,9 @@ class _CabAddScreenState extends State<CabAddScreen> {
       if (res["error"] == null) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const CabAddSuccess()),
+          MaterialPageRoute(builder: (context) =>  CabAddSuccess(
+            usersEmail: widget.usersEmail
+          )),
         );
       } else {
         showErrorDialog(context, res["error"]);

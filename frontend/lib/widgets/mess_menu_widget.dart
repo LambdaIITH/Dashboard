@@ -52,7 +52,7 @@ class ShowMessMenu extends StatelessWidget {
                   TextSpan(
                     text: '\n$time',
                     style: GoogleFonts.inter(
-                      color: Color.fromARGB(255, 114, 114, 114),
+                      color: const Color.fromARGB(255, 114, 114, 114),
                       fontSize: 14.0,
                       fontWeight: FontWeight.w500,
                     ),

@@ -1,5 +1,4 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/models/user_model.dart';
 import 'package:frontend/screens/login_screen.dart';
@@ -63,15 +62,15 @@ class HomeScreenAppBar extends StatelessWidget {
                 onTap: () {
                   Navigator.pushAndRemoveUntil(
                       context,
-                      MaterialPageRoute(builder: (ctx) => LoginScreen()),
+                      MaterialPageRoute(builder: (ctx) => const LoginScreen()),
                       (Route<dynamic> route) => false);
                 },
                 child: Container(
-                  padding: EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                       // color: Colors.orange,
                       borderRadius: BorderRadius.circular(500)),
-                  child: Icon(Icons.logout_rounded),
+                  child: const Icon(Icons.logout_rounded),
                 ),
               )
             : InkWell(

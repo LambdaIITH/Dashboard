@@ -11,7 +11,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 class ProfileScreen extends StatefulWidget {
   final UserModel user;
   final String image;
-  const ProfileScreen({Key? key, required this.user, required this.image});
+  const ProfileScreen({super.key, Key? key, required this.user, required this.image});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -35,7 +35,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           title: const Text('Logout'),
           content: const SingleChildScrollView(
             child: ListBody(
-              children: const <Widget>[
+              children: <Widget>[
                 Text('Are you sure you want to log out?'),
               ],
             ),

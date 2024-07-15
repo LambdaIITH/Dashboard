@@ -3,7 +3,8 @@ import 'package:frontend/screens/cab_sharing_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class CabAddSuccess extends StatelessWidget {
-  const CabAddSuccess({Key? key}) : super(key: key);
+  final String usersEmail;
+  const CabAddSuccess({Key? key, required this.usersEmail}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -11,7 +12,9 @@ class CabAddSuccess extends StatelessWidget {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => const CabSharingScreen(),
+            builder: (context) => CabSharingScreen(
+              usersEmail: usersEmail,
+            ),
           ),
         );
       });

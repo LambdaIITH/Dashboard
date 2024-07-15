@@ -194,7 +194,9 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: RefreshIndicator(
-                  onRefresh: _refresh,
+                  onRefresh: () {
+                    return Future.delayed(const Duration(seconds: 1), _refresh);
+                  },
                   child: ListView(
                     children: [
                       const SizedBox(height: 24),
@@ -216,8 +218,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           widget.isGuest
                               ? showError()
                               : Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (context) =>
-                                      const CabSharingScreen(),
+                                  builder: (context) => CabSharingScreen(
+                                    usersEmail: userModel?.email ?? '',
+                                  ),
                                 ));
                         },
                       ),
