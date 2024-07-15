@@ -1,5 +1,7 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/models/user_model.dart';
 import 'package:frontend/screens/login_screen.dart';
 import 'package:frontend/services/analytics_service.dart';
 import 'package:frontend/services/api_service.dart';
@@ -7,7 +9,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
+  final UserModel user;
+  final String image;
+  const ProfileScreen({Key? key, required this.user, required this.image});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -111,13 +115,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const SizedBox(height: 40),
-            const CircleAvatar(
+            CircleAvatar(
               radius: 80,
-              backgroundImage: AssetImage('assets/icons/profile-photo.jpeg'),
+              // replaces google image with size parameter changed to improve image resolution
+              backgroundImage: CachedNetworkImageProvider(
+                  widget.image.replaceFirst(RegExp(r'=s\d+'), '=s240')),
             ),
             const SizedBox(height: 15),
             Text(
-              'Rajeev Singh',
+              widget.user.name,
               style: GoogleFonts.inter(
                 fontSize: 28,
                 fontWeight: FontWeight.w700,
@@ -126,7 +132,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: 5),
             Text(
-              'CS24BTECH11001',
+              widget.user.getRollNumber(),
               style: GoogleFonts.inter(
                 fontSize: 20,
                 fontWeight: FontWeight.w500,
