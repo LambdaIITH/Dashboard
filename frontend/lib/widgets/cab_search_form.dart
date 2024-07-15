@@ -65,7 +65,7 @@ class _CabSearchState extends State<CabSearch> {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: initialDate.isBefore(firstDate) ? firstDate : initialDate,
-      firstDate: firstDate,
+      firstDate: DateTime.now(),
       lastDate: DateTime(2101),
     );
     if (pickedDate != null) {

@@ -51,15 +51,13 @@ class BookingModel {
     return {
       'start_time': startTime.toIso8601String(),
       'end_time': endTime.toIso8601String(),
-      // 'start_time': startTime.toString(),
-      // 'end_time': endTime.toString(),
       'capacity': capacity,
       'from_loc': fromLoc,
       'to_loc': toLoc,
       'comments': travellers[0].comments,
       // 'requests': requests,
       // 'travellers': travellers,
-      'owner_email': ownerEmail
+      // 'owner_email': ownerEmail
     };
   }
 }

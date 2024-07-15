@@ -11,7 +11,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 class ProfileScreen extends StatefulWidget {
   final UserModel user;
   final String image;
-  const ProfileScreen({super.key, Key? key, required this.user, required this.image});
+  const ProfileScreen({super.key, required this.user, required this.image});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
