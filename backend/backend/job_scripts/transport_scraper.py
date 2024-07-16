@@ -6,16 +6,8 @@ import string
 import datetime
 from oauth2client.service_account import ServiceAccountCredentials
 from functools import reduce
+from datetime import datetime
 
-# -------------------------------------------------------------------------------
-# What week is now? (1/2/3/4) (for deciding which menu to use)
-d = datetime.date.today()
-current_week = (
-    d.isocalendar()[1] - datetime.date(d.year, d.month, 1).isocalendar()[1] + 1
-)
-
-# -------------------------------------------------------------------------------
-# Get sheets
 scope = ["https://spreadsheets.google.com/feeds",
          'https://www.googleapis.com/auth/spreadsheets',
          "https://www.googleapis.com/auth/drive.file",
@@ -33,7 +25,7 @@ sh = gc.open_by_url(sheet_link)
 
 sheet = sh.worksheet('Transport Schedule')
 
-# fetching bus data
+#! fetching bus data-----------------------------------------------------
 bus_directions = sheet.col_values(1)[2:]
 bus_unique_directions = reduce(lambda x, y: x if y in x else x + [y], [[], ] + bus_directions)
 
@@ -43,10 +35,8 @@ bus_data = {
 
 unusable_data_points = ['', ' ', '-', 'Break']
 
-time_values = []
 # fetching bus data from columns
 
-from datetime import datetime
 for bus_num in range(1, 4):
     bus = sheet.col_values(bus_num + 1)[2:]
     for i, time in enumerate(bus):
@@ -55,16 +45,42 @@ for bus_num in range(1, 4):
                 time_mod = datetime.strptime(time, "%H:%M:%S").time()
                 bus_data[bus_directions[i]].append(time_mod)
             except:
+                print("Error on:", time)
                 pass
             
 bus_data = {key: sorted(value) for key, value in bus_data.items()}
 bus_data = {key: [str(value) for value in values] for key, values in bus_data.items()}
 
+#! fetching EV data----------------------------------------------------------
+EV_directions = sheet.col_values(6)[2:]
+EV_unique_directions = reduce(lambda x, y: x if y in x else x + [y], [[], ] + EV_directions)
+EV_times = sheet.col_values(7)[2:]
+
+EV_data = {EV_unique_directions[i]: [] for i in range(len(EV_unique_directions))}
+
+
+# fetch ev data from columns
+for i, time in enumerate(EV_times):
+    if time not in unusable_data_points:
+        try:
+            time_mod = datetime.strptime(time, "%H:%M:%S").time()
+            EV_data[EV_directions[i]].append(time_mod)
+        except:
+            print("Error on:", time)
+            pass
+        
+EV_data = {key: sorted(value) for key, value in EV_data.items()}
+EV_data = {key: [str(value) for value in values] for key, values in EV_data.items()}
+
+
 
 # writing into a json file
-outname = os.path.dirname(__file__) + "/../Routes/Bus/bus.json"
-
+outname = os.path.dirname(__file__) + "/../Routes/Transport/transport.json"
+out_json = {
+    "bus": bus_data,
+    "EV": EV_data
+}
 import json
 with open(outname, 'w') as f:
-    json.dump(bus_data, f, indent = 2)
+    json.dump(out_json, f, indent = 2)
 

@@ -16,7 +16,7 @@ from Routes.CabSharing.controller import app as cab_router
 from Routes.User.controller import router as user_router
 from Routes.Auth.tokens import verify_token
 from fastapi.responses import JSONResponse
-from Routes.Bus.bus_schedule import router as bus_router
+from Routes.Transport.transport_schedule import router as transport_router
 load_dotenv()
 
 app = FastAPI()
@@ -47,7 +47,7 @@ app.include_router(found_router)
 app.include_router(lost_router)
 app.include_router(cab_router)
 app.include_router(user_router)
-app.include_router(bus_router)
+app.include_router(transport_router)
 
 async def cookie_verification_middleware(request: Request, call_next):
     if request.method == "OPTIONS":
