@@ -62,6 +62,6 @@ conn.autocommit = False
                 
         
 S3Client = S3Manager()
-ESClient = ElasticsearchManager()
+# ESClient = ElasticsearchManager()
                                
         

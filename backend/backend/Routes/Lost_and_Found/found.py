@@ -6,7 +6,7 @@ from Routes.Auth.cookie import get_user_id
 from utils import *
 from models import LfItem, LfResponse
 from queries.found import *
-from utils import S3Client, ESClient
+from utils import S3Client
 
 
 router = APIRouter(prefix="/found", tags=["found"])
@@ -26,7 +26,6 @@ async def add_item( request: Request,
             item = LfItem.from_row(cur.fetchone())
         
         # update in elasticsearch
-        ESClient.add_item(item.id, item.item_name, item.item_description, "found", item.created_at)
         
         if images is not None:
             image_paths = S3Client.uploadToCloud(images, item.id, "found")
@@ -96,7 +95,6 @@ def delete_found_item( request: Request, item_id: int = Form(...)) -> Dict[str, 
             query = f"DELETE from found WHERE found.id = {item_id}"
             cur.execute( query )        
         S3Client.deleteFromCloud( item_id, "found" )
-        ESClient.delete_item( item_id, "found" )
         conn.commit()
         return {"message": "Item deleted successfully!"}
                
@@ -132,8 +130,6 @@ def edit_selected_item( request: Request, item_id: int = Form(...),  form_data:s
             item = LfItem.from_row(row)
             
         
-            ESClient.delete_item(item_id, "found")
-            ESClient.add_item(item_id, item.item_name, item.item_description, "found", item.created_at)
             
             S3Client.deleteFromCloud( item_id, "found")
             cur.execute(delete_an_item_images(item_id))
@@ -150,10 +146,12 @@ def edit_selected_item( request: Request, item_id: int = Form(...),  form_data:s
         raise HTTPException(status_code=500, detail=f"Error: {e}")          
 
 @router.get("/search") 
-def search(query : str, max_results: int = 10) -> List[Dict[str, Any]]:
+def search(query : str, max_results: int = 100) -> List[Dict[str, Any]]:
     try: 
-        response = ESClient.search_items(query, max_results, "found")
-        res = list(map(lambda x: {"id": x["_source"]["id"], "name": x["_source"]["name"]}, response))
+        with conn.cursor() as cur: 
+            cur.execute( search_found_items( query, max_results ) )
+            res = cur.fetchall()
+            res = list( map( lambda x: {"id": x[0], "name": x[1]}, res ) )
         return res
     except Exception as e: 
         raise HTTPException(status_code=500, detail=f"Error: {e}")

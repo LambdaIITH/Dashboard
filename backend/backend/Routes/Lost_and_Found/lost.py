@@ -6,7 +6,7 @@ from Routes.Auth.cookie import get_user_id
 from utils import *
 from queries.lost import *
 from models import LfItem, LfResponse
-from utils import S3Client, ESClient
+from utils import S3Client
 router = APIRouter(prefix="/lost", tags=["lost"])
 
 # add lost item 
@@ -25,7 +25,6 @@ async def add_item( request: Request,
             item = LfItem.from_row(cur.fetchone())
         
         # update in elasticsearch
-        ESClient.add_item(item.id, item.item_name, item.item_description, "lost", item.created_at)
         
         if images is not None:
             image_paths = S3Client.uploadToCloud(images, item.id, "lost")
@@ -95,7 +94,6 @@ def delete_lost_item(request: Request, item_id: int = Form(...) ) -> Dict[str, s
             cur.execute( query )
         
         S3Client.deleteFromCloud( item_id, "lost" )
-        ESClient.delete_item( item_id, "lost" ) 
         conn.commit() 
         
         return {"message": "Item deleted successfully!"}
@@ -130,9 +128,6 @@ def edit_selected_item(request: Request, item_id: int = Form(...),  form_data:st
             item = LfItem.from_row(row)
             
         
-            ESClient.delete_item(item_id, "lost")
-            ESClient.add_item(item_id, item.item_name, item.item_description, "lost", item.created_at)
-            
             S3Client.deleteFromCloud( item_id, "lost" )
             cur.execute(delete_an_item_images(item_id))
             if images is not None:
@@ -149,10 +144,12 @@ def edit_selected_item(request: Request, item_id: int = Form(...),  form_data:st
 
 # search lost items
 @router.get("/search")
-def search(query : str, max_results: int = 10) -> List[Dict[str, Any]] :
+def search(query : str, max_results: int = 100) -> List[Dict[str, Any]] :
     try: 
-        response = ESClient.search_items(query, max_results, "lost")
-        res = list(map(lambda x: {"id": x["_source"]["id"], "name": x["_source"]["name"]}, response))
+        with conn.cursor() as cur: 
+            cur.execute( search_lost_items( query, max_results ) )
+            res = cur.fetchall()
+            res = list( map( lambda x: {"id": x[0], "name": x[1]}, res ) )
         return res
     except Exception as e: 
         raise HTTPException(status_code=500, detail=f"Error: {e}")

@@ -1,5 +1,5 @@
 
-from pypika import Query, Table, functions as fn
+from pypika import Query, Table, functions as fn, Order
 from typing import Dict, Any
 
 found_table, found_images_table = Table('found'), Table('found_images')
@@ -69,4 +69,13 @@ def delete_an_item_images(item_id: int):
 
 def get_all_image_uris(item_id : int):
     query = Query.from_(found_images_table).select('image_url').where(found_images_table['item_id'] == item_id)
+    return str(query)
+
+def search_found_items(search_query: str, max_results: int= 10):
+    query = (Query.from_(found_table)
+    .select('*')
+    .where(found_table['item_name'].like(f'%{search_query}%') | found_table['item_description'].ilike(f'%{search_query}%'))
+    .orderby(found_table['created_at'], order=Order.desc)
+    .limit(max_results)
+    )
     return str(query)
