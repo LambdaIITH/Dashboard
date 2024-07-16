@@ -8,7 +8,7 @@ class BookingModel {
   final String fromLoc;
   final String toLoc;
   final String ownerEmail;
-  List<TravellersModel>? requests = [];
+  final List<TravellersModel> requests;
   final List<TravellersModel> travellers;
 
   BookingModel({
@@ -20,7 +20,7 @@ class BookingModel {
     required this.toLoc,
     required this.ownerEmail,
     required this.travellers,
-    this.requests,
+    this.requests = const [],
   });
 
   factory BookingModel.fromJson(Map<String, dynamic> json) {
@@ -31,7 +31,7 @@ class BookingModel {
 
     List<TravellersModel> travellers =
         travellersfromJson.map((e) => TravellersModel.fromJson(e)).toList();
-    List<TravellersModel>? requests =
+    List<TravellersModel> requests =
         requestsfromJson.map((e) => TravellersModel.fromJson(e)).toList();
 
     return BookingModel(

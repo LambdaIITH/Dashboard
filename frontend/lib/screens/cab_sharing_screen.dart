@@ -185,6 +185,14 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
                     itemBuilder: (ctx, inx) => Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: CabCard(
+                        onRefresh: () {
+                          return Future.delayed(
+                            const Duration(seconds: 1),
+                            () {
+                              getAllCabs();
+                            },
+                          );
+                        },
                         cab: allBookings[inx],
                         usersEmail: widget.usersEmail,
                       ),
@@ -228,6 +236,14 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
                     itemBuilder: (ctx, inx) => Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: CabCard(
+                        onRefresh: () {
+                          return Future.delayed(
+                            const Duration(seconds: 1),
+                            () {
+                              getUserCabs();
+                            },
+                          );
+                        },
                         cab: userBookings[inx],
                         usersEmail: widget.usersEmail,
                       ),

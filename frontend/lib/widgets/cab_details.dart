@@ -8,12 +8,14 @@ class CabCard extends StatefulWidget {
   final bool isExpanded;
   final BookingModel cab;
   final String usersEmail;
+  final Function onRefresh;
 
   const CabCard(
       {super.key,
       this.isExpanded = false,
       required this.cab,
-      required this.usersEmail});
+      required this.usersEmail,
+      required this.onRefresh});
 
   @override
   State<CabCard> createState() => _CabCardState();
@@ -46,7 +48,7 @@ class _CabCardState extends State<CabCard> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(msg),
-        duration: const Duration(milliseconds: 500),
+        duration: const Duration(milliseconds: 1500),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
@@ -115,7 +117,8 @@ class _CabCardState extends State<CabCard> {
               },
               child: Container(
                 alignment: Alignment.topCenter,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
                   color: const Color.fromRGBO(254, 114, 76, 0.70),
@@ -131,6 +134,114 @@ class _CabCardState extends State<CabCard> {
       },
     );
   }
+
+  void requestStatusDialog(
+      String name, String email, String phone, String comment) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Request Status',
+              style:
+                  GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.bold)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Name: $name',
+                  style: GoogleFonts.inter(
+                      fontSize: 16, fontWeight: FontWeight.w500)),
+              const SizedBox(height: 10),
+              Text('Email: $email',
+                  style: GoogleFonts.inter(
+                      fontSize: 16, fontWeight: FontWeight.w500)),
+              const SizedBox(height: 10),
+              Text('Phone: $phone',
+                  style: GoogleFonts.inter(
+                      fontSize: 16, fontWeight: FontWeight.w500)),
+              const SizedBox(height: 10),
+              Text('Comment: $comment',
+                  style: GoogleFonts.inter(
+                      fontSize: 16, fontWeight: FontWeight.w500)),
+            ],
+          ),
+          actions: <Widget>[
+            Row(
+              children: [
+                Expanded(
+                  child: InkWell(
+                    onTap: () async {
+                      final res =
+                          await apiServices.rejectRequest(bookingId, email);
+                      if (res['status'] == 200) {
+                        showMessage("Successfully request rejected");
+                      } else {
+                        showMessage(res['error']);
+                      }
+
+                      Navigator.pop(context);
+                      widget.onRefresh();
+                    },
+                    child: Container(
+                      alignment: Alignment.topCenter,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 5),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        color: const Color(0xffdc2828),
+                      ),
+                      child: Text('Reject',
+                          style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white)),
+                    ),
+                  ),
+                ),
+                const SizedBox(
+                  width: 12,
+                ),
+                Expanded(
+                  child: InkWell(
+                    onTap: () async {
+                      final res =
+                          await apiServices.acceptRequest(bookingId, email);
+                      if (res['status'] == 200) {
+                        showMessage("Successfully request accepted");
+                      } else {
+                        showMessage(res['error']);
+                      }
+                      Navigator.pop(context);
+                      widget.onRefresh();
+                    },
+                    child: Container(
+                      alignment: Alignment.topCenter,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 5),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        color: const Color(0xff16a249),
+                      ),
+                      child: Text('Accept',
+                          style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white)),
+                    ),
+                  ),
+                ),
+              ],
+            )
+          ],
+        );
+      },
+    );
+  }
+
+  bool isUserAlreadyATraveller() {
+  return widget.cab.ownerEmail == widget.usersEmail ||
+         widget.cab.travellers.any((t) => t.email == widget.usersEmail);
+}
 
   @override
   void initState() {
@@ -318,7 +429,7 @@ class _CabCardState extends State<CabCard> {
                               ),
                             ),
                           ),
-                          if (widget.cab.ownerEmail != widget.usersEmail)
+                          if (!isUserAlreadyATraveller())
                             Expanded(
                               flex: 1,
                               child: Align(
@@ -353,6 +464,88 @@ class _CabCardState extends State<CabCard> {
                             ),
                         ],
                       ),
+                      widget.cab.ownerEmail == widget.usersEmail &&
+                              widget.cab.requests.isNotEmpty
+                          ? const SizedBox(height: 15.0)
+                          : const SizedBox(),
+                      widget.cab.ownerEmail == widget.usersEmail &&
+                              widget.cab.requests.isNotEmpty
+                          ? Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Requests",
+                                  style: GoogleFonts.inter(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                const SizedBox(height: 5.0),
+                                Column(
+                                  children: widget.cab.requests
+                                      .map(
+                                        (req) => Container(
+                                          padding: const EdgeInsets.fromLTRB(
+                                              10, 0, 10, 0),
+                                          margin: const EdgeInsets.only(
+                                              bottom: 5.0),
+                                          child: Row(
+                                            children: [
+                                              Expanded(
+                                                child: Text(
+                                                  req.name,
+                                                  style: GoogleFonts.inter(
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: Colors.black,
+                                                  ),
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                              InkWell(
+                                                onTap: () {
+                                                  requestStatusDialog(
+                                                      req.name,
+                                                      req.email,
+                                                      req.phoneNumber,
+                                                      req.comments);
+                                                },
+                                                child: Container(
+                                                  // width: 48,
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 12,
+                                                      vertical: 5),
+                                                  decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            12),
+                                                    color: const Color.fromRGBO(
+                                                        254, 114, 76, 0.70),
+                                                  ),
+                                                  child: Text(
+                                                    'Request Status',
+                                                    style: GoogleFonts.inter(
+                                                      fontSize: 12,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      color: Colors.black,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      )
+                                      .toList(),
+                                ),
+                              ],
+                            )
+                          : Container(),
                       const SizedBox(height: 15.0),
                       Column(
                         mainAxisAlignment: MainAxisAlignment.start,

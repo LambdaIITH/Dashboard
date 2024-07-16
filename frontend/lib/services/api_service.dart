@@ -57,7 +57,7 @@ class ApiServices {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Text('Session Expired Please Login again!'),
-        duration: const Duration(milliseconds: 500),
+        duration: const Duration(milliseconds: 1500),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
@@ -142,7 +142,7 @@ class ApiServices {
           email: data['email'],
           name: data['name'],
           cr: data['cr'],
-          phone: data['phone'],
+          phone: data['phone_number'],
           id: data['id']);
     } catch (e) {
       debugPrint("Failed to fetch bus schedule: $e");
