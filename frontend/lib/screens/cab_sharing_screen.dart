@@ -142,7 +142,7 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
         return Future.delayed(
           const Duration(seconds: 1),
           () {
-            getUserCabs();
+            getAllCabs();
           },
         );
       },

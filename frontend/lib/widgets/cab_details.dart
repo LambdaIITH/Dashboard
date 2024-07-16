@@ -47,9 +47,13 @@ class _CabCardState extends State<CabCard> {
   void showMessage(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(msg),
+        content: Text(
+          msg,
+          style: GoogleFonts.inter(),
+          textAlign: TextAlign.center,
+        ),
         duration: const Duration(milliseconds: 1500),
-        behavior: SnackBarBehavior.floating,
+        behavior: SnackBarBehavior.fixed,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
@@ -63,29 +67,38 @@ class _CabCardState extends State<CabCard> {
       final res = await apiServices.requestToJoinBooking(bookingId, "context");
       if (res["status"] == 200) {
         showMessage("Successfully sent the cab join request");
-        // ScaffoldMessenger.of(context).showSnackBar(
-        //   const SnackBar(
-        //     content: Text("Successfully joined the cab"),
-        //     backgroundColor: Colors.green,
-        //   ),
-        // );
       } else {
         showMessage(res['error']);
-        // ScaffoldMessenger.of(context).showSnackBar(
-        //   SnackBar(
-        //     content: Text(res['error']),
-        //     backgroundColor: Colors.red,
-        //   ),
-        // );
       }
     } catch (e) {
       showMessage('Something went wrong');
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   const SnackBar(
-      //     content: Text("Error while joining cab"),
-      //     backgroundColor: Colors.red,
-      //   ),
-      // );
+    }
+  }
+
+  void deleteCab() async {
+    final res = await apiServices.deleteBooking(bookingId);
+    if (res['status'] == 200) {
+      showMessage("Cab has been successfully deleted");
+    } else {
+      showMessage(res['error']);
+    }
+  }
+
+  void exitCab() async {
+    final res = await apiServices.exitBooking(bookingId);
+    if (res['status'] == 200) {
+      showMessage("Successfully exited from the cab");
+    } else {
+      showMessage(res['error']);
+    }
+  }
+
+  void cancelRequest() async {
+    final res = await apiServices.deleteRequest(bookingId);
+    if (res['status'] == 200) {
+      showMessage("Request has been successfully canceled");
+    } else {
+      showMessage(res['error']);
     }
   }
 
@@ -173,13 +186,13 @@ class _CabCardState extends State<CabCard> {
                     onTap: () async {
                       final res =
                           await apiServices.rejectRequest(bookingId, email);
+                      Navigator.pop(context);
                       if (res['status'] == 200) {
                         showMessage("Successfully request rejected");
                       } else {
                         showMessage(res['error']);
                       }
 
-                      Navigator.pop(context);
                       widget.onRefresh();
                     },
                     child: Container(
@@ -206,12 +219,12 @@ class _CabCardState extends State<CabCard> {
                     onTap: () async {
                       final res =
                           await apiServices.acceptRequest(bookingId, email);
+                      Navigator.pop(context);
                       if (res['status'] == 200) {
                         showMessage("Successfully request accepted");
                       } else {
                         showMessage(res['error']);
                       }
-                      Navigator.pop(context);
                       widget.onRefresh();
                     },
                     child: Container(
@@ -238,10 +251,83 @@ class _CabCardState extends State<CabCard> {
     );
   }
 
+  showConfirmationDialog(
+      BuildContext context, String title, String button, Function onTap) {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text(
+              'Confirmation',
+              style:
+                  GoogleFonts.inter(fontSize: 19, fontWeight: FontWeight.w600),
+            ),
+            content: Text(
+              title,
+              style:
+                  GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w400),
+            ),
+            actions: <Widget>[
+              Row(
+                children: [
+                  Expanded(
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
+                      child: Container(
+                        alignment: Alignment.topCenter,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 5),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          color: const Color.fromRGBO(254, 114, 76, 0.70),
+                        ),
+                        child: Text('No',
+                            style: GoogleFonts.inter(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 12,
+                  ),
+                  Expanded(
+                    child: InkWell(
+                      onTap: () async {
+                        Navigator.pop(context);
+                        await onTap();
+                        widget.onRefresh();
+                      },
+                      child: Container(
+                        alignment: Alignment.topCenter,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 5),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          color: const Color(0xffdc2828),
+                        ),
+                        child: Text(button,
+                            style: GoogleFonts.inter(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white)),
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            ],
+          );
+        });
+  }
+
   bool isUserAlreadyATraveller() {
-  return widget.cab.ownerEmail == widget.usersEmail ||
-         widget.cab.travellers.any((t) => t.email == widget.usersEmail);
-}
+    return widget.cab.ownerEmail == widget.usersEmail ||
+        widget.cab.travellers.any((t) => t.email == widget.usersEmail);
+  }
 
   @override
   void initState() {
@@ -429,39 +515,153 @@ class _CabCardState extends State<CabCard> {
                               ),
                             ),
                           ),
-                          if (!isUserAlreadyATraveller())
-                            Expanded(
-                              flex: 1,
-                              child: Align(
-                                alignment: Alignment.centerRight,
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    joinCab(
-                                      context,
-                                    );
-                                  },
-                                  style: TextButton.styleFrom(
-                                    backgroundColor: const Color.fromRGBO(
-                                        254, 114, 76, 0.70),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 16.0,
-                                      vertical: 3.0,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10.0),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    "Join",
-                                    style: GoogleFonts.inter(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
+                          !isUserAlreadyATraveller()
+                              ? widget.cab.requests
+                                      .any((r) => r.email == widget.usersEmail)
+                                  ? Expanded(
+                                      flex: 1,
+                                      child: Align(
+                                        alignment: Alignment.centerRight,
+                                        child: ElevatedButton(
+                                          onPressed: () {
+                                            showConfirmationDialog(
+                                                context,
+                                                'Are you sure you want to cancel this request?',
+                                                'Yes',
+                                                cancelRequest);
+                                          },
+                                          style: TextButton.styleFrom(
+                                            backgroundColor:
+                                                const Color.fromRGBO(
+                                                    254, 114, 76, 0.70),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 16.0,
+                                              vertical: 3.0,
+                                            ),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(10.0),
+                                            ),
+                                          ),
+                                          child: Text(
+                                            "Cancel",
+                                            style: GoogleFonts.inter(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                  : Expanded(
+                                      flex: 1,
+                                      child: Align(
+                                        alignment: Alignment.centerRight,
+                                        child: ElevatedButton(
+                                          onPressed: () {
+                                            joinCab(
+                                              context,
+                                            );
+                                          },
+                                          style: TextButton.styleFrom(
+                                            backgroundColor:
+                                                const Color.fromRGBO(
+                                                    254, 114, 76, 0.70),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 16.0,
+                                              vertical: 3.0,
+                                            ),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(10.0),
+                                            ),
+                                          ),
+                                          child: Text(
+                                            "Join",
+                                            style: GoogleFonts.inter(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                              : widget.cab.ownerEmail == widget.usersEmail
+                                  ? Expanded(
+                                      flex: 1,
+                                      child: Align(
+                                        alignment: Alignment.centerRight,
+                                        child: ElevatedButton(
+                                          onPressed: () {
+                                            // deleteCab();
+                                            showConfirmationDialog(
+                                                context,
+                                                'Are you sure you want to delete this ride?',
+                                                'Yes',
+                                                deleteCab);
+                                          },
+                                          style: TextButton.styleFrom(
+                                            backgroundColor:
+                                                const Color.fromRGBO(
+                                                    254, 114, 76, 0.70),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 16.0,
+                                              vertical: 3.0,
+                                            ),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(10.0),
+                                            ),
+                                          ),
+                                          child: Text(
+                                            "Delete",
+                                            style: GoogleFonts.inter(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                  : Expanded(
+                                      flex: 1,
+                                      child: Align(
+                                        alignment: Alignment.centerRight,
+                                        child: ElevatedButton(
+                                          onPressed: () {
+                                            showConfirmationDialog(
+                                                context,
+                                                'Are you sure you want to exit from this booking?',
+                                                'Yes',
+                                                exitCab);
+                                          },
+                                          style: TextButton.styleFrom(
+                                            backgroundColor:
+                                                const Color.fromRGBO(
+                                                    254, 114, 76, 0.70),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 16.0,
+                                              vertical: 3.0,
+                                            ),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(10.0),
+                                            ),
+                                          ),
+                                          child: Text(
+                                            "Exit",
+                                            style: GoogleFonts.inter(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    )
                         ],
                       ),
                       widget.cab.ownerEmail == widget.usersEmail &&
