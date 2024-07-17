@@ -145,7 +145,29 @@ class _CabAddScreenState extends State<CabAddScreen> {
   }
 
   void createCab() async {
-    
+    // Check for phone number
+    if (userDetails?.phone == null || userDetails?.phone == '') {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Phone Number not addded'),
+          content: const Text(
+            'Please update your phone number in the profile section before adding a cab.',
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                if (Navigator.of(context).canPop()) {
+                  Navigator.of(context).pop();
+                }
+              },
+            ),
+          ],
+        ),
+      );
+      return;
+    }
     if (selectedEndDateTime == null ||
         selectedStartDateTime == null ||
         seats == null ||

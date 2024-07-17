@@ -33,6 +33,8 @@ class _CabCardState extends State<CabCard> {
   late String startLocation;
   late String endLocation;
   late List<Map<String, String>> travellers;
+  
+  TextEditingController commentController = TextEditingController();
 
   String convertDateFormat(DateTime inputDate) {
     String formattedDate = DateFormat('E, d MMM y').format(inputDate);
@@ -64,7 +66,7 @@ class _CabCardState extends State<CabCard> {
 
   void joinCab(BuildContext context) async {
     try {
-      final res = await apiServices.requestToJoinBooking(bookingId, "context");
+      final res = await apiServices.requestToJoinBooking(bookingId, commentController.text);
       if (res["status"] == 200) {
         showMessage("Successfully sent the cab join request");
       } else {
@@ -560,9 +562,7 @@ class _CabCardState extends State<CabCard> {
                                         alignment: Alignment.centerRight,
                                         child: ElevatedButton(
                                           onPressed: () {
-                                            joinCab(
-                                              context,
-                                            );
+                                            _showBottomSheet(context, commentController, joinCab);
                                           },
                                           style: TextButton.styleFrom(
                                             backgroundColor:
@@ -829,65 +829,175 @@ class _CabCardState extends State<CabCard> {
   }
 }
 
-class Cab {
-  final int id;
-  final String startTime;
-  final String endTime;
-  final int capacity;
-  final String from;
-  final String to;
-  final String ownerEmail;
-  final List<Traveller> travellers;
-  final List<Traveller> requests;
+// class Cab {
+//   final int id;
+//   final String startTime;
+//   final String endTime;
+//   final int capacity;
+//   final String from;
+//   final String to;
+//   final String ownerEmail;
+//   final List<Traveller> travellers;
+//   final List<Traveller> requests;
 
-  Cab({
-    required this.id,
-    required this.startTime,
-    required this.endTime,
-    required this.capacity,
-    required this.from,
-    required this.to,
-    required this.ownerEmail,
-    required this.travellers,
-    required this.requests,
-  });
+//   Cab({
+//     required this.id,
+//     required this.startTime,
+//     required this.endTime,
+//     required this.capacity,
+//     required this.from,
+//     required this.to,
+//     required this.ownerEmail,
+//     required this.travellers,
+//     required this.requests,
+//   });
 
-  factory Cab.fromJson(Map<String, dynamic> json) {
-    return Cab(
-      id: json['id'],
-      startTime: json['start_time'],
-      endTime: json['end_time'],
-      capacity: json['capacity'],
-      from: json['from_'],
-      to: json['to'],
-      ownerEmail: json['owner_email'],
-      travellers: List<Traveller>.from(
-          json['travellers'].map((x) => Traveller.fromJson(x))),
-      requests: List<Traveller>.from(
-          json['requests'].map((x) => Traveller.fromJson(x))),
-    );
-  }
-}
+//   factory Cab.fromJson(Map<String, dynamic> json) {
+//     return Cab(
+//       id: json['id'],
+//       startTime: json['start_time'],
+//       endTime: json['end_time'],
+//       capacity: json['capacity'],
+//       from: json['from_'],
+//       to: json['to'],
+//       ownerEmail: json['owner_email'],
+//       travellers: List<Traveller>.from(
+//           json['travellers'].map((x) => Traveller.fromJson(x))),
+//       requests: List<Traveller>.from(
+//           json['requests'].map((x) => Traveller.fromJson(x))),
+//     );
+//   }
+// }
 
-class Traveller {
-  final String email;
-  final String comments;
-  final String name;
-  final String phoneNumber;
+// class Traveller {
+//   final String email;
+//   final String comments;
+//   final String name;
+//   final String phoneNumber;
 
-  Traveller({
-    required this.email,
-    required this.comments,
-    required this.name,
-    required this.phoneNumber,
-  });
+//   Traveller({
+//     required this.email,
+//     required this.comments,
+//     required this.name,
+//     required this.phoneNumber,
+//   });
 
-  factory Traveller.fromJson(Map<String, dynamic> json) {
-    return Traveller(
-      email: json['email'],
-      comments: json['comments'],
-      name: json['name'],
-      phoneNumber: json['phone_number'],
-    );
-  }
+//   factory Traveller.fromJson(Map<String, dynamic> json) {
+//     return Traveller(
+//       email: json['email'],
+//       comments: json['comments'],
+//       name: json['name'],
+//       phoneNumber: json['phone_number'],
+//     );
+//   }
+// }
+
+void _showBottomSheet(BuildContext context, commentController, joinCab) {
+  showModalBottomSheet(
+    isScrollControlled: true,
+    context: context,
+    builder: (BuildContext context) {
+      return SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: Container(
+            width: double.infinity,
+            // height: context.size!.height * 0.5,
+            padding: const EdgeInsets.all(25),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Comment',
+                  style: GoogleFonts.inter(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'Please enter a comment to help the owner understand why you want to join this ride',
+                  style: GoogleFonts.inter(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  decoration: const InputDecoration(
+                    hintText: 'Enter your comment here',
+                    hintStyle: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black45,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                      borderSide: BorderSide(
+                        color: Colors.black12,
+                        width: 1,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                      borderSide: BorderSide(
+                        color: Colors.black12,
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                  maxLines: 5,
+                  controller: commentController,
+                  style: GoogleFonts.inter(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        if (commentController.text.isEmpty) {
+                          return;
+                        }
+                        joinCab(context);
+                        Navigator.pop(context);
+                      },
+                      
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.fromLTRB(18, 8, 18, 8),
+                        // alignment: Alignment.centerLeft,
+                        backgroundColor:
+                        commentController.text.isEmpty ? Colors.grey :
+                            const Color.fromRGBO(254, 114, 76, 0.70),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: Text(
+                        'Join',
+                        style: GoogleFonts.inter(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+  );
 }
