@@ -111,8 +111,8 @@ class ApiServices {
 
   Future<BusSchedule?> getBusSchedule(BuildContext context) async {
     try {
-      debugPrint("Making request to: ${dio.options.baseUrl}/bus_schedule");
-      final response = await dio.get('/bus_schedule/');
+      debugPrint("Making request to: ${dio.options.baseUrl}/transport");
+      final response = await dio.get('/transport/');
 
       if (response.statusCode == 401) {
         await logout(context);

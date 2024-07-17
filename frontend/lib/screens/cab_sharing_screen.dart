@@ -29,6 +29,11 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
   bool isLoading = true;
   int state = 0;
 
+  bool sortBySeatsSelected = false;
+  bool sortBySeatsDescendingSelected = false;
+  bool sortByEndTimeSelected = false;
+  bool sortByEndTimeDescendingSelected = false;
+
   changeLoadingState() {
     state++;
     if (state >= 2) {
@@ -83,10 +88,19 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
   ApiServices apiServices = ApiServices();
 
   List<BookingModel> allBookings = [];
+  List<BookingModel> allBookingsSTORED = [];
   void getAllCabs() async {
     final cabs = await apiServices.getBookings(context);
+    if (cabs.isEmpty && allBookingsSTORED.isNotEmpty) {
+      return;
+    }
     setState(() {
       allBookings = cabs;
+      allBookingsSTORED = [...cabs];
+      sortBySeatsSelected = false;
+      sortBySeatsDescendingSelected = false;
+      sortByEndTimeDescendingSelected = false;
+      sortByEndTimeSelected = false;
     });
     changeLoadingState();
   }
@@ -135,6 +149,60 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
     );
   }
 
+  void sortBySeats() {
+    setState(() {
+      sortBySeatsSelected = !sortBySeatsSelected;
+      if (sortBySeatsSelected) {
+        sortBySeatsDescendingSelected = false;
+        allBookings.sort((a, b) => (a.capacity - a.travellers.length)
+            .compareTo(b.capacity - b.travellers.length));
+      } else {
+        allBookings = [...allBookingsSTORED];
+      }
+    });
+  }
+
+  void sortBySeatsDescending() {
+    setState(() {
+      sortBySeatsDescendingSelected = !sortBySeatsDescendingSelected;
+      if (sortBySeatsDescendingSelected) {
+        sortBySeatsSelected = false;
+        allBookings.sort((a, b) => (b.capacity - b.travellers.length)
+            .compareTo(a.capacity - a.travellers.length));
+      } else {
+        allBookings = [...allBookingsSTORED];
+      }
+    });
+  }
+
+  void sortByEndTime() {
+    setState(() {
+      sortByEndTimeSelected = !sortByEndTimeSelected;
+      if (sortByEndTimeSelected) {
+        sortByEndTimeDescendingSelected = false;
+        sortBySeatsSelected = false;
+        sortBySeatsDescendingSelected = false;
+        allBookings.sort((a, b) => a.endTime.compareTo(b.endTime));
+      } else {
+        allBookings = [...allBookingsSTORED];
+      }
+    });
+  }
+
+  void sortByEndTimeDescending() {
+    setState(() {
+      sortByEndTimeDescendingSelected = !sortByEndTimeDescendingSelected;
+      if (sortByEndTimeDescendingSelected) {
+        sortByEndTimeSelected = false;
+        sortBySeatsSelected = false;
+        sortBySeatsDescendingSelected = false;
+        allBookings.sort((a, b) => b.endTime.compareTo(a.endTime));
+      } else {
+        allBookings = [...allBookingsSTORED];
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget allRides = RefreshIndicator(
@@ -153,10 +221,85 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Icon(
-                  Icons.sort_outlined,
-                  size: 30.0,
-                  color: Color(0xffFE724C),
+                PopupMenuButton<int>(
+                  icon: const Icon(
+                    Icons.sort_outlined,
+                    size: 30.0,
+                    color: Color(0xffFE724C),
+                  ),
+                  onSelected: (value) {
+                    if (value == 1) {
+                      sortBySeats();
+                    } else if (value == 2) {
+                      sortBySeatsDescending();
+                    } else if (value == 3) {
+                      sortByEndTime();
+                    } else if (value == 4) {
+                      sortByEndTimeDescending();
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    PopupMenuItem<int>(
+                      value: 1,
+                      child: Row(
+                        children: [
+                          Checkbox(
+                            value: sortBySeatsSelected,
+                            onChanged: (value) {
+                              sortBySeats();
+                              Navigator.pop(context);
+                            },
+                          ),
+                          const Text('Sort by Seats'),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem<int>(
+                      value: 2,
+                      child: Row(
+                        children: [
+                          Checkbox(
+                            value: sortBySeatsDescendingSelected,
+                            onChanged: (value) {
+                              sortBySeatsDescending();
+                              Navigator.pop(context);
+                            },
+                          ),
+                          const Text('Sort by Seats Desc'),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem<int>(
+                      value: 3,
+                      child: Row(
+                        children: [
+                          Checkbox(
+                            value: sortByEndTimeSelected,
+                            onChanged: (value) {
+                              sortByEndTime();
+                              Navigator.pop(context);
+                            },
+                          ),
+                          const Text('Sort by End Time'),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem<int>(
+                      value: 4,
+                      child: Row(
+                        children: [
+                          Checkbox(
+                            value: sortByEndTimeDescendingSelected,
+                            onChanged: (value) {
+                              sortByEndTimeDescending();
+                              Navigator.pop(context);
+                            },
+                          ),
+                          const Text('Sort by End Time Desc'),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(width: 10.0),
                 GestureDetector(
@@ -171,12 +314,21 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
             ),
           ),
           allBookings.isEmpty
-              ? const Text(
-                  'No rides found',
-                  style: TextStyle(
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black,
+              ? Expanded(
+                  child: ListView(
+                    children: [
+                      Container(
+                        alignment: Alignment.topCenter,
+                        child: const Text(
+                          'No rides found',
+                          style: TextStyle(
+                            fontSize: 18.0,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black,
+                          ),
+                        ),
+                      )
+                    ],
                   ),
                 )
               : Expanded(
@@ -184,32 +336,24 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
                     itemCount: allBookings.length,
                     itemBuilder: (ctx, inx) => Padding(
                       padding: const EdgeInsets.only(bottom: 12),
-                      child: CabCard(
-                        onRefresh: () {
-                          return Future.delayed(
-                            const Duration(seconds: 1),
-                            () {
-                              getAllCabs();
-                            },
-                          );
-                        },
-                        cab: allBookings[inx],
-                        usersEmail: widget.usersEmail,
-                      ),
+                      child: allBookings[inx].capacity !=
+                              allBookings[inx].travellers.length
+                          ? CabCard(
+                              onRefresh: () {
+                                return Future.delayed(
+                                  const Duration(seconds: 1),
+                                  () {
+                                    getAllCabs();
+                                  },
+                                );
+                              },
+                              cab: allBookings[inx],
+                              usersEmail: widget.usersEmail,
+                            )
+                          : null,
                     ),
                   ),
                 ),
-          // allBookings.isNotEmpty
-          //     ? Text(
-          //         'End of List',
-          //         style: GoogleFonts.inter(
-          //           fontSize: 18.0,
-          //           fontWeight: FontWeight.w600,
-          //           color: Colors.black,
-          //         ),
-          //       )
-          //     : const SizedBox(),
-          // const SizedBox(height: 25.0),
         ],
       ),
     );
@@ -223,15 +367,14 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
           },
         );
       },
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: Column(
-          children: [
-            // TODO : Add both past and future rides
-            userBookings.isNotEmpty
-                ? ListView.builder(
+      child: Column(
+        children: [
+          // TODO : Add both past and future rides
+          userBookings.isNotEmpty
+              ? Expanded(
+                child: ListView.builder(
                     shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
+                    // physics: const NeverScrollableScrollPhysics(),
                     itemCount: userBookings.length,
                     itemBuilder: (ctx, inx) => Padding(
                       padding: const EdgeInsets.only(bottom: 12),
@@ -248,21 +391,30 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
                         usersEmail: widget.usersEmail,
                       ),
                     ),
-                  )
-                : SizedBox(
-                    width: double.infinity,
-                    child: Text(
-                      'You have no rides',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.inter(
-                        fontSize: 18.0,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black,
+                  ),
+              )
+              : Expanded(
+                child: ListView(
+                  shrinkWrap: true,
+                   physics: const NeverScrollableScrollPhysics(),
+                  children: [
+                    Container(
+                      alignment: Alignment.topCenter,
+                      width: double.infinity,
+                      child: Text(
+                        'You have no rides',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.inter(
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black,
+                        ),
                       ),
-                    ),
-                  )
-          ],
-        ),
+                    )
+                  ],
+                ),
+              )
+        ],
       ),
     );
 

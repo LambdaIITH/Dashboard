@@ -72,7 +72,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         children: [
                           TextSpan(
-                            text: "Campus\nCompanion",
+                            text: "IITH\nDashboard",
                             style: GoogleFonts.inter(
                               fontSize: 32,
                               fontWeight: FontWeight.w700,

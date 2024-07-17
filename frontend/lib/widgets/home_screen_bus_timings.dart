@@ -15,101 +15,84 @@ class HomeScreenBusTimings extends StatefulWidget {
 }
 
 class _HomeScreenBusTimingsState extends State<HomeScreenBusTimings> {
-  int getNextOneBusesFromMaingate() {
-    if (widget.busSchedule == null) return -1;
-
-    List<String> allBuses = widget.busSchedule!.toIITH;
+  List<int> getNextOneBusesFromMaingate() {
+    if (widget.busSchedule == null) return [-1, -1];
+    Map<String, int> allBuses =
+        Map<String, int>.from(widget.busSchedule!.toIITH);
     DateTime now = DateTime.now();
 
-    List<DateTime> busTimes = allBuses.map((time) {
-      List<String> parts = time.split(':');
-      int hour = int.parse(parts[0]);
-      int minute = int.parse(parts[1]);
-      return DateTime(now.year, now.month, now.day, hour, minute);
-    }).toList();
+    List<MapEntry<DateTime, int>> busTimes = allBuses.entries
+        .map((entry) {
+          List<String> parts = entry.key.split(':');
+          int hour = int.parse(parts[0]);
+          int minute = int.parse(parts[1]);
+          DateTime time = DateTime(now.year, now.month, now.day, hour, minute);
+          return MapEntry(time, entry.value);
+        })
+        .where((entry) => entry.key.isAfter(now))
+        .toList();
 
-    List<DateTime> nextBuses =
-        busTimes.where((busTime) => busTime.isAfter(now)).toList();
-    nextBuses.sort();
+    busTimes.sort((a, b) => a.key.compareTo(b.key));
 
-    if (nextBuses.isNotEmpty) {
-      Duration difference = nextBuses.first.difference(
-          DateTime(now.year, now.month, now.day, now.hour, now.minute));
-      return difference.inMinutes;
+    if (busTimes.isNotEmpty) {
+      DateTime nextBusTime = busTimes.first.key;
+      int mode = busTimes.first.value;
+      Duration difference = nextBusTime.difference(now);
+      return [
+        difference.inMinutes,
+        mode
+      ]; // First element is time, second is mode
     } else {
-      return -1;
+      return [-1, -1];
     }
-
-    // List<NextBusModel> nextTwoBuses = nextBuses.take(1).map((busTime) {
-    // Duration difference = busTime.difference(
-    //     DateTime(now.year, now.month, now.day, now.hour, now.minute));
-    //   int minutes = difference.inMinutes;
-    //   String formattedDifference = "$minutes min";
-    //   return NextBusModel(
-    //     isFromIITH: false,
-    //     time:
-    //         "${busTime.hour.toString().padLeft(2, '0')}:${busTime.minute.toString().padLeft(2, '0')}",
-    //     timeDifference: formattedDifference,
-    //   );
-    // }).toList();
-
-    // return nextTwoBuses;
   }
 
-  int getNextOneBusesFromHostelCircle() {
-    if (widget.busSchedule == null) return -1;
-
-    List<String> allBuses = widget.busSchedule!.fromIITH;
+  List<int> getNextOneBusesFromHostelCircle() {
+    if (widget.busSchedule == null) return [-1, -1];
+    Map<String, int> allBuses =
+        Map<String, int>.from(widget.busSchedule!.fromIITH);
     DateTime now = DateTime.now();
 
-    List<DateTime> busTimes = allBuses.map((time) {
-      List<String> parts = time.split(':');
-      int hour = int.parse(parts[0]);
-      int minute = int.parse(parts[1]);
-      return DateTime(now.year, now.month, now.day, hour, minute);
-    }).toList();
+    List<MapEntry<DateTime, int>> busTimes = allBuses.entries
+        .map((entry) {
+          List<String> parts = entry.key.split(':');
+          int hour = int.parse(parts[0]);
+          int minute = int.parse(parts[1]);
+          DateTime time = DateTime(now.year, now.month, now.day, hour, minute);
+          return MapEntry(time, entry.value);
+        })
+        .where((entry) => entry.key.isAfter(now))
+        .toList();
 
-    List<DateTime> nextBuses =
-        busTimes.where((busTime) => busTime.isAfter(now)).toList();
-    nextBuses.sort();
+    busTimes.sort((a, b) => a.key.compareTo(b.key));
 
-    if (nextBuses.isNotEmpty) {
-      Duration difference = nextBuses.first.difference(
-          DateTime(now.year, now.month, now.day, now.hour, now.minute));
-      return difference.inMinutes;
+    if (busTimes.isNotEmpty) {
+      DateTime nextBusTime = busTimes.first.key;
+      int mode = busTimes.first.value;
+      Duration difference = nextBusTime.difference(now);
+      return [difference.inMinutes, mode];
     } else {
-      return -1;
+      return [-1, -1];
     }
-
-    // List<NextBusModel> nextTwoBuses = nextBuses.take(1).map((busTime) {
-    //   Duration difference = busTime.difference(
-    //       DateTime(now.year, now.month, now.day, now.hour, now.minute));
-    //   int minutes = difference.inMinutes;
-    //   String formattedDifference = "$minutes min";
-    //   return NextBusModel(
-    //     isFromIITH: true,
-    //     time:
-    //         "${busTime.hour.toString().padLeft(2, '0')}:${busTime.minute.toString().padLeft(2, '0')}",
-    //     timeDifference: formattedDifference,
-    //   );
-    // }).toList();
-
-    // return nextTwoBuses;
   }
 
   void updateNextBuses() {
-    int maingateBuses = getNextOneBusesFromMaingate();
-    int hostelCircleBuses = getNextOneBusesFromHostelCircle();
+    List<int> maingateBuses = getNextOneBusesFromMaingate();
+    List<int> hostelCircleBuses = getNextOneBusesFromHostelCircle();
 
     setState(() {
-      busOneTime = maingateBuses;
-      busTwoTime = hostelCircleBuses;
+      busOneTime = maingateBuses[0];
+      busTwoTime = hostelCircleBuses[0];
+      firstMode = maingateBuses[1];
+      secondMode = hostelCircleBuses[1];
     });
   }
 
   Timer? _timer;
   int busOneTime = -1;
   int busTwoTime = -1;
+  int firstMode = 0;
+  int secondMode = 0;
 
   @override
   void initState() {
@@ -196,7 +179,7 @@ class _HomeScreenBusTimingsState extends State<HomeScreenBusTimings> {
       return noBusses("Failed to fetch bus schedule", context);
     }
 
-    if (busOneTime == -1 && busTwoTime==-1) {
+    if (busOneTime == -1 && busTwoTime == -1) {
       return noBusses("No upcoming buses available", context);
     }
 
@@ -239,11 +222,17 @@ class _HomeScreenBusTimingsState extends State<HomeScreenBusTimings> {
             const SizedBox(height: 20),
             if (busOneTime != -1)
               getBusCard(
-                  'Main Gate', 'Hostel Circle', '$busOneTime min', context),
+                  'Main Gate',
+                  firstMode == 0 ? 'Hostel Circle' : 'Hostel Circle*',
+                  '$busOneTime min',
+                  context),
             const SizedBox(height: 10),
             if (busTwoTime != -1)
               getBusCard(
-                  'Hostel Circle', 'Main Gate', '$busTwoTime min', context),
+                  'Hostel Circle',
+                  secondMode == 0 ? 'Main Gate' : 'Main Gate*',
+                  '$busTwoTime min',
+                  context),
             const SizedBox(height: 10),
           ],
         ),

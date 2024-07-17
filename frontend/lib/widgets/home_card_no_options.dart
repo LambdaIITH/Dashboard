@@ -24,7 +24,6 @@ class HomeCardNoOptions extends StatelessWidget {
       onTap: onTap,
       child: Container(
         height: isimage ? 140 : 180,
-
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(10),

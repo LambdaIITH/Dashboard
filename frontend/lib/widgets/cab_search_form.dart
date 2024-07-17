@@ -247,7 +247,7 @@ class _CabSearchState extends State<CabSearch> {
         isExpanded: true,
         decoration: const InputDecoration(
           border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+          contentPadding: EdgeInsets.fromLTRB(15 , 5, 0, 5),
         ),
         items: locations.map((location) {
           return DropdownMenuItem<String>(

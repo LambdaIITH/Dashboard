@@ -13,7 +13,7 @@ import 'package:frontend/services/api_service.dart';
 // import 'package:frontend/screens/splash_screen.dart';
 
 void main() async {
-  await dotenv.load(fileName: ".env");
+  await dotenv.load(fileName: "env");
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,

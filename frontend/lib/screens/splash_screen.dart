@@ -60,7 +60,7 @@ class _SplashScreenState extends State<SplashScreen> {
             child: RichText(
               textAlign: TextAlign.center,
               text: TextSpan(
-                  text: "Campus", //TODO: change this
+                  text: "IITH ", //TODO: change this
                   style: GoogleFonts.inter(
                     fontSize: 42,
                     fontWeight: FontWeight.w700,
@@ -68,7 +68,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   ),
                   children: [
                     TextSpan(
-                      text: "\nCompanion", //TODO: change this
+                      text: "\nDashboard", //TODO: change this
                       style: GoogleFonts.inter(
                         fontSize: 42,
                         fontWeight: FontWeight.w700,

@@ -50,9 +50,11 @@ class NextBusModel {
   final bool isFromIITH;
   final String time;
   final String timeDifference;
+  final bool isEv;
 
   NextBusModel(
       {required this.isFromIITH,
+      required this.isEv,
       required this.time,
       required this.timeDifference});
 }
@@ -95,7 +97,7 @@ class _BusSchedulePageState extends State<BusSchedulePage> {
 
   final List<Widget> fullScheduleWidget = [
     Text(
-      'Next Buses',
+      'Upcoming',
       style: GoogleFonts.inter(
         fontSize: 18.0,
         fontWeight: FontWeight.w600,
@@ -113,65 +115,71 @@ class _BusSchedulePageState extends State<BusSchedulePage> {
   ];
 
   List<NextBusModel> getNextTwoBusesFromMaingate() {
-    List<String> allBuses = widget.busSchedule.toIITH;
+    if (widget.busSchedule == null) return [];
+    Map<String, int> allBuses =
+        Map<String, int>.from(widget.busSchedule!.toIITH);
     DateTime now = DateTime.now();
 
-    List<DateTime> busTimes = allBuses.map((time) {
-      List<String> parts = time.split(':');
-      int hour = int.parse(parts[0]);
-      int minute = int.parse(parts[1]);
-      return DateTime(now.year, now.month, now.day, hour, minute);
-    }).toList();
+    List<MapEntry<DateTime, int>> busTimes = allBuses.entries
+        .map((entry) {
+          List<String> parts = entry.key.split(':');
+          int hour = int.parse(parts[0]);
+          int minute = int.parse(parts[1]);
+          DateTime time = DateTime(now.year, now.month, now.day, hour, minute);
+          return MapEntry(time, entry.value);
+        })
+        .where((entry) => entry.key.isAfter(now))
+        .toList();
 
-    List<DateTime> nextBuses =
-        busTimes.where((busTime) => busTime.isAfter(now)).toList();
-    nextBuses.sort();
+    busTimes.sort((a, b) => a.key.compareTo(b.key));
 
-    List<NextBusModel> nextTwoBuses = nextBuses.take(2).map((busTime) {
-      Duration difference = busTime.difference(
+    return busTimes.take(2).map((entry) {
+      Duration difference = entry.key.difference(
           DateTime(now.year, now.month, now.day, now.hour, now.minute));
       int minutes = difference.inMinutes;
       String formattedDifference = "$minutes minutes";
-      return NextBusModel(
-        isFromIITH: false,
-        time:
-            "${busTime.hour.toString().padLeft(2, '0')}:${busTime.minute.toString().padLeft(2, '0')}",
-        timeDifference: formattedDifference,
-      );
-    }).toList();
 
-    return nextTwoBuses;
+      return NextBusModel(
+          isFromIITH: false,
+          isEv: entry.value == 1,
+          time:
+              "${entry.key.hour.toString().padLeft(2, '0')}:${entry.key.minute.toString().padLeft(2, '0')}",
+          timeDifference: formattedDifference);
+    }).toList();
   }
 
   List<NextBusModel> getNextTwoBusesFromHostelCircle() {
-    List<String> allBuses = widget.busSchedule.fromIITH;
+    if (widget.busSchedule == null) return [];
+    Map<String, int> allBuses =
+        Map<String, int>.from(widget.busSchedule!.fromIITH);
     DateTime now = DateTime.now();
 
-    List<DateTime> busTimes = allBuses.map((time) {
-      List<String> parts = time.split(':');
-      int hour = int.parse(parts[0]);
-      int minute = int.parse(parts[1]);
-      return DateTime(now.year, now.month, now.day, hour, minute);
-    }).toList();
+    List<MapEntry<DateTime, int>> busTimes = allBuses.entries
+        .map((entry) {
+          List<String> parts = entry.key.split(':');
+          int hour = int.parse(parts[0]);
+          int minute = int.parse(parts[1]);
+          DateTime time = DateTime(now.year, now.month, now.day, hour, minute);
+          return MapEntry(time, entry.value);
+        })
+        .where((entry) => entry.key.isAfter(now))
+        .toList();
 
-    List<DateTime> nextBuses =
-        busTimes.where((busTime) => busTime.isAfter(now)).toList();
-    nextBuses.sort();
+    busTimes.sort((a, b) => a.key.compareTo(b.key));
 
-    List<NextBusModel> nextTwoBuses = nextBuses.take(2).map((busTime) {
-      Duration difference = busTime.difference(
+    return busTimes.take(2).map((entry) {
+      Duration difference = entry.key.difference(
           DateTime(now.year, now.month, now.day, now.hour, now.minute));
       int minutes = difference.inMinutes;
       String formattedDifference = "$minutes minutes";
-      return NextBusModel(
-        isFromIITH: true,
-        time:
-            "${busTime.hour.toString().padLeft(2, '0')}:${busTime.minute.toString().padLeft(2, '0')}",
-        timeDifference: formattedDifference,
-      );
-    }).toList();
 
-    return nextTwoBuses;
+      return NextBusModel(
+          isFromIITH: false,
+          isEv: entry.value == 1,
+          time:
+              "${entry.key.hour.toString().padLeft(2, '0')}:${entry.key.minute.toString().padLeft(2, '0')}",
+          timeDifference: formattedDifference);
+    }).toList();
   }
 
   List<NextBusModel> getNextBuses() {
@@ -223,6 +231,15 @@ class _BusSchedulePageState extends State<BusSchedulePage> {
     super.dispose();
   }
 
+  Widget justSomeRandomShit() {
+    return Text(
+      '* indicates EV timings',
+      style: GoogleFonts.inter(
+        fontSize: 14,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -271,6 +288,7 @@ class _BusSchedulePageState extends State<BusSchedulePage> {
                               destination:
                                   bus.isFromIITH ? 'Maingate' : 'Hostel Circle',
                               waitingTime: bus.timeDifference,
+                              isEv: bus.isEv,
                             ),
                           );
                         },
@@ -355,8 +373,8 @@ class _BusSchedulePageState extends State<BusSchedulePage> {
                                   const EdgeInsets.only(left: 6.0, bottom: 6.0),
                               child: BusTimingList(
                                   from: 'Maingate',
-                                  destinantion: 'Hostel',
-                                  timings: widget.busSchedule.toIITH),
+                                  destination: 'Hostel',
+                                  timings: widget.busSchedule.fromIITH), //TODO
                             )),
                             const SizedBox(
                               width: 4.0,
@@ -367,13 +385,14 @@ class _BusSchedulePageState extends State<BusSchedulePage> {
                                   right: 6.0, bottom: 6.0),
                               child: BusTimingList(
                                   from: 'Hostel',
-                                  destinantion: 'Maingate',
-                                  timings: widget.busSchedule.fromIITH),
+                                  destination: 'Maingate',
+                                  timings: widget.busSchedule.toIITH), //TODO
                             ))
                           ],
                         ),
                       ),
-                    )
+                    ),
+                    justSomeRandomShit()
                     // : defaultShow == 'Lingampally'
                     //     ? selectedOption[1]
                     //         ? Expanded(

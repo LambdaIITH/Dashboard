@@ -380,7 +380,7 @@ class _CabAddScreenState extends State<CabAddScreen> {
                       decoration: const InputDecoration(
                         border: InputBorder.none,
                         contentPadding: EdgeInsets.symmetric(
-                          horizontal: 15.0,
+                          horizontal: 12.0,
                           vertical: 0.0,
                         ),
                       ),
@@ -422,165 +422,9 @@ class _CabAddScreenState extends State<CabAddScreen> {
               ],
             ),
             const SizedBox(height: 2.0),
-            // Container(
-            //   height: 48,
-            //   decoration: BoxDecoration(
-            //     boxShadow: const [
-            //       BoxShadow(
-            //         color: Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
-            //         // Shadow color
-            //         offset: Offset(0, 8), // Offset in the x, y direction
-            //         blurRadius: 21.0,
-            //         spreadRadius: 0.0,
-            //       ),
-            //     ],
-            //     borderRadius: BorderRadius.circular(10.0),
-            //     color: Colors.white,
-            //   ),
-            //   child: TextFormField(
-            //     textAlignVertical: TextAlignVertical.center,
-            //     readOnly: true,
-            //     style: GoogleFonts.inter(
-            //       fontSize: 20,
-            //       fontWeight: FontWeight.w400,
-            //       color: Colors.black,
-            //     ),
-            //     decoration: InputDecoration(
-            //       suffixIcon: const Icon(
-            //         Icons.date_range,
-            //         color: Color(0xffADADAD),
-            //       ),
-            //       hintText: 'Date',
-            //       // : "${selectedDate?.toLocal()}".split(' ')[0],
-            //       hintStyle: GoogleFonts.inter(
-            //         fontSize: 17,
-            //         fontWeight: FontWeight.w500,
-            //         color: const Color(0xffADADAD),
-            //       ),
-            //       border: InputBorder.none,
-            //       contentPadding: const EdgeInsets.symmetric(
-            //         horizontal: 20.0,
-            //         vertical: 0.0,
-            //       ),
-            //     ),
-            //     onTap: () => _selectDate(context),
-            //     controller: TextEditingController(
-            //       text: selectedDate == null
-            //           ? ""
-            //           : "${selectedDate?.toLocal()}".split(' ')[0],
-            //     ),
-            //   ),
-            // ),
             _dateTimePicker('Start Time', selectedStartDateTime, true),
             const SizedBox(height: 12.0),
             _dateTimePicker('End Time', selectedEndDateTime, false),
-            // Row(
-            //   children: [
-            //     Expanded(
-            //       child: Container(
-            //         height: 48,
-            //         decoration: BoxDecoration(
-            //           boxShadow: const [
-            //             BoxShadow(
-            //               color:
-            //                   Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
-            //               // Shadow color
-            //               offset: Offset(0, 8), // Offset in the x, y direction
-            //               blurRadius: 21.0,
-            //               spreadRadius: 0.0,
-            //             ),
-            //           ],
-            //           borderRadius: BorderRadius.circular(10.0),
-            //           color: Colors.white,
-            //         ),
-            //         child: TextFormField(
-            //           textAlignVertical: TextAlignVertical.center,
-            //           readOnly: true,
-            //           style: GoogleFonts.inter(
-            //             fontSize: 20,
-            //             fontWeight: FontWeight.w400,
-            //             color: Colors.black,
-            //           ),
-            //           decoration: InputDecoration(
-            //             suffixIcon: const Icon(
-            //               Icons.access_time,
-            //               color: Color(0xffADADAD),
-            //             ),
-            //             hintText: 'Start Time',
-            //             hintStyle: GoogleFonts.inter(
-            //               fontSize: 17,
-            //               fontWeight: FontWeight.w500,
-            //               color: const Color(0xffADADAD),
-            //             ),
-            //             border: InputBorder.none,
-            //             contentPadding: EdgeInsets.symmetric(
-            //               horizontal: 20.0,
-            //               vertical: 20.0,
-            //             ),
-            //           ),
-            //           onTap: () => _selectStartTime(context),
-            //           controller: TextEditingController(
-            //             text: selectedStartTime == null
-            //                 ? ''
-            //                 : "${selectedStartTime?.hour}:${selectedStartTime?.minute} ",
-            //           ),
-            //         ),
-            //       ),
-            //     ),
-            //     const SizedBox(width: 20.0),
-            //     Expanded(
-            //       child: Container(
-            //         height: 48,
-            //         decoration: BoxDecoration(
-            //           boxShadow: const [
-            //             BoxShadow(
-            //               color:
-            //                   Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
-            //               // Shadow color
-            //               offset: Offset(0, 8), // Offset in the x, y direction
-            //               blurRadius: 21.0,
-            //               spreadRadius: 0.0,
-            //             ),
-            //           ],
-            //           borderRadius: BorderRadius.circular(10.0),
-            //           color: Colors.white,
-            //         ),
-            //         child: TextFormField(
-            //           textAlignVertical: TextAlignVertical.center,
-            //           readOnly: true,
-            //           style: GoogleFonts.inter(
-            //             fontSize: 20,
-            //             fontWeight: FontWeight.w400,
-            //             color: Colors.black,
-            //           ),
-            //           decoration: InputDecoration(
-            //             suffixIcon: Icon(
-            //               Icons.access_time,
-            //               color: Color(0xffADADAD),
-            //             ),
-            //             hintText: 'End Time',
-            //             hintStyle: GoogleFonts.inter(
-            //               fontSize: 17,
-            //               fontWeight: FontWeight.w500,
-            //               color: const Color(0xffADADAD),
-            //             ),
-            //             border: InputBorder.none,
-            //             contentPadding: EdgeInsets.symmetric(
-            //               horizontal: 20.0,
-            //               vertical: 0.0,
-            //             ),
-            //           ),
-            //           onTap: () => _selectEndTime(context),
-            //           controller: TextEditingController(
-            //             text: selectedEndTime == null
-            //                 ? ''
-            //                 : "${selectedEndTime?.hour}:${selectedEndTime?.minute}",
-            //           ),
-            //         ),
-            //       ),
-            //     ),
-            //   ],
-            // ),
             const SizedBox(height: 12.0),
             Container(
               decoration: BoxDecoration(
@@ -599,10 +443,7 @@ class _CabAddScreenState extends State<CabAddScreen> {
                   borderRadius: BorderRadius.circular(10.0),
                   decoration: const InputDecoration(
                     border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 20.0,
-                      vertical: 0.0,
-                    ),
+                    contentPadding: EdgeInsets.fromLTRB(20, 0, 12, 0),
                   ),
                   items: ['1', '2', '3', '4', '5', '6'].map((String seat) {
                     return DropdownMenuItem<String>(
