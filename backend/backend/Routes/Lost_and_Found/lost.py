@@ -48,7 +48,17 @@ async def get_all_lost_item_names() -> List[Dict[str, Any]]:
         with conn.cursor() as cur: 
             cur.execute("SELECT id, item_name FROM lost ORDER BY created_at DESC")
             rows = cur.fetchall()
-            rows =list( map(lambda x: {"id" : x[0], "name" : x[1]},rows))
+            cur.execute("SELECT image_url, item_id from lost_images")
+            images = cur.fetchall()
+            
+            image_dict = {}
+            for image in images:
+                if image[1] not in image_dict:
+                    image_dict[image[1]] = []
+                image_dict[image[1]].append(image[0])
+            
+            rows = list(map(lambda x: {"id": x[0], "name": x[1], "images": image_dict.get(x[0], [])}, rows))
+                
             return rows        
        
     except Exception as e: 
