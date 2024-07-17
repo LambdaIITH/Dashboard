@@ -49,9 +49,9 @@ class _SplashScreenState extends State<SplashScreen> {
               child: Hero(
             tag: "splash_icon",
             child: Image.asset(
-              "assets/icons/Icon.png",
-              height: 150,
-              width: 150,
+              "assets/icons/logo.png",
+              height: 190,
+              width: 190,
             ),
           )),
           Container(

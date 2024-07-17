@@ -154,6 +154,8 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
       sortBySeatsSelected = !sortBySeatsSelected;
       if (sortBySeatsSelected) {
         sortBySeatsDescendingSelected = false;
+        sortByEndTimeDescendingSelected = false;
+        sortByEndTimeSelected = false;
         allBookings.sort((a, b) => (a.capacity - a.travellers.length)
             .compareTo(b.capacity - b.travellers.length));
       } else {
@@ -167,6 +169,8 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
       sortBySeatsDescendingSelected = !sortBySeatsDescendingSelected;
       if (sortBySeatsDescendingSelected) {
         sortBySeatsSelected = false;
+        sortByEndTimeDescendingSelected = false;
+        sortByEndTimeSelected = false;
         allBookings.sort((a, b) => (b.capacity - b.travellers.length)
             .compareTo(a.capacity - a.travellers.length));
       } else {
@@ -372,7 +376,7 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
           // TODO : Add both past and future rides
           userBookings.isNotEmpty
               ? Expanded(
-                child: ListView.builder(
+                  child: ListView.builder(
                     shrinkWrap: true,
                     // physics: const NeverScrollableScrollPhysics(),
                     itemCount: userBookings.length,
@@ -392,28 +396,28 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
                       ),
                     ),
                   ),
-              )
+                )
               : Expanded(
-                child: ListView(
-                  shrinkWrap: true,
-                   physics: const NeverScrollableScrollPhysics(),
-                  children: [
-                    Container(
-                      alignment: Alignment.topCenter,
-                      width: double.infinity,
-                      child: Text(
-                        'You have no rides',
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.inter(
-                          fontSize: 18.0,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
+                  child: ListView(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    children: [
+                      Container(
+                        alignment: Alignment.topCenter,
+                        width: double.infinity,
+                        child: Text(
+                          'You have no rides',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.inter(
+                            fontSize: 18.0,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black,
+                          ),
                         ),
-                      ),
-                    )
-                  ],
-                ),
-              )
+                      )
+                    ],
+                  ),
+                )
         ],
       ),
     );

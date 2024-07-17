@@ -86,9 +86,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   Hero(
                     tag: "splash_icon",
                     child: Image.asset(
-                      "assets/icons/Icon.png",
-                      height: 85,
-                      width: 85,
+                      "assets/icons/logo.png",
+                      height: 115,
+                      width: 115,
                     ),
                   ),
                 ],

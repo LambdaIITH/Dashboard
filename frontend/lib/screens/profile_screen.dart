@@ -175,7 +175,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Image(
-                      image: AssetImage('assets/icons/Icon.png'),
+                      image: AssetImage('assets/icons/logo.png'),
                       height: 40,
                       width: 40,
                     ),
