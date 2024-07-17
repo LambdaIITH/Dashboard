@@ -57,6 +57,8 @@ dependencies:
   web: ^0.5.1
   shared_preferences: ^2.2.3
   cached_network_image: ^3.3.1
+  flutter_native_splash: ^2.4.1
+  in_app_update: ^4.2.3
 
 
 dev_dependencies:
@@ -69,6 +71,19 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
+
+flutter_native_splash:
+  color: "#ffffff"
+  image: assets/icons/logo.png
+  color_dark: "#ffffff"
+  image_dark: assets/icons/logo.png
+
+  android_12:
+    image: assets/icons/logo.png
+    icon_background_color: "#ffffff"
+    image_dark: assets/icons/logo.png
+    icon_background_color_dark: "#ffffff"
+
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -85,7 +100,6 @@ flutter:
   assets:
     - assets/icons/
     - assets/lost_and_found/
-    - assets/bus.json
     - .env
   #   - images/a_dot_ham.jpeg
 

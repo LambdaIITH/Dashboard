@@ -37,7 +37,8 @@ class _HomeScreenBusTimingsState extends State<HomeScreenBusTimings> {
     if (busTimes.isNotEmpty) {
       DateTime nextBusTime = busTimes.first.key;
       int mode = busTimes.first.value;
-      Duration difference = nextBusTime.difference(now);
+      Duration difference = nextBusTime.difference(
+          DateTime(now.year, now.month, now.day, now.hour, now.minute));
       return [
         difference.inMinutes,
         mode
@@ -69,7 +70,8 @@ class _HomeScreenBusTimingsState extends State<HomeScreenBusTimings> {
     if (busTimes.isNotEmpty) {
       DateTime nextBusTime = busTimes.first.key;
       int mode = busTimes.first.value;
-      Duration difference = nextBusTime.difference(now);
+      Duration difference = nextBusTime.difference(
+          DateTime(now.year, now.month, now.day, now.hour, now.minute));
       return [difference.inMinutes, mode];
     } else {
       return [-1, -1];

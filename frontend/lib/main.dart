@@ -2,15 +2,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:frontend/firebase_options.dart';
 import 'package:frontend/screens/home_screen.dart';
 import 'package:frontend/screens/login_screen.dart';
 import 'package:frontend/screens/splash_screen.dart';
 import 'package:frontend/services/analytics_service.dart';
 import 'package:frontend/services/api_service.dart';
-// import 'package:frontend/screens/mess_menu_screen.dart';
-// import 'package:frontend/screens/login_screen.dart';
-// import 'package:frontend/screens/splash_screen.dart';
 
 void main() async {
   await dotenv.load(fileName: ".env");
@@ -55,6 +53,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+    FlutterNativeSplash.remove();
     getAuthStatus();
   }
 
@@ -77,13 +76,6 @@ class _MyAppState extends State<MyApp> {
                   nextPage: LoginScreenWrapper(
                     timeDilationFactor: 4.0,
                   )),
-      // home: SplashScreen(
-      //     nextPage: LoginScreenWrapper(
-      //   timeDilationFactor: 4.0,
-      // )),
-      //  home: HomeScreen(user: ''),
-      //  home: BusTimingsScreen(),
-      // home: MessMenuScreen(),
     );
   }
 }

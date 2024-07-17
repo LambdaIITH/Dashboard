@@ -62,14 +62,14 @@ class _MessMenuPageState extends State<MessMenuPage> {
   final List<bool> selectedOption = [true, false];
   final List<Widget> messToggleButtons = [
     Text(
-      'UDH',
+      'Mess A',
       style: GoogleFonts.inter(
-          fontSize: 19.0, fontWeight: FontWeight.w700, color: Colors.black),
+          fontSize: 16.0, fontWeight: FontWeight.w700, color: const Color.fromARGB(255, 47, 47, 47)),
     ),
     Text(
-      'LDH',
+      'Mess B',
       style: GoogleFonts.inter(
-          fontSize: 19.0, fontWeight: FontWeight.w700, color: Colors.black),
+          fontSize: 16.0, fontWeight: FontWeight.w700, color: const Color.fromARGB(255, 47, 47, 47)),
     )
   ];
 

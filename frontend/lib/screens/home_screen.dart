@@ -14,6 +14,7 @@ import 'package:frontend/widgets/home_card_no_options.dart';
 import 'package:frontend/widgets/home_screen_appbar.dart';
 import 'package:frontend/widgets/home_screen_bus_timings.dart';
 import 'package:frontend/widgets/home_screen_mess_menu.dart';
+import 'package:in_app_update/in_app_update.dart';
 
 class HomeScreen extends StatefulWidget {
   final bool isGuest;
@@ -155,6 +156,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    checkForUpdates();
     if (!widget.isGuest) {
       totalOperation = totalOperation + 2;
       fetchUser();
@@ -180,6 +182,28 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     fetchMessMenu();
     fetchBus();
+  }
+
+   checkForUpdates() async {
+    await Future.delayed(const Duration(seconds: 30));
+    try {
+      var updateInfo = await InAppUpdate.checkForUpdate();
+      if (updateInfo.updateAvailability == UpdateAvailability.updateAvailable) {
+        if (updateInfo.immediateUpdateAllowed) {
+          InAppUpdate.performImmediateUpdate().then((appUpdateResult) {
+            if (appUpdateResult == AppUpdateResult.success) {}
+          });
+        } else if (updateInfo.flexibleUpdateAllowed) {
+          InAppUpdate.startFlexibleUpdate().then((appUpdateResult) {
+            if (appUpdateResult == AppUpdateResult.success) {
+              InAppUpdate.completeFlexibleUpdate();
+            }
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint("Error in checking for update: $e");
+    }
   }
 
   @override
