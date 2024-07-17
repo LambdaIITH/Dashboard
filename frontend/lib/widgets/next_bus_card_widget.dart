@@ -35,7 +35,7 @@ class NextBusCard extends StatelessWidget {
           // height: 141.0,
           child: Stack(children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              // mainAxisAlignment: MainAxisAlignment.spaceAround,spaceBetween
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -103,6 +103,7 @@ class NextBusCard extends StatelessWidget {
                     const SizedBox(height: 12),
                   ],
                 ),
+                Spacer(),
                 Container(
                   width: 100,
                   child: Image.asset(

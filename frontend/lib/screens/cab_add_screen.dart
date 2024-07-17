@@ -96,7 +96,7 @@ class _CabAddScreenState extends State<CabAddScreen> {
             if (selectedEndDateTime != null &&
                 selectedEndDateTime!.difference(pickedDateTime).inHours.abs() >=
                     24) {
-              //TODO: show a taost
+              //TODO: show a toast
               selectedStartDateTime = null;
             }
           } else {
@@ -116,7 +116,7 @@ class _CabAddScreenState extends State<CabAddScreen> {
                         .inHours
                         .abs() >=
                     24) {
-              //TODO: show a taost
+              //TODO: show a toast
               selectedEndDateTime = null;
             }
           }
@@ -132,7 +132,9 @@ class _CabAddScreenState extends State<CabAddScreen> {
   UserModel? userDetails;
   void getUserDetails() async {
     final user = await apiServices.getUserDetails(context);
-    userDetails = user;
+    setState(() {
+      userDetails = user;
+    });
   }
 
   bool updateButtonStatus() {
@@ -140,8 +142,7 @@ class _CabAddScreenState extends State<CabAddScreen> {
     return selectedEndDateTime != null &&
         selectedStartDateTime != null &&
         seats != null &&
-        selectedLocation != null &&
-        commentController.text.trim().isNotEmpty;
+        selectedLocation != null;
   }
 
   void createCab() async {
@@ -150,7 +151,7 @@ class _CabAddScreenState extends State<CabAddScreen> {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Phone Number not addded'),
+          title: const Text('Phone Number not added'),
           content: const Text(
             'Please update your phone number in the profile section before adding a cab.',
           ),
@@ -172,9 +173,7 @@ class _CabAddScreenState extends State<CabAddScreen> {
         selectedStartDateTime == null ||
         seats == null ||
         selectedLocation == null ||
-        userDetails == null ||
-        // userDetails?.phone == null ||//TODO: implement this
-        commentController.text.trim().isEmpty) {
+        userDetails == null) {
       return;
     }
     final BookingModel bookingModel = BookingModel(
@@ -257,334 +256,278 @@ class _CabAddScreenState extends State<CabAddScreen> {
           },
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 22.0,
-          vertical: 16.0,
-        ),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Container(
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10.0),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
-                        // Shadow color
-                        offset: Offset(0, 8), // Offset in the x, y direction
-                        blurRadius: 21.0,
-                        spreadRadius: 0.0,
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 22.0,
+              vertical: 16.0,
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10.0),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Color.fromRGBO(
+                                  51, 51, 51, 0.10), // Shadow color
+                              offset:
+                                  Offset(0, 8), // Offset in the x, y direction
+                              blurRadius: 21.0,
+                              spreadRadius: 0.0,
+                            ),
+                          ],
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Center(
+                            child: Text(
+                              'IITH',
+                              style: GoogleFonts.inter(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.all(10.0),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: () {
+                            setState(() {
+                              isFrom = !isFrom;
+                              updateButtonStatus();
+                            });
+                          },
+                          child: Material(
+                            color: Colors.transparent,
+                            child: Container(
+                              height: 48,
+                              width: 48,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                color: const Color.fromRGBO(254, 114, 76, 0.70),
+                              ),
+                              child: Icon(
+                                isFrom ? Icons.arrow_forward : Icons.arrow_back,
+                                size: 25.0,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Container(
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10.0),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Color.fromRGBO(
+                                    51, 51, 51, 0.10), // Shadow color
+                                offset: Offset(
+                                    0, 8), // Offset in the x, y direction
+                                blurRadius: 21.0,
+                                spreadRadius: 0.0,
+                              ),
+                            ],
+                          ),
+                          child: DropdownButtonFormField<String>(
+                            borderRadius: BorderRadius.circular(10.0),
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 12.0,
+                                vertical: 0.0,
+                              ),
+                            ),
+                            items: locations.map((String location) {
+                              String displayText = location;
+                              return DropdownMenuItem<String>(
+                                value: location,
+                                child: Text(
+                                  displayText,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: (String? value) {
+                              setState(() {
+                                if (value != null) {
+                                  selectedLocation = value;
+                                  updateButtonStatus();
+                                }
+                              });
+                            },
+                            hint: selectedLocation == null
+                                ? Text(
+                                    'Location',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w500,
+                                      color: const Color(0xffADADAD),
+                                    ),
+                                  )
+                                : null,
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Center(
-                      child: Text(
-                        'IITH',
-                        style: GoogleFonts.inter(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Expanded(
-                //   child: Container(
-                //     decoration: BoxDecoration(
-                //       color: Colors.white,
-                //       borderRadius: BorderRadius.circular(10.0),
-                //       boxShadow: const [
-                //         BoxShadow(
-                //           color:
-                //               Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
-                //           offset: Offset(0, 4), // Offset in the x, y direction
-                //           blurRadius: 10.0,
-                //           spreadRadius: 0.0,
-                //         ),
-                //       ],
-                //     ),
-                //     child: DropdownButtonFormField<String>(
-                //       borderRadius: BorderRadius.circular(10.0),
-                //       decoration: const InputDecoration(
-                //         border: InputBorder.none,
-                //         contentPadding: EdgeInsets.symmetric(
-                //           horizontal: 15.0,
-                //           vertical: 25.0,
-                //         ),
-                //       ),
-                //       items: locations.map((String location) {
-                //         String displayText = location.length > 7
-                //             ? '${location.substring(0, 7)}..'
-                //             : location;
-                //         return DropdownMenuItem<String>(
-                //           value: location,
-                //           child: Text(
-                //             displayText,
-                //             style: GoogleFonts.inter(
-                //               fontSize: 17,
-                //               fontWeight: FontWeight.w500,
-                //               color: Colors.black,
-                //             ),
-                //           ),
-                //         );
-                //       }).toList(),
-                //       onChanged: (String? value) {
-                //         selectedFromPlace = value;
-                //       },
-                //       hint: selectedFromPlace == null
-                //           ? Text(
-                //               'From',
-                //               style: GoogleFonts.inter(
-                //                 fontSize: 18,
-                //                 fontWeight: FontWeight.w600,
-                //                 color: const Color(0xffADADAD),
-                //               ),
-                //             )
-                //           : null,
-                //     ),
-                //   ),
-                // ),
-                Padding(
-                  padding: EdgeInsets.all(10.0),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(12),
-                    onTap: () {
-                      setState(() {
-                        isFrom = !isFrom;
-                        updateButtonStatus();
-                      });
-                    },
-                    child: Material(
-                      color: Colors.transparent,
-                      child: Container(
-                        height: 48,
-                        width: 48,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          color: const Color.fromRGBO(254, 114, 76, 0.70),
-                        ),
-                        child: Icon(
-                          isFrom ? Icons.arrow_forward : Icons.arrow_back,
-                          size: 25.0,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Container(
-                    height: 48,
+                  const SizedBox(height: 2.0),
+                  _dateTimePicker('Start Time', selectedStartDateTime, true),
+                  const SizedBox(height: 12.0),
+                  _dateTimePicker('End Time', selectedEndDateTime, false),
+                  const SizedBox(height: 12.0),
+                  Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10.0),
                       boxShadow: const [
                         BoxShadow(
                           color:
                               Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
-                          // Shadow color
                           offset: Offset(0, 8), // Offset in the x, y direction
                           blurRadius: 21.0,
                           spreadRadius: 0.0,
                         ),
                       ],
+                      borderRadius: BorderRadius.circular(10.0),
+                      color: Colors.white,
                     ),
                     child: DropdownButtonFormField<String>(
-                      borderRadius: BorderRadius.circular(10.0),
-                      decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 12.0,
-                          vertical: 0.0,
+                        borderRadius: BorderRadius.circular(10.0),
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.fromLTRB(20, 0, 12, 0),
                         ),
-                      ),
-                      items: locations.map((String location) {
-                        String displayText = location;
-                        return DropdownMenuItem<String>(
-                          value: location,
-                          child: Text(
-                            displayText,
-                            style: GoogleFonts.inter(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black,
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (String? value) {
-                        setState(() {
-                          if (value != null) {
-                            selectedLocation = value;
-                            updateButtonStatus();
-                          }
-                        });
-                      },
-                      hint: selectedLocation == null
-                          ? Text(
-                              'Location',
+                        items:
+                            ['1', '2', '3', '4', '5', '6'].map((String seat) {
+                          return DropdownMenuItem<String>(
+                            value: seat,
+                            child: Text(
+                              seat,
                               style: GoogleFonts.inter(
                                 fontSize: 17,
                                 fontWeight: FontWeight.w500,
-                                color: const Color(0xffADADAD),
+                                color: Colors.black,
                               ),
-                            )
-                          : null,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 2.0),
-            _dateTimePicker('Start Time', selectedStartDateTime, true),
-            const SizedBox(height: 12.0),
-            _dateTimePicker('End Time', selectedEndDateTime, false),
-            const SizedBox(height: 12.0),
-            Container(
-              decoration: BoxDecoration(
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
-                    offset: Offset(0, 8), // Offset in the x, y direction
-                    blurRadius: 21.0,
-                    spreadRadius: 0.0,
-                  ),
-                ],
-                borderRadius: BorderRadius.circular(10.0),
-                color: Colors.white,
-              ),
-              child: DropdownButtonFormField<String>(
-                  borderRadius: BorderRadius.circular(10.0),
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.fromLTRB(20, 0, 12, 0),
-                  ),
-                  items: ['1', '2', '3', '4', '5', '6'].map((String seat) {
-                    return DropdownMenuItem<String>(
-                      value: seat,
-                      child: Text(
-                        seat,
-                        style: GoogleFonts.inter(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black,
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (String? value) {
-                    setState(() {
-                      if (value != null) {
-                        updateButtonStatus();
-                        seats = value;
-                      }
-                    });
-                  },
-                  hint: Text(
-                    'Seats including yours',
-                    style: GoogleFonts.inter(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w500,
-                      color: const Color(0xffADADAD),
-                    ),
-                  )),
-            ),
-            const SizedBox(height: 12.0),
-            Container(
-              decoration: BoxDecoration(
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
-                    offset: Offset(0, 8), // Offset in the x, y direction
-                    blurRadius: 21.0,
-                    spreadRadius: 0.0,
-                  ),
-                ],
-                borderRadius: BorderRadius.circular(10.0),
-                color: Colors.white,
-              ),
-              child: TextFormField(
-                maxLines: 4,
-                style: GoogleFonts.inter(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black,
-                ),
-                controller: commentController,
-                textAlignVertical: TextAlignVertical.center,
-                decoration: InputDecoration(
-                  hintText: 'Comments',
-                  hintStyle: GoogleFonts.inter(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w500,
-                    color: const Color(0xffADADAD),
-                  ),
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 20.0,
-                    vertical: 8.0,
-                  ),
-                ),
-              ),
-            ),
-            Expanded(
-              child: Align(
-                alignment: FractionalOffset.bottomCenter,
-                child: TextButton(
-                  // style: ElevatedButton.styleFrom(
-                  //   primary: const Color.fromRGBO(254, 114, 76, 0.70),
-                  //   shape: RoundedRectangleBorder(
-                  //     borderRadius: BorderRadius.circular(10.0),
-                  //   ),
-                  // ),
-                  onPressed: !updateButtonStatus()
-                      ? null
-                      : () {
-                          createCab();
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (String? value) {
+                          setState(() {
+                            if (value != null) {
+                              updateButtonStatus();
+                              seats = value;
+                            }
+                          });
                         },
-                  child: Container(
+                        hint: Text(
+                          'Seats including yours',
+                          style: GoogleFonts.inter(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xffADADAD),
+                          ),
+                        )),
+                  ),
+                  const SizedBox(height: 12.0),
+                  Container(
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10.0),
-                      color: !updateButtonStatus()
-                          ? Colors.grey
-                          : const Color.fromRGBO(254, 114, 76, 0.70),
                       boxShadow: const [
                         BoxShadow(
                           color:
                               Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
                           offset: Offset(0, 8), // Offset in the x, y direction
                           blurRadius: 21.0,
-                          spreadRadius: 4.0,
+                          spreadRadius: 0.0,
                         ),
                       ],
+                      borderRadius: BorderRadius.circular(10.0),
+                      color: Colors.white,
                     ),
-                    // color: const Color.fromRGBO(254, 114, 76, 0.70),
-                    width: double.infinity,
-                    height: 60,
-                    alignment: Alignment.center,
-                    child: Text(
-                      'Add Cab',
+                    child: TextFormField(
+                      maxLines: 4,
                       style: GoogleFonts.inter(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w500,
                         color: Colors.black,
                       ),
+                      controller: commentController,
+                      textAlignVertical: TextAlignVertical.center,
+                      decoration: InputDecoration(
+                        hintText: 'Comments',
+                        hintStyle: GoogleFonts.inter(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xffADADAD),
+                        ),
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 20.0,
+                          vertical: 8.0,
+                        ),
+                      ),
                     ),
+                  ),
+                  const SizedBox(height: 80.0), // Space for the button
+                ],
+              ),
+            ),
+          ),
+          Container(
+            alignment: Alignment.bottomCenter,
+            margin: EdgeInsets.only(bottom: 16),
+            child: TextButton(
+              onPressed: !updateButtonStatus()
+                  ? null
+                  : () {
+                      createCab();
+                    },
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10.0),
+                  color: !updateButtonStatus()
+                      ? Colors.grey
+                      : const Color.fromRGBO(254, 114, 76, 0.70),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
+                      offset: Offset(0, 8), // Offset in the x, y direction
+                      blurRadius: 21.0,
+                      spreadRadius: 4.0,
+                    ),
+                  ],
+                ),
+                width: double.infinity,
+                height: 60,
+                alignment: Alignment.center,
+                child: Text(
+                  'Add Cab',
+                  style: GoogleFonts.inter(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black,
                   ),
                 ),
               ),
             ),
-            const SizedBox(height: 25.0),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

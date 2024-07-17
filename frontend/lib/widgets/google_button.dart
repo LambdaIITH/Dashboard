@@ -26,69 +26,72 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
   void showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        backgroundColor: const Color(0xffFE724C),
         content: Text(
           message,
+          style: GoogleFonts.inter(),
           textAlign: TextAlign.center,
         ),
+        duration: const Duration(milliseconds: 1500),
+        behavior: SnackBarBehavior.fixed,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }
 
-  Future<void> silentLogin() async {
-    try {
-      final GoogleSignInAccount? googleUser =
-          await _googleSignIn.signInSilently();
-      if (googleUser == null) {
-        return;
-      }
+  // Future<void> silentLogin() async {
+  //   try {
+  //     final GoogleSignInAccount? googleUser =
+  //         await _googleSignIn.signInSilently();
+  //     if (googleUser == null) {
+  //       return;
+  //     }
 
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
+  //     final GoogleSignInAuthentication googleAuth =
+  //         await googleUser.authentication;
 
-      final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
+  //     final AuthCredential credential = GoogleAuthProvider.credential(
+  //       accessToken: googleAuth.accessToken,
+  //       idToken: googleAuth.idToken,
+  //     );
 
-      await FirebaseAuth.instance.signInWithCredential(credential);
+  //     await FirebaseAuth.instance.signInWithCredential(credential);
 
-      var result = await ApiServices().login(googleAuth.idToken ?? 'aa45');
+  //     var result = await ApiServices().login(googleAuth.idToken ?? 'aa45');
 
-      if (result['status'] == 401) {
-        showSnackBar(result['error']);
-        return;
-      }
-      if (result['user'] == null) {
-        showSnackBar('Failed to sign in with Google.');
-        return;
-      }
-      // successfully logged in
-      analyticsService.logEvent(name: "Google Login");
+  //     if (result['status'] == 401) {
+  //       showSnackBar(result['error']);
+  //       return;
+  //     }
+  //     if (result['user'] == null) {
+  //       showSnackBar('Failed to sign in with Google.');
+  //       return;
+  //     }
+  //     // successfully logged in
+  //     analyticsService.logEvent(name: "Google Login");
 
-      var email = FirebaseAuth.instance.currentUser?.email ?? '';
+  //     var email = FirebaseAuth.instance.currentUser?.email ?? '';
 
-      if (email.isEmpty) {
-        await logout();
-        showSnackBar('Error!');
-      } else {
-        // verifying iith users
-        var splitted = email.split('@');
-        if (splitted.length > 1 && splitted[1].contains("iith.ac.in")) {
-          Navigator.of(context).pushReplacement(MaterialPageRoute(
-            builder: (context) => const HomeScreen(
-              isGuest: false,
-            ),
-          ));
-        } else {
-          await logout();
-          showSnackBar('Please login with IITH email-ID');
-        }
-      }
-    } catch (error) {
-      showSnackBar('Failed to sign in with Google.');
-    }
-  }
+  //     if (email.isEmpty) {
+  //       await logout();
+  //       showSnackBar('Error!');
+  //     } else {
+  //       // verifying iith users
+  //       var splitted = email.split('@');
+  //       if (splitted.length > 1 && splitted[1].contains("iith.ac.in")) {
+  //         Navigator.of(context).pushReplacement(MaterialPageRoute(
+  //           builder: (context) => const HomeScreen(
+  //             isGuest: false,
+  //           ),
+  //         ));
+  //       } else {
+  //         await logout();
+  //         showSnackBar('Please login with IITH email-ID');
+  //       }
+  //     }
+  //   } catch (error) {
+  //     showSnackBar('Failed to sign in with Google.');
+  //   }
+  // }
 
   Future<bool> signInWithGoogle() async {
     timeDilation = 1;
@@ -119,7 +122,7 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
       var result = await ApiServices().login(googleAuth.idToken ?? 'aa45');
 
       if (result['status'] == 401) {
-        showSnackBar(result['error']);
+        showSnackBar('Please login with IITH email-ID');
         return false;
       }
       if (result['user'] == null) {
@@ -137,6 +140,7 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
   }
 
   Future<void> logout() async {
+    await FirebaseAuth.instance.signOut();
     await _googleSignIn.signOut();
   }
 
@@ -152,7 +156,7 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
   @override
   void initState() {
     super.initState();
-    silentLogin(); 
+    // silentLogin();
   }
 
   @override
@@ -176,7 +180,7 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
 
               if (email.isEmpty) {
                 await logout();
-                showSnackBar('Error!');
+                showSnackBar('Something went wrong');
                 Navigator.of(context).pop(); //POP THE LOADING SCREEN
               } else {
                 //verifying iith users

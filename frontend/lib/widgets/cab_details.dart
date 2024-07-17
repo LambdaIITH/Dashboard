@@ -33,8 +33,8 @@ class _CabCardState extends State<CabCard> {
   late String startLocation;
   late String endLocation;
   late List<Map<String, String>> travellers;
-  
-  TextEditingController commentController = TextEditingController();
+
+  TextEditingController commentController = TextEditingController(text: "I am interested to join.");
 
   String convertDateFormat(DateTime inputDate) {
     String formattedDate = DateFormat('E, d MMM y').format(inputDate);
@@ -66,7 +66,8 @@ class _CabCardState extends State<CabCard> {
 
   void joinCab(BuildContext context) async {
     try {
-      final res = await apiServices.requestToJoinBooking(bookingId, commentController.text);
+      final res = await apiServices.requestToJoinBooking(
+          bookingId, commentController.text.trim());
       if (res["status"] == 200) {
         showMessage("Successfully sent the cab join request");
       } else {
@@ -562,7 +563,8 @@ class _CabCardState extends State<CabCard> {
                                         alignment: Alignment.centerRight,
                                         child: ElevatedButton(
                                           onPressed: () {
-                                            _showBottomSheet(context, commentController, joinCab);
+                                            _showBottomSheet(context,
+                                                commentController, joinCab);
                                           },
                                           style: TextButton.styleFrom(
                                             backgroundColor:
@@ -951,7 +953,7 @@ void _showBottomSheet(BuildContext context, commentController, joinCab) {
                       ),
                     ),
                   ),
-                  maxLines: 5,
+                  maxLines: 4,
                   controller: commentController,
                   style: GoogleFonts.inter(
                     fontSize: 16,
@@ -965,18 +967,16 @@ void _showBottomSheet(BuildContext context, commentController, joinCab) {
                   children: [
                     TextButton(
                       onPressed: () {
-                        if (commentController.text.isEmpty) {
-                          return;
-                        }
+                        // if (commentController.text.trim().isEmpty) {
+                        //   return;
+                        // }
                         joinCab(context);
                         Navigator.pop(context);
                       },
-                      
                       style: TextButton.styleFrom(
                         padding: const EdgeInsets.fromLTRB(18, 8, 18, 8),
                         // alignment: Alignment.centerLeft,
                         backgroundColor:
-                        commentController.text.isEmpty ? Colors.grey :
                             const Color.fromRGBO(254, 114, 76, 0.70),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
