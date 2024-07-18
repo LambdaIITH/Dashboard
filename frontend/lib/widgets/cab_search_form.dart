@@ -1,225 +1,323 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 
 class CabSearch extends StatefulWidget {
-  const CabSearch({super.key});
+  final Function onSearch;
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final String? from;
+  final String? to;
+
+  const CabSearch(
+      {super.key,
+      required this.onSearch,
+      this.endDate,
+      this.from,
+      this.startDate,
+      this.to});
 
   @override
   State<CabSearch> createState() => _CabSearchState();
 }
 
 class _CabSearchState extends State<CabSearch> {
-  DateTime selectedDate = DateTime.now();
+  late DateTime selectedStartDate = DateTime.now();
+  late DateTime selectedEndDate = DateTime.now()
+      .add(const Duration(hours: 1)); 
   String? selectedOption;
   String? selectedOption2;
-  bool isTabOneSelected = true;
+  List<String> locations = [
+    'IITH',
+    'RGIA',
+    'Secun. Railway Stn.',
+    "Lingampally Stn.",
+    "Kacheguda Stn.",
+    "Hyd. Deccan Stn."
+  ];
 
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-        context: context,
-        initialDate: selectedDate,
-        firstDate: DateTime(2015, 8),
-        lastDate: DateTime(2101));
-    if (picked != null && picked != selectedDate) {
-      setState(() {
-        selectedDate = picked;
-      });
+  @override
+  void initState() {
+    super.initState();
+    if (widget.endDate != null) {
+      selectedEndDate = widget.endDate!;
+      isEndTimeSelected = true;
+    }
+    if (widget.startDate != null) {
+      selectedStartDate = widget.startDate!;
+      isStartTimeSelected = true;
+    }
+    if (widget.from != null) {
+      selectedOption = widget.from;
+      isFromSelected = true;
+    }
+    if (widget.to != null) {
+      selectedOption2 = widget.to;
+      isToSelected = true;
     }
   }
 
+  Future<void> _selectDateTime(BuildContext context,
+      {required bool isStartDate}) async {
+    final DateTime now = DateTime.now();
+    final DateTime firstDate = selectedStartDate;
+    final DateTime initialDate = selectedStartDate;
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: initialDate.isBefore(firstDate) ? firstDate : initialDate,
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2101),
+    );
+    if (pickedDate != null) {
+      final TimeOfDay initialTime = TimeOfDay.fromDateTime(
+          isStartDate ? selectedStartDate : selectedEndDate);
+      final TimeOfDay? pickedTime = await showTimePicker(
+        context: context,
+        initialTime: initialTime,
+      );
+      if (pickedTime != null) {
+        final DateTime combined = DateTime(
+          pickedDate.year,
+          pickedDate.month,
+          pickedDate.day,
+          pickedTime.hour,
+          pickedTime.minute,
+        );
+        if (isStartDate) {
+          if (combined.isBefore(now)) {
+            selectedStartDate = now;
+          } else {
+            selectedStartDate = combined;
+          }
+          if (selectedEndDate.isBefore(selectedStartDate)) {
+            selectedEndDate = selectedStartDate.add(const Duration(hours: 1));
+          }
+          isStartTimeSelected = true;
+        } else {
+          if (combined.isBefore(selectedStartDate)) {
+            selectedEndDate = selectedStartDate.add(const Duration(hours: 1));
+          } else {
+            selectedEndDate = combined;
+          }
+          isEndTimeSelected = true;
+        }
+        setState(() {});
+      }
+    }
+  }
+
+  bool isStartTimeSelected = false;
+  bool isEndTimeSelected = false;
+  bool isFromSelected = false;
+  bool isToSelected = false;
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        Row(
-          children: [
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10.0),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
-                      offset: Offset(0, 4), // Offset in the x, y direction
-                      blurRadius: 10.0,
-                      spreadRadius: 0.0,
-                    ),
-                  ],
-                ),
-                child: DropdownButtonFormField<String>(
-                  borderRadius: BorderRadius.circular(10.0),
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 15.0,
-                      vertical: 25.0,
-                    ),
-                  ),
-                  items: ['Campus', 'RGIA', 'Airport'].map((String location) {
-                    return DropdownMenuItem<String>(
-                      value: location,
-                      child: Text(
-                        location,
-                        style: GoogleFonts.inter(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black,
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (String? value) {
-                    selectedOption = value;
-                  },
-                  hint: selectedOption == null
-                      ? Text(
-                          'From',
-                          style: GoogleFonts.inter(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xffADADAD),
-                          ),
-                        )
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          _buildLocationDropdown(selectedOption, 'From', true),
+          const SizedBox(height: 12.0),
+          _buildLocationDropdown(selectedOption2, 'To', false),
+          const SizedBox(height: 12.0),
+          _buildDateTimePicker("Start Time", selectedStartDate, true),
+          const SizedBox(height: 12.0),
+          _buildDateTimePicker("End Time", selectedEndDate, false),
+          const SizedBox(height: 25.0),
+          Row(
+            children: [
+              Expanded(
+                child: TextButton(
+                  onPressed: ((isStartTimeSelected || isEndTimeSelected) ||
+                          (isFromSelected || isToSelected))
+                      ? () {
+                          widget.onSearch(
+                            start: null,
+                            end: null,
+                            searchSelectedOption: null,
+                            searchSelectedOption2: null,
+                          );
+                          Navigator.pop(context);
+                        }
                       : null,
-                ),
-              ),
-            ),
-            const Padding(
-              padding: EdgeInsets.all(10.0),
-              child: Icon(Icons.arrow_forward,
-                  size: 25.0, color: Color(0xffADADAD)),
-            ),
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10.0),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
-                      // Shadow color
-                      offset: Offset(0, 8), // Offset in the x, y direction
-                      blurRadius: 21.0,
-                      spreadRadius: 0.0,
-                    ),
-                  ],
-                ),
-                child: DropdownButtonFormField<String>(
-                  borderRadius: BorderRadius.circular(10.0),
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 15.0,
-                      vertical: 25.0,
-                    ),
-                  ),
-                  items: [
-                    'Campus',
-                    'RGIA',
-                    'Airport',
-                  ].map((String location) {
-                    return DropdownMenuItem<String>(
-                      value: location,
-                      child: Text(
-                        location,
-                        style: GoogleFonts.inter(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black,
+                  child: Container(
+                    height: 40,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: ((isStartTimeSelected || isEndTimeSelected) ||
+                              (isFromSelected || isToSelected))
+                          ? const Color.fromRGBO(254, 114, 76, 0.70)
+                          : Colors.grey,
+                      borderRadius: BorderRadius.circular(10.0),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color.fromRGBO(51, 51, 51, 0.10),
+                          offset: Offset(0, 8),
+                          blurRadius: 21.0,
+                          spreadRadius: 0.0,
                         ),
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (String? value) {
-                    selectedOption2 = value;
-                  },
-                  hint: selectedOption2 == null
-                      ? Text(
-                          'To',
-                          style: GoogleFonts.inter(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xffADADAD),
-                          ),
-                        )
+                      ],
+                    ),
+                    child: Text(
+                      'Clear',
+                      style: GoogleFonts.inter(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white),
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: TextButton(
+                  onPressed: ((isStartTimeSelected && isEndTimeSelected) ||
+                          (isFromSelected && isToSelected))
+                      ? () {
+                          widget.onSearch(
+                            start: isStartTimeSelected && isEndTimeSelected
+                                ? selectedStartDate
+                                : null,
+                            end: isStartTimeSelected && isEndTimeSelected
+                                ? selectedEndDate
+                                : null,
+                            searchSelectedOption: isFromSelected && isToSelected
+                                ? selectedOption
+                                : null,
+                            searchSelectedOption2:
+                                isToSelected && isFromSelected
+                                    ? selectedOption2
+                                    : null,
+                          );
+                          Navigator.pop(context);
+                        }
                       : null,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 25.0),
-        Row(
-          children: [
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
-                      // Shadow color
-                      offset: Offset(0, 8), // Offset in the x, y direction
-                      blurRadius: 21.0,
-                      spreadRadius: 0.0,
+                  child: Container(
+                    height: 40,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: ((isStartTimeSelected && isEndTimeSelected) ||
+                              (isFromSelected && isToSelected))
+                          ? const Color.fromRGBO(254, 114, 76, 0.70)
+                          : Colors.grey,
+                      borderRadius: BorderRadius.circular(10.0),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color.fromRGBO(51, 51, 51, 0.10),
+                          offset: Offset(0, 8),
+                          blurRadius: 21.0,
+                          spreadRadius: 0.0,
+                        ),
+                      ],
                     ),
-                  ],
-                  borderRadius: BorderRadius.circular(10.0),
-                  color: Colors.white,
-                ),
-                child: TextFormField(
-                  readOnly: true,
-                  style: GoogleFonts.inter(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.black,
-                  ),
-                  decoration: InputDecoration(
-                    suffixIcon: const Icon(
-                      Icons.calendar_today,
-                      color: Color(0xffADADAD),
+                    child: Text(
+                      'Search',
+                      style: GoogleFonts.inter(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white),
                     ),
-                    hintText: selectedOption == null
-                        ? 'Date'
-                        : "${selectedDate.toLocal()}".split(' ')[0],
-                    hintStyle: GoogleFonts.inter(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w400,
-                      color: const Color(0xffADADAD),
-                    ),
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 20.0,
-                      vertical: 20.0,
-                    ),
-                  ),
-                  onTap: () => _selectDate(context),
-                  controller: TextEditingController(
-                    text: "${selectedDate.toLocal()}".split(' ')[0],
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLocationDropdown(
+      String? selectedValue, String hintText, bool isFrom) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10.0),
+        boxShadow: const [
+          BoxShadow(
+            color: Color.fromRGBO(51, 51, 51, 0.10),
+            offset: Offset(0, 4),
+            blurRadius: 10.0,
+            spreadRadius: 0.0,
+          ),
+        ],
+      ),
+      child: DropdownButtonFormField<String>(
+        isExpanded: true,
+        decoration: const InputDecoration(
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.fromLTRB(15 , 5, 0, 5),
         ),
-        const SizedBox(height: 25.0),
-        const Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Icon(
-              Icons.sort_outlined,
-              size: 30.0,
-              color: Color(0xffFE724C),
-            ),
-            SizedBox(width: 10.0),
-            Icon(
-              Icons.filter_alt_outlined,
-              size: 30.0,
-              color: Color(0xffFE724C),
-            ),
-          ],
+        items: locations.map((location) {
+          return DropdownMenuItem<String>(
+            value: location,
+            child: Text(location,
+                style: GoogleFonts.inter(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                )),
+          );
+        }).toList(),
+        onChanged: (value) {
+          setState(() {
+            if (isFrom) {
+              selectedOption = value;
+              isFromSelected = true;
+            } else {
+              selectedOption2 = value;
+              isToSelected = true;
+            }
+          });
+        },
+        value: selectedValue,
+        hint: Text(hintText,
+            style: GoogleFonts.inter(
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xffADADAD))),
+      ),
+    );
+  }
+
+  Widget _buildDateTimePicker(
+      String label, DateTime dateTime, bool isStartDate) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10.0),
+        boxShadow: const [
+          BoxShadow(
+            color: Color.fromRGBO(51, 51, 51, 0.10),
+            offset: Offset(0, 4),
+            blurRadius: 10.0,
+          ),
+        ],
+      ),
+      child: TextFormField(
+        readOnly: true,
+        style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w500),
+        decoration: InputDecoration(
+          suffixIcon: const Icon(Icons.calendar_today, color: Color(0xffADADAD)),
+          hintText: label,
+          hintStyle: GoogleFonts.inter(
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xffADADAD)),
+          border: InputBorder.none,
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
         ),
-      ],
+        onTap: () => _selectDateTime(context, isStartDate: isStartDate),
+        controller: TextEditingController(
+            text: isStartDate
+                ? isStartTimeSelected
+                    ? DateFormat('yyyy-MM-dd – kk:mm').format(dateTime)
+                    : ""
+                : isEndTimeSelected
+                    ? DateFormat('yyyy-MM-dd – kk:mm').format(dateTime)
+                    : ""),
+      ),
     );
   }
 }

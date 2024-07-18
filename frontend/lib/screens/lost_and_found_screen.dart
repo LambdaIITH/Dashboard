@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/models/lost_and_found_model.dart';
+import 'package:frontend/services/analytics_service.dart';
 import 'package:frontend/utils/bold_text.dart';
 import 'package:frontend/widgets/lost_found_add_item.dart';
 import 'package:frontend/widgets/lost_found_item.dart';
@@ -29,6 +30,12 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
     } else {
       return 0.6;
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    analyticsService.logScreenView(screenName: "Lost And Found Screen");
   }
 
   Future<List<Widget>> getItems() async {

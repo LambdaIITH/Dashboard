@@ -1,4 +1,3 @@
-
 class MessMenuModel {
   final Map<String, DayMenu> ldh;
   final Map<String, DayMenu> udh;
@@ -19,6 +18,15 @@ class MessMenuModel {
       ldhAdditional: (json['LDH Additional'] as Map<String, dynamic>).map((key, value) => MapEntry(key, AdditionalMenu.fromJson(value))),
       udhAdditional: (json['UDH Additional'] as Map<String, dynamic>).map((key, value) => MapEntry(key, AdditionalMenu.fromJson(value))),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'LDH': ldh.map((key, value) => MapEntry(key, value.toJson())),
+      'UDH': udh.map((key, value) => MapEntry(key, value.toJson())),
+      'LDH Additional': ldhAdditional.map((key, value) => MapEntry(key, value.toJson())),
+      'UDH Additional': udhAdditional.map((key, value) => MapEntry(key, value.toJson())),
+    };
   }
 }
 
@@ -43,6 +51,15 @@ class DayMenu {
       dinner: List<String>.from(json['Dinner']),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'Breakfast': breakfast,
+      'Lunch': lunch,
+      'Snacks': snacks,
+      'Dinner': dinner,
+    };
+  }
 }
 
 class AdditionalMenu {
@@ -65,5 +82,14 @@ class AdditionalMenu {
       snacks: List<String>.from(json['Snacks']),
       dinner: List<String>.from(json['Dinner']),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'Breakfast': breakfast,
+      'Lunch': lunch,
+      'Snacks': snacks,
+      'Dinner': dinner,
+    };
   }
 }

@@ -1,23 +1,44 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/models/user_model.dart';
+import 'package:frontend/screens/login_screen.dart';
 import 'package:frontend/screens/profile_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class HomeScreenAppBar extends StatelessWidget {
-  const HomeScreenAppBar({
-    super.key,
-  });
+  const HomeScreenAppBar(
+      {super.key,
+      required this.user,
+      required this.image,
+      required this.isGuest});
+  final UserModel? user;
+  final String image;
+  final bool isGuest;
+
+  String getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) {
+      return 'Good Morning';
+    } else if (hour < 17) {
+      return 'Good Afternoon';
+    } else {
+      return 'Good Evening';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final greeting = getGreeting();
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         RichText(
           text: TextSpan(
             children: [
-              const TextSpan(
-                text: 'Good Morning\n',
-                style: TextStyle(
+              TextSpan(
+                text: '$greeting\n',
+                style: GoogleFonts.inter(
                   color: Colors.black,
                   fontSize: 28,
                   fontWeight: FontWeight.w600,
@@ -25,7 +46,7 @@ class HomeScreenAppBar extends StatelessWidget {
                 ),
               ),
               TextSpan(
-                text: 'Adhith T',
+                text: user?.name.split(' ').first ?? 'User',
                 style: GoogleFonts.inter(
                   color: Colors.black,
                   fontSize: 36,
@@ -36,20 +57,37 @@ class HomeScreenAppBar extends StatelessWidget {
             ],
           ),
         ),
-        InkWell(
-          borderRadius: BorderRadius.circular(100),
-          onTap: () {
-            Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => const ProfileScreen(),
-            ));
-          },
-          child: ClipOval(
-            child: CircleAvatar(
-              radius: 26,
-              child: Image.asset('assets/icons/profile-photo.jpeg'),
-            ),
-          ),
-        )
+        isGuest
+            ? InkWell(
+                onTap: () {
+                  Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (ctx) => const LoginScreen()),
+                      (Route<dynamic> route) => false);
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                      // color: Colors.orange,
+                      borderRadius: BorderRadius.circular(500)),
+                  child: const Icon(Icons.logout_rounded),
+                ),
+              )
+            : InkWell(
+                borderRadius: BorderRadius.circular(100),
+                onTap: () {
+                  if (user == null) {
+                    return;
+                  }
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => ProfileScreen(user: user!, image: image),
+                  ));
+                },
+                child: ClipOval(
+                  child: CircleAvatar(
+                      radius: 24, child: CachedNetworkImage(imageUrl: image)),
+                ),
+              )
       ],
     );
   }

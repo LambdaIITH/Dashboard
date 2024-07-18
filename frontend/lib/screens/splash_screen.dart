@@ -7,15 +7,18 @@ import 'package:google_fonts/google_fonts.dart';
 class SplashScreen extends StatefulWidget {
   const SplashScreen(
       {super.key,
+      this.isLoading = true,
       required this.nextPage,
       this.delay =
           const Duration(milliseconds: 900 /*TODO: change accordingly*/)});
   final Widget nextPage;
   final Duration delay;
+  final bool isLoading;
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
 }
+
 class _SplashScreenState extends State<SplashScreen> {
   openNextPage() {
     Future.delayed(widget.delay, () {
@@ -27,7 +30,9 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    openNextPage();
+    if (!widget.isLoading) {
+      openNextPage();
+    }
   }
 
   @override
@@ -44,9 +49,9 @@ class _SplashScreenState extends State<SplashScreen> {
               child: Hero(
             tag: "splash_icon",
             child: Image.asset(
-              "assets/icons/Icon.png",
-              height: 150,
-              width: 150,
+              "assets/icons/logo.png",
+              height: 190,
+              width: 190,
             ),
           )),
           Container(
@@ -55,7 +60,7 @@ class _SplashScreenState extends State<SplashScreen> {
             child: RichText(
               textAlign: TextAlign.center,
               text: TextSpan(
-                  text: "Campus", //TODO: change this
+                  text: "IITH ", //TODO: change this
                   style: GoogleFonts.inter(
                     fontSize: 42,
                     fontWeight: FontWeight.w700,
@@ -63,7 +68,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   ),
                   children: [
                     TextSpan(
-                      text: "\nCompanion", //TODO: change this
+                      text: "\nDashboard", //TODO: change this
                       style: GoogleFonts.inter(
                         fontSize: 42,
                         fontWeight: FontWeight.w700,

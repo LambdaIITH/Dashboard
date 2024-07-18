@@ -1,18 +1,196 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/bus_timings_screen.dart';
+import 'package:frontend/utils/bus_schedule.dart';
 import 'package:frontend/utils/normal_text.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class HomeScreenBusTimings extends StatelessWidget {
-  const HomeScreenBusTimings({
-    super.key,
-  });
+class HomeScreenBusTimings extends StatefulWidget {
+  const HomeScreenBusTimings({super.key, required this.busSchedule});
+  final BusSchedule? busSchedule;
+
+  @override
+  State<HomeScreenBusTimings> createState() => _HomeScreenBusTimingsState();
+}
+
+class _HomeScreenBusTimingsState extends State<HomeScreenBusTimings> {
+  List<int> getNextOneBusesFromMaingate() {
+    if (widget.busSchedule == null) return [-1, -1];
+    Map<String, int> allBuses =
+        Map<String, int>.from(widget.busSchedule!.toIITH);
+    DateTime now = DateTime.now();
+
+    List<MapEntry<DateTime, int>> busTimes = allBuses.entries
+        .map((entry) {
+          List<String> parts = entry.key.split(':');
+          int hour = int.parse(parts[0]);
+          int minute = int.parse(parts[1]);
+          DateTime time = DateTime(now.year, now.month, now.day, hour, minute);
+          return MapEntry(time, entry.value);
+        })
+        .where((entry) => entry.key.isAfter(now))
+        .toList();
+
+    busTimes.sort((a, b) => a.key.compareTo(b.key));
+
+    if (busTimes.isNotEmpty) {
+      DateTime nextBusTime = busTimes.first.key;
+      int mode = busTimes.first.value;
+      Duration difference = nextBusTime.difference(
+          DateTime(now.year, now.month, now.day, now.hour, now.minute));
+      return [
+        difference.inMinutes,
+        mode
+      ]; // First element is time, second is mode
+    } else {
+      return [-1, -1];
+    }
+  }
+
+  List<int> getNextOneBusesFromHostelCircle() {
+    if (widget.busSchedule == null) return [-1, -1];
+    Map<String, int> allBuses =
+        Map<String, int>.from(widget.busSchedule!.fromIITH);
+    DateTime now = DateTime.now();
+
+    List<MapEntry<DateTime, int>> busTimes = allBuses.entries
+        .map((entry) {
+          List<String> parts = entry.key.split(':');
+          int hour = int.parse(parts[0]);
+          int minute = int.parse(parts[1]);
+          DateTime time = DateTime(now.year, now.month, now.day, hour, minute);
+          return MapEntry(time, entry.value);
+        })
+        .where((entry) => entry.key.isAfter(now))
+        .toList();
+
+    busTimes.sort((a, b) => a.key.compareTo(b.key));
+
+    if (busTimes.isNotEmpty) {
+      DateTime nextBusTime = busTimes.first.key;
+      int mode = busTimes.first.value;
+      Duration difference = nextBusTime.difference(
+          DateTime(now.year, now.month, now.day, now.hour, now.minute));
+      return [difference.inMinutes, mode];
+    } else {
+      return [-1, -1];
+    }
+  }
+
+  void updateNextBuses() {
+    List<int> maingateBuses = getNextOneBusesFromMaingate();
+    List<int> hostelCircleBuses = getNextOneBusesFromHostelCircle();
+
+    setState(() {
+      busOneTime = maingateBuses[0];
+      busTwoTime = hostelCircleBuses[0];
+      firstMode = maingateBuses[1];
+      secondMode = hostelCircleBuses[1];
+    });
+  }
+
+  Timer? _timer;
+  int busOneTime = -1;
+  int busTwoTime = -1;
+  int firstMode = 0;
+  int secondMode = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    updateNextBuses();
+    setInitialTimer();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void setInitialTimer() {
+    DateTime now = DateTime.now();
+    int secondsUntilNextMinute = 60 - now.second;
+    _timer = Timer(Duration(seconds: secondsUntilNextMinute), () {
+      updateNextBuses();
+      _timer = Timer.periodic(const Duration(minutes: 1), (timer) {
+        updateNextBuses();
+      });
+    });
+  }
+
+  Widget noBusses(String msg, BuildContext context) {
+    return InkWell(
+      onTap: () {
+        if (widget.busSchedule == null) {
+          return;
+        }
+        Navigator.of(context).push(
+          MaterialPageRoute(
+              builder: (context) =>
+                  BusTimingsScreen(busSchedule: widget.busSchedule!)),
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: const [
+            BoxShadow(
+              color: Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
+              offset: Offset(0, 4), // Offset in the x, y direction
+              blurRadius: 10.0,
+              spreadRadius: 0.0,
+            ),
+          ],
+        ),
+        clipBehavior: Clip.hardEdge,
+        child: Column(
+          children: [
+            Align(
+              alignment: Alignment.topLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 18, top: 15),
+                child: Text(
+                  'Bus Timings',
+                  style: GoogleFonts.inter().copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 28,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              msg,
+              style: GoogleFonts.inter(
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 10),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (widget.busSchedule == null) {
+      return noBusses("Failed to fetch bus schedule", context);
+    }
+
+    if (busOneTime == -1 && busTwoTime == -1) {
+      return noBusses("No upcoming buses available", context);
+    }
+
     return InkWell(
       onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(builder: (context) => const BusTimingsScreen()),
+        MaterialPageRoute(
+            builder: (context) => BusTimingsScreen(
+                  busSchedule: widget.busSchedule!,
+                )),
       ),
       child: Container(
         decoration: BoxDecoration(
@@ -44,9 +222,19 @@ class HomeScreenBusTimings extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            getBusCard('Main Gate', 'Hostel Circle', '5 min', context),
+            if (busOneTime != -1)
+              getBusCard(
+                  'Main Gate',
+                  firstMode == 0 ? 'Hostel Circle' : 'Hostel Circle*',
+                  '$busOneTime min',
+                  context),
             const SizedBox(height: 10),
-            getBusCard('Hostel Circle', 'Main Gate', '5 min', context),
+            if (busTwoTime != -1)
+              getBusCard(
+                  'Hostel Circle',
+                  secondMode == 0 ? 'Main Gate' : 'Main Gate*',
+                  '$busTwoTime min',
+                  context),
             const SizedBox(height: 10),
           ],
         ),

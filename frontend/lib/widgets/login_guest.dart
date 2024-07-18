@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/home_screen.dart';
+import 'package:frontend/services/analytics_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ContinueAsGuest extends StatelessWidget {
@@ -7,6 +8,7 @@ class ContinueAsGuest extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final analyticsService = FirebaseAnalyticsService();
     return Container(
       height: 60,
       width: double.infinity,
@@ -19,9 +21,10 @@ class ContinueAsGuest extends StatelessWidget {
         child: InkWell(
           onTap: () {
             //TODO: handle this
+            analyticsService.logEvent(name: "Guest Login");
             Navigator.of(context).pushReplacement(MaterialPageRoute(
               builder: (context) => const HomeScreen(
-                user: 'guest',
+                isGuest: true,
               ),
             ));
           },

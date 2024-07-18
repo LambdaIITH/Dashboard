@@ -60,7 +60,7 @@ class HomeScreenDrawer extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 10),
               child: ListTile(
                 leading: Image.asset(
-                  'assets/icons/Icon.png',
+                  'assets/icons/logo.png',
                   height: 38,
                 ),
                 horizontalTitleGap: 10,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/models/mess_menu_model.dart';
+import 'package:frontend/services/analytics_service.dart';
 import 'package:frontend/widgets/mess_menu_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -61,14 +62,14 @@ class _MessMenuPageState extends State<MessMenuPage> {
   final List<bool> selectedOption = [true, false];
   final List<Widget> messToggleButtons = [
     Text(
-      'UDH',
+      'Mess A',
       style: GoogleFonts.inter(
-          fontSize: 19.0, fontWeight: FontWeight.w700, color: Colors.black),
+          fontSize: 16.0, fontWeight: FontWeight.w700, color: const Color.fromARGB(255, 47, 47, 47)),
     ),
     Text(
-      'LDH',
+      'Mess B',
       style: GoogleFonts.inter(
-          fontSize: 19.0, fontWeight: FontWeight.w700, color: Colors.black),
+          fontSize: 16.0, fontWeight: FontWeight.w700, color: const Color.fromARGB(255, 47, 47, 47)),
     )
   ];
 
@@ -78,10 +79,13 @@ class _MessMenuPageState extends State<MessMenuPage> {
     return day;
   }
 
+  final analyticsService = FirebaseAnalyticsService();
+
   @override
   void initState() {
     whichDay = getCurrentDay();
     super.initState();
+    analyticsService.logScreenView(screenName: "Mess Menu Screen");
   }
 
   @override
@@ -89,6 +93,8 @@ class _MessMenuPageState extends State<MessMenuPage> {
     final meals = selectedOption[0]
         ? widget.messMenu.udh[whichDay]
         : widget.messMenu.ldh[whichDay];
+
+    final extras = widget.messMenu.udhAdditional[whichDay];
 
     return Column(
       children: [
@@ -159,21 +165,25 @@ class _MessMenuPageState extends State<MessMenuPage> {
             ),
             if (meals != null) ...[
               ShowMessMenu(
+                extras: extras?.breakfast ?? [],
                 whichMeal: 'Breakfast',
                 time: '7:30AM-10:30AM',
                 meals: meals.breakfast,
               ),
               ShowMessMenu(
+                extras: extras?.lunch ?? [],
                 whichMeal: 'Lunch',
                 time: '12:30PM-2:45PM',
                 meals: meals.lunch,
               ),
               ShowMessMenu(
+                extras: extras?.snacks ?? [],
                 whichMeal: 'Snacks',
                 time: '5:00PM-6:00PM',
                 meals: meals.snacks,
               ),
               ShowMessMenu(
+                extras: extras?.dinner ?? [],
                 whichMeal: 'Dinner',
                 time: '7:30PM-9:30PM',
                 meals: meals.dinner,

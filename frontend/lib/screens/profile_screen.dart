@@ -1,9 +1,93 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/models/user_model.dart';
+import 'package:frontend/screens/login_screen.dart';
+import 'package:frontend/services/analytics_service.dart';
 import 'package:frontend/services/api_service.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
-class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
+class ProfileScreen extends StatefulWidget {
+  final UserModel user;
+  final String image;
+  const ProfileScreen({super.key, required this.user, required this.image});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  final analyticsService = FirebaseAnalyticsService();
+
+  @override
+  void initState() {
+    super.initState();
+    analyticsService.logScreenView(screenName: "Profile Screen");
+  }
+
+  Future<void> _showLogoutDialog(BuildContext context) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Logout'),
+          content: const SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Are you sure you want to log out?'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Logout'),
+              onPressed: () {
+                analyticsService.logEvent(name: "Logout");
+                Navigator.of(context).pop();
+                logout(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> logout(BuildContext context) async {
+    await FirebaseAuth.instance.signOut();
+    await GoogleSignIn().signOut();
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('You have been logged out successfully.'),
+          duration: const Duration(milliseconds: 1500),
+          behavior: SnackBarBehavior.floating,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+            builder: (context) => const LoginScreen(
+                  timeDilation: 1,
+                )),
+        (Route<dynamic> route) => false,
+      );
+    }
+    await ApiServices().serverLogout();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,13 +116,15 @@ class ProfileScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const SizedBox(height: 40),
-            const CircleAvatar(
+            CircleAvatar(
               radius: 80,
-              backgroundImage: AssetImage('assets/icons/profile-photo.jpeg'),
+              // replaces google image with size parameter changed to improve image resolution
+              backgroundImage: CachedNetworkImageProvider(
+                  widget.image.replaceFirst(RegExp(r'=s\d+'), '=s240')),
             ),
             const SizedBox(height: 15),
             Text(
-              'Rajeev Singh',
+              widget.user.name,
               style: GoogleFonts.inter(
                 fontSize: 28,
                 fontWeight: FontWeight.w700,
@@ -47,7 +133,7 @@ class ProfileScreen extends StatelessWidget {
             ),
             const SizedBox(height: 5),
             Text(
-              'CS24BTECH11001',
+              widget.user.getRollNumber(),
               style: GoogleFonts.inter(
                 fontSize: 20,
                 fontWeight: FontWeight.w500,
@@ -75,9 +161,12 @@ class ProfileScreen extends StatelessWidget {
                 _showBottomSheet(context);
               },
             ),
-            const ProfileButton(
+            ProfileButton(
               buttonName: 'Logout',
               iconName: Icons.logout_rounded,
+              onPressed: () {
+                _showLogoutDialog(context);
+              },
             ),
             const SizedBox(height: 20),
             Expanded(
@@ -86,28 +175,32 @@ class ProfileScreen extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Image(
-                      image: AssetImage('assets/icons/Icon.png'),
-                      height: 40,
-                      width: 40,
-                    ),
-                    const SizedBox(width: 15),
                     Text(
-                      'IITH Dashboard',
+                      'Made with 🖤 by Lambda',
                       style: GoogleFonts.inter(
-                        fontSize: 20,
+                        fontSize: 16,
                         fontWeight: FontWeight.w500,
                         color: Colors.black45,
                       ),
                     ),
-                    const SizedBox(width: 20),
-                    Text(
-                      'v0.1.0',
-                      style: GoogleFonts.inter(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.black45,
-                      ),
+                    const SizedBox(width: 10),
+                    FutureBuilder<PackageInfo>(
+                      future: PackageInfo.fromPlatform(),
+                      builder: (BuildContext context,
+                          AsyncSnapshot<PackageInfo> snapshot) {
+                        if (snapshot.hasData) {
+                          return Text(
+                            snapshot.data!.version,
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black45,
+                            ),
+                          );
+                        } else {
+                          return const Text('Debug App');
+                        }
+                      },
                     ),
                   ],
                 ),
@@ -135,51 +228,56 @@ class ProfileButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextButton(
-      style: TextButton.styleFrom(
-        padding: const EdgeInsets.all(15),
-        alignment: Alignment.centerLeft,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-      ),
-      onPressed: () {
+    return InkWell(
+      onTap: () {
         if (onPressed != null) {
           onPressed!();
         }
       },
       child: Container(
-        padding: const EdgeInsets.all(20),
-        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        alignment: Alignment.centerLeft,
         decoration: BoxDecoration(
-          color: Colors.white,
           borderRadius: BorderRadius.circular(10),
-          boxShadow: const [
-            BoxShadow(
-              color: Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
-              offset: Offset(0, 4), // Offset in the x, y direction
-              blurRadius: 10.0,
-              spreadRadius: 0.0,
-            ),
-          ],
         ),
-        child: Row(
-          children: [
-            Icon(
-              iconName,
-              size: 30,
-              color: Colors.black,
-            ),
-            const SizedBox(width: 20),
-            Text(
-              buttonName,
-              style: GoogleFonts.inter(
-                fontSize: 20,
-                fontWeight: FontWeight.w500,
+        // onPressed: () {
+        //   if (onPressed != null) {
+        //     onPressed!();
+        //   }
+        // },
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: const [
+              BoxShadow(
+                color: Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
+                offset: Offset(0, 4), // Offset in the x, y direction
+                blurRadius: 10.0,
+                spreadRadius: 0.0,
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Icon(
+                iconName,
+                size: 30,
                 color: Colors.black,
               ),
-            ),
-          ],
+              const SizedBox(width: 20),
+              Text(
+                buttonName,
+                style: GoogleFonts.inter(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

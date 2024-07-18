@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:frontend/screens/home_screen.dart';
+import 'package:frontend/services/analytics_service.dart';
 import 'package:frontend/services/api_service.dart';
 import 'package:frontend/utils/loading_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -15,6 +16,7 @@ class CustomGoogleButton extends StatefulWidget {
 }
 
 class _CustomGoogleButtonState extends State<CustomGoogleButton> {
+  final analyticsService = FirebaseAnalyticsService();
   final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ["email"]);
 
   Future<bool> checkLoggedIn() async {
@@ -24,18 +26,75 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
   void showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        backgroundColor: const Color(0xffFE724C),
         content: Text(
           message,
+          style: GoogleFonts.inter(),
           textAlign: TextAlign.center,
         ),
+        duration: const Duration(milliseconds: 1500),
+        behavior: SnackBarBehavior.fixed,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }
 
+  // Future<void> silentLogin() async {
+  //   try {
+  //     final GoogleSignInAccount? googleUser =
+  //         await _googleSignIn.signInSilently();
+  //     if (googleUser == null) {
+  //       return;
+  //     }
+
+  //     final GoogleSignInAuthentication googleAuth =
+  //         await googleUser.authentication;
+
+  //     final AuthCredential credential = GoogleAuthProvider.credential(
+  //       accessToken: googleAuth.accessToken,
+  //       idToken: googleAuth.idToken,
+  //     );
+
+  //     await FirebaseAuth.instance.signInWithCredential(credential);
+
+  //     var result = await ApiServices().login(googleAuth.idToken ?? 'aa45');
+
+  //     if (result['status'] == 401) {
+  //       showSnackBar(result['error']);
+  //       return;
+  //     }
+  //     if (result['user'] == null) {
+  //       showSnackBar('Failed to sign in with Google.');
+  //       return;
+  //     }
+  //     // successfully logged in
+  //     analyticsService.logEvent(name: "Google Login");
+
+  //     var email = FirebaseAuth.instance.currentUser?.email ?? '';
+
+  //     if (email.isEmpty) {
+  //       await logout();
+  //       showSnackBar('Error!');
+  //     } else {
+  //       // verifying iith users
+  //       var splitted = email.split('@');
+  //       if (splitted.length > 1 && splitted[1].contains("iith.ac.in")) {
+  //         Navigator.of(context).pushReplacement(MaterialPageRoute(
+  //           builder: (context) => const HomeScreen(
+  //             isGuest: false,
+  //           ),
+  //         ));
+  //       } else {
+  //         await logout();
+  //         showSnackBar('Please login with IITH email-ID');
+  //       }
+  //     }
+  //   } catch (error) {
+  //     showSnackBar('Failed to sign in with Google.');
+  //   }
+  // }
+
   Future<bool> signInWithGoogle() async {
-    timeDilation =
-        1.5; //MAKE IT 1.0 IF YOU THINK ANY SCREEN IS TAKING LONG TIME TO LOAD
+    timeDilation = 1;
     FirebaseAuth auth = FirebaseAuth.instance;
     try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
@@ -60,21 +119,20 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
 
       await auth.signInWithCredential(credential);
 
-      printInChunks(googleAuth.idToken ?? '');
-
       var result = await ApiServices().login(googleAuth.idToken ?? 'aa45');
+
       if (result['status'] == 401) {
-        showSnackBar(result['error']);
+        showSnackBar('Please login with IITH email-ID');
         return false;
       }
-      if (result['user'] ==null) {
+      if (result['user'] == null) {
         showSnackBar('Failed to sign in with Google.');
         return false;
       }
       // successfully logged in
+      analyticsService.logEvent(name: "Google Login");
 
       return true;
-      
     } catch (error) {
       showSnackBar('Failed to sign in with Google.');
       return false;
@@ -82,16 +140,23 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
   }
 
   Future<void> logout() async {
+    await FirebaseAuth.instance.signOut();
     await _googleSignIn.signOut();
   }
 
-  void printInChunks(String longString, {int chunkSize = 500}) {
-    for (int i = 0; i < longString.length; i += chunkSize) {
-      int end = (i + chunkSize < longString.length)
-          ? i + chunkSize
-          : longString.length;
-      debugPrint(longString.substring(i, end));
-    }
+  // void printInChunks(String longString, {int chunkSize = 500}) {
+  //   for (int i = 0; i < longString.length; i += chunkSize) {
+  //     int end = (i + chunkSize < longString.length)
+  //         ? i + chunkSize
+  //         : longString.length;
+  //     debugPrint(longString.substring(i, end));
+  //   }
+  // }
+
+  @override
+  void initState() {
+    super.initState();
+    // silentLogin();
   }
 
   @override
@@ -115,7 +180,7 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
 
               if (email.isEmpty) {
                 await logout();
-                showSnackBar('Error!');
+                showSnackBar('Something went wrong');
                 Navigator.of(context).pop(); //POP THE LOADING SCREEN
               } else {
                 //verifying iith users
@@ -123,7 +188,7 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
                 if (splitted.length > 1 && splitted[1].contains("iith.ac.in")) {
                   Navigator.of(context).pushReplacement(MaterialPageRoute(
                     builder: (context) => const HomeScreen(
-                      user: 'someuser',
+                      isGuest: false,
                     ),
                   ));
                 } else {
@@ -132,7 +197,7 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
                   Navigator.of(context).pop(); //POP THE LOADING SCREEN
                 }
               }
-            }else{
+            } else {
               await logout();
               Navigator.of(context).pop(); //POP THE LOADING SCREEN
             }
