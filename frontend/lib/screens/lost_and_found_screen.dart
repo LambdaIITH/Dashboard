@@ -16,7 +16,7 @@ class LostAndFoundScreen extends StatefulWidget {
 class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
   String _search = '';
   late final TextEditingController _searchController;
-
+  final analyticsService = FirebaseAnalyticsService();
   double getAspectRatio(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     if (screenWidth > 450) {
@@ -30,12 +30,6 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
     } else {
       return 0.6;
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    analyticsService.logScreenView(screenName: "Lost And Found Screen");
   }
 
   Future<List<Widget>> getItems() async {
@@ -61,6 +55,7 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
 
   @override
   void initState() {
+    analyticsService.logScreenView(screenName: "Lost And Found Screen");
     _searchController = TextEditingController();
     super.initState();
   }
