@@ -80,7 +80,7 @@ class HomeScreenAppBar extends StatelessWidget {
                     return;
                   }
                   Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => ProfileScreen(user: user!, image: image),
+                    builder: (context) => ProfileScreen(user: user!, image: image,),
                   ));
                 },
                 child: ClipOval(

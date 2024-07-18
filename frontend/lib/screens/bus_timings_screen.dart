@@ -51,11 +51,13 @@ class NextBusModel {
   final String time;
   final String timeDifference;
   final bool isEv;
+  final int diff;
 
   NextBusModel(
       {required this.isFromIITH,
       required this.isEv,
       required this.time,
+      required this.diff,
       required this.timeDifference});
 }
 
@@ -126,6 +128,11 @@ class _BusSchedulePageState extends State<BusSchedulePage> {
           int hour = int.parse(parts[0]);
           int minute = int.parse(parts[1]);
           DateTime time = DateTime(now.year, now.month, now.day, hour, minute);
+
+          if (time.isBefore(now)) {
+            time = time.add(Duration(days: 1));
+          }
+
           return MapEntry(time, entry.value);
         })
         .where((entry) => entry.key.isAfter(now))
@@ -140,6 +147,7 @@ class _BusSchedulePageState extends State<BusSchedulePage> {
       String formattedDifference = "$minutes minutes";
 
       return NextBusModel(
+          diff: minutes,
           isFromIITH: false,
           isEv: entry.value == 1,
           time:
@@ -160,6 +168,11 @@ class _BusSchedulePageState extends State<BusSchedulePage> {
           int hour = int.parse(parts[0]);
           int minute = int.parse(parts[1]);
           DateTime time = DateTime(now.year, now.month, now.day, hour, minute);
+
+          if (time.isBefore(now)) {
+            time = time.add(Duration(days: 1));
+          }
+
           return MapEntry(time, entry.value);
         })
         .where((entry) => entry.key.isAfter(now))
@@ -174,11 +187,13 @@ class _BusSchedulePageState extends State<BusSchedulePage> {
       String formattedDifference = "$minutes minutes";
 
       return NextBusModel(
-          isFromIITH: false,
-          isEv: entry.value == 1,
-          time:
-              "${entry.key.hour.toString().padLeft(2, '0')}:${entry.key.minute.toString().padLeft(2, '0')}",
-          timeDifference: formattedDifference);
+        diff: minutes,
+        isFromIITH: true,
+        isEv: entry.value == 1,
+        time:
+            "${entry.key.hour.toString().padLeft(2, '0')}:${entry.key.minute.toString().padLeft(2, '0')}",
+        timeDifference: formattedDifference,
+      );
     }).toList();
   }
 
@@ -190,7 +205,7 @@ class _BusSchedulePageState extends State<BusSchedulePage> {
     combinedBuses.addAll(maingateBuses);
     combinedBuses.addAll(hostelCircleBuses);
 
-    combinedBuses.sort((a, b) => a.time.compareTo(b.time));
+    combinedBuses.sort((a, b) => a.diff.compareTo(b.diff));
 
     return combinedBuses;
   }
@@ -233,7 +248,7 @@ class _BusSchedulePageState extends State<BusSchedulePage> {
 
   Widget justSomeRandomShit() {
     return Text(
-      '* indicates EV timings',
+      '* indicates EV',
       style: GoogleFonts.inter(
         fontSize: 14,
       ),
@@ -270,12 +285,19 @@ class _BusSchedulePageState extends State<BusSchedulePage> {
         !fullSchedule
             ? Expanded(
                 child: nextBuses == null || nextBuses?.length == 0
-                    ? Text(
-                        "No upcoming buses available",
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
+                    ? ListView(children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "No upcoming buses available",
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
                         ),
-                      )
+                      ])
                     : ListView.builder(
                         itemCount: nextBuses?.length ?? 0,
                         itemBuilder: (context, index) {

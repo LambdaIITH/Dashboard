@@ -1,6 +1,5 @@
 // ignore_for_file: use_build_context_synchronously
 
-
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -137,6 +136,30 @@ class ApiServices {
         return null;
       }
 
+      final data = response.data;
+      return UserModel(
+          email: data['email'],
+          name: data['name'],
+          cr: data['cr'],
+          phone: data['phone_number'],
+          id: data['id']);
+    } catch (e) {
+      debugPrint("Failed to fetch bus schedule: $e");
+      return null;
+    }
+  }
+
+  Future<UserModel?> updatePhoneNumber(
+      BuildContext context, String phone) async {
+    try {
+      debugPrint("Making request to: ${dio.options.baseUrl}/user");
+      final response =
+          await dio.patch('/user/update', data: {"phone_number": phone});
+
+      if (response.statusCode == 401) {
+        await logout(context);
+        return null;
+      }
       final data = response.data;
       return UserModel(
           email: data['email'],
