@@ -7,6 +7,7 @@ import 'package:frontend/services/analytics_service.dart';
 import 'package:frontend/services/api_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class ProfileScreen extends StatefulWidget {
   final UserModel user;
@@ -174,28 +175,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Image(
-                      image: AssetImage('assets/icons/logo.png'),
-                      height: 40,
-                      width: 40,
-                    ),
-                    const SizedBox(width: 15),
                     Text(
-                      'IITH Dashboard',
+                      'Made with 🖤 by Lambda',
                       style: GoogleFonts.inter(
-                        fontSize: 20,
+                        fontSize: 16,
                         fontWeight: FontWeight.w500,
                         color: Colors.black45,
                       ),
                     ),
-                    const SizedBox(width: 20),
-                    Text(
-                      'v0.1.0',
-                      style: GoogleFonts.inter(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.black45,
-                      ),
+                    const SizedBox(width: 10),
+                    FutureBuilder<PackageInfo>(
+                      future: PackageInfo.fromPlatform(),
+                      builder: (BuildContext context,
+                          AsyncSnapshot<PackageInfo> snapshot) {
+                        if (snapshot.hasData) {
+                          return Text(
+                            snapshot.data!.version,
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black45,
+                            ),
+                          );
+                        } else {
+                          return const Text('Debug App');
+                        }
+                      },
                     ),
                   ],
                 ),
@@ -230,7 +235,7 @@ class ProfileButton extends StatelessWidget {
         }
       },
       child: Container(
-        padding: const EdgeInsets.all(15),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         alignment: Alignment.centerLeft,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
