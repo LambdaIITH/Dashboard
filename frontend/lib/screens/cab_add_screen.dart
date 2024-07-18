@@ -299,7 +299,7 @@ class _CabAddScreenState extends State<CabAddScreen> {
                         ),
                       ),
                       Padding(
-                        padding: EdgeInsets.all(10.0),
+                        padding: const EdgeInsets.all(10.0),
                         child: InkWell(
                           borderRadius: BorderRadius.circular(12),
                           onTap: () {
@@ -477,7 +477,7 @@ class _CabAddScreenState extends State<CabAddScreen> {
                           color: const Color(0xffADADAD),
                         ),
                         border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(
+                        contentPadding: const EdgeInsets.symmetric(
                           horizontal: 20.0,
                           vertical: 8.0,
                         ),
@@ -491,7 +491,7 @@ class _CabAddScreenState extends State<CabAddScreen> {
           ),
           Container(
             alignment: Alignment.bottomCenter,
-            margin: EdgeInsets.only(bottom: 16),
+            margin: const EdgeInsets.only(bottom: 16),
             child: TextButton(
               onPressed: !updateButtonStatus()
                   ? null
@@ -574,7 +574,7 @@ class _CabAddScreenState extends State<CabAddScreen> {
         controller: TextEditingController(
           text: dateTime == null
               ? ''
-              : "${DateFormat('yyyy-MM-dd – kk:mm').format(dateTime)}",
+              : DateFormat('yyyy-MM-dd – kk:mm').format(dateTime),
         ),
       ),
     );

@@ -28,7 +28,7 @@ class _HomeScreenBusTimingsState extends State<HomeScreenBusTimings> {
           int minute = int.parse(parts[1]);
           DateTime time = DateTime(now.year, now.month, now.day, hour, minute);
           if (time.isBefore(now)) {
-            time = time.add(Duration(days: 1));
+            time = time.add(const Duration(days: 1));
           }
           return MapEntry(time, entry.value);
         })
@@ -64,7 +64,7 @@ class _HomeScreenBusTimingsState extends State<HomeScreenBusTimings> {
           int minute = int.parse(parts[1]);
           DateTime time = DateTime(now.year, now.month, now.day, hour, minute);
           if (time.isBefore(now)) {
-            time = time.add(Duration(days: 1));
+            time = time.add(const Duration(days: 1));
           }
           return MapEntry(time, entry.value);
         })

@@ -117,9 +117,8 @@ class _BusSchedulePageState extends State<BusSchedulePage> {
   ];
 
   List<NextBusModel> getNextTwoBusesFromMaingate() {
-    if (widget.busSchedule == null) return [];
     Map<String, int> allBuses =
-        Map<String, int>.from(widget.busSchedule!.toIITH);
+        Map<String, int>.from(widget.busSchedule.toIITH);
     DateTime now = DateTime.now();
 
     List<MapEntry<DateTime, int>> busTimes = allBuses.entries
@@ -130,7 +129,7 @@ class _BusSchedulePageState extends State<BusSchedulePage> {
           DateTime time = DateTime(now.year, now.month, now.day, hour, minute);
 
           if (time.isBefore(now)) {
-            time = time.add(Duration(days: 1));
+            time = time.add(const Duration(days: 1));
           }
 
           return MapEntry(time, entry.value);
@@ -157,9 +156,8 @@ class _BusSchedulePageState extends State<BusSchedulePage> {
   }
 
   List<NextBusModel> getNextTwoBusesFromHostelCircle() {
-    if (widget.busSchedule == null) return [];
     Map<String, int> allBuses =
-        Map<String, int>.from(widget.busSchedule!.fromIITH);
+        Map<String, int>.from(widget.busSchedule.fromIITH);
     DateTime now = DateTime.now();
 
     List<MapEntry<DateTime, int>> busTimes = allBuses.entries
@@ -170,7 +168,7 @@ class _BusSchedulePageState extends State<BusSchedulePage> {
           DateTime time = DateTime(now.year, now.month, now.day, hour, minute);
 
           if (time.isBefore(now)) {
-            time = time.add(Duration(days: 1));
+            time = time.add(const Duration(days: 1));
           }
 
           return MapEntry(time, entry.value);

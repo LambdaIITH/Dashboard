@@ -84,8 +84,8 @@ class NextBusCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 8),
                           Container(
-                            margin: EdgeInsets.only(top: 2),
-                            child: SvgIcon("assets/icons/arrow.svg"),
+                            margin: const EdgeInsets.only(top: 2),
+                            child: const SvgIcon("assets/icons/arrow.svg"),
                           ),
                           const SizedBox(width: 8),
                           Flexible(
@@ -126,8 +126,8 @@ class NextBusCard extends StatelessWidget {
                   height: 20,
                   // padding: EdgeInsets.symmetric(horizontal: 10, vertical: 2),
                   decoration: BoxDecoration(
-                      color: isEv ? Color(0xff0FBF00) : Color(0xff8850FF),
-                      borderRadius: BorderRadius.only(
+                      color: isEv ? const Color(0xff0FBF00) : const Color(0xff8850FF),
+                      borderRadius: const BorderRadius.only(
                           topRight: Radius.circular(12),
                           bottomLeft: Radius.circular(12))),
                   child: Center(
