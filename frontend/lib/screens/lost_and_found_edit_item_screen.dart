@@ -9,15 +9,26 @@ import 'package:frontend/utils/show_message.dart';
 import 'package:frontend/widgets/custom_carousel.dart';
 import 'package:image_picker/image_picker.dart';
 
-class LostAndFoundAddItemScreen extends StatefulWidget {
-  const LostAndFoundAddItemScreen({super.key});
+class LostAndFoundEditItemScreen extends StatefulWidget {
+  const LostAndFoundEditItemScreen({
+    super.key,
+    required this.lostOrFound,
+    required this.itemName,
+    required this.itemDescription,
+    required this.id,
+  });
 
+  final LostOrFound lostOrFound;
+  final String itemName;
+  final String itemDescription;
+  final String id;
   @override
-  State<LostAndFoundAddItemScreen> createState() =>
-      _LostAndFoundAddItemScreenState();
+  State<LostAndFoundEditItemScreen> createState() =>
+      _LostAndFoundEditItemScreenState();
 }
 
-class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
+class _LostAndFoundEditItemScreenState
+    extends State<LostAndFoundEditItemScreen> {
   late final TextEditingController _itemNameController;
   late final TextEditingController _itemDescriptionController;
   late final ImagePicker _imagePicker;
@@ -29,6 +40,8 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
   void initState() {
     _itemDescriptionController = TextEditingController();
     _itemNameController = TextEditingController();
+    _itemNameController.text = widget.itemName;
+    _itemDescriptionController.text = widget.itemDescription;
     _imagePicker = ImagePicker();
     super.initState();
   }
@@ -41,12 +54,7 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
   }
 
   void pickImage() async {
-    final image = await _imagePicker.pickImage(
-      source: ImageSource.camera,
-      imageQuality: 50, // <- Reduce Image quality
-      maxHeight: 500, // <- reduce the image size
-      maxWidth: 500,
-    );
+    final image = await _imagePicker.pickImage(source: ImageSource.camera);
     if (image == null) {
       return;
     }
@@ -55,7 +63,7 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
     });
   }
 
-  void createListing() async {
+  void editListing() async {
     if (_images.isEmpty) {
       showMessage(
         msg: "Images cannot be empty",
@@ -86,14 +94,16 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
       return;
     }
 
-    final response = await ApiServices().addLostAndFoundItem(
+    final response = await ApiServices().editLostAndFounditem(
+      id: widget.id,
       itemName: _itemNameController.text,
       itemDescription: _itemDescriptionController.text,
       lostOrFound: _lostOrFound!,
       images: _images,
     );
 
-    if (response['status'] == 200) {
+    // TODO: check status!!!!
+    if (response['status'] == 201) {
       showMessage(
         context: context,
         msg: "Successfully item added!",
@@ -102,7 +112,7 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
     } else {
       showMessage(
         context: context,
-        msg: response['error'].toString(),
+        msg: "Something went wrong. Please try again later.",
       );
     }
   }
@@ -113,7 +123,7 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const BoldText(
-          text: 'Listings',
+          text: 'Edit Item',
           color: Colors.black,
           size: 28,
         ),
@@ -255,8 +265,8 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
                     backgroundColor: WidgetStateColor.resolveWith(
                         (_) => const Color(0xB2FE724C)),
                   ),
-                  onPressed: createListing,
-                  child: const Text('Post'),
+                  onPressed: editListing,
+                  child: const Text('Edit'),
                 ),
               )
             ],

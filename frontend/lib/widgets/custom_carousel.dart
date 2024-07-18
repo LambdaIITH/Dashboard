@@ -39,9 +39,9 @@ class _CustomCarouselState extends State<CustomCarousel> {
           items: widget.images
               .map(
                 (item) => widget.fromMemory == false
-                    ? Image.asset(
+                    ? Image.network(
                         item,
-                        fit: BoxFit.cover,
+                        fit: BoxFit.fill,
                       )
                     : Image.file(
                         File(item),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/constants/enums/lost_and_found.dart';
+import 'package:frontend/models/lost_and_found_model.dart';
 import 'package:frontend/screens/lost_and_found_item_screen.dart';
 import 'package:frontend/utils/normal_text.dart';
 import 'package:frontend/widgets/custom_carousel.dart';
@@ -7,26 +8,20 @@ import 'package:frontend/widgets/custom_carousel.dart';
 class LostFoundItem extends StatelessWidget {
   const LostFoundItem({
     super.key,
-    required this.itemName,
-    required this.images,
-    required this.lostOrFound,
+    required this.item,
   });
 
-  final String itemName;
-  final LostOrFound lostOrFound;
-  final List<String> images;
+  final LostAndFoundModel item;
 
+  
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => LostAndFoundItemScreen(
-            images: images,
-            itemName: itemName,
-            itemDescription:
-                'Green highlighter found near the canteen on 20th October.',
-            lostOrFound: lostOrFound,
+            id: item.id,
+            lostOrFound: item.lostOrFound,
           ),
         ),
       ),
@@ -51,25 +46,38 @@ class LostFoundItem extends StatelessWidget {
             // Using Expanded to ensure the Carousel takes the available space
             Expanded(
               child: CustomCarousel(
-                images: images,
+                images: item.images,
                 fromMemory: false,
               ),
             ),
             const SizedBox(height: 10),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: NormalText(
-                text: itemName,
-                size: 16,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: NormalText(
-                text: lostOrFound == LostOrFound.lost ? 'Lost' : 'Found',
-                size: 16,
-                color: const Color(0xB2FE724C),
-              ),
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        child: NormalText(
+                          text: item.itemName,
+                          size: 16,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        child: NormalText(
+                          text: item.lostOrFound == LostOrFound.lost
+                              ? 'Lost'
+                              : 'Found',
+                          size: 16,
+                          color: const Color(0xB2FE724C),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                ],
             ),
           ],
         ),
