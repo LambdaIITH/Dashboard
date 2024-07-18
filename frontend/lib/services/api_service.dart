@@ -394,4 +394,30 @@ class ApiServices {
   }
 
   // ====================CAB SHARING ENDS===================================
+
+  // ====================PROFILE PAGE STARTS===================================
+  Future<Map<String, dynamic>> postFeedback(
+      int bookingId, String feedback) async {
+    try {
+      final response = await dio.post(
+        '/feedback',
+        data: {"feedback": feedback},
+      );
+      return {'status': response.statusCode};
+    } on DioException catch (e) {
+      if (e.response != null) {
+        return {
+          'error': e.response?.data['detail'],
+          'status': e.response?.statusCode
+        };
+      }
+      debugPrint("Posting Feedback failed: $e");
+      return {
+        'error': 'Posting Feedback failed',
+        'status': e.response?.statusCode
+      };
+    }
+  }
+
+  // ====================PROFILE PAGE ENDS===================================
 }
