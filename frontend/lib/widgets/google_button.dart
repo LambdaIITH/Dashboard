@@ -184,18 +184,19 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
                 Navigator.of(context).pop(); //POP THE LOADING SCREEN
               } else {
                 //verifying iith users
-                var splitted = email.split('@');
-                if (splitted.length > 1 && splitted[1].contains("iith.ac.in")) {
+                // var splitted = email.split('@');
+                // if (splitted.length > 1 && splitted[1].contains("iith.ac.in")) {
                   Navigator.of(context).pushReplacement(MaterialPageRoute(
                     builder: (context) => const HomeScreen(
                       isGuest: false,
                     ),
                   ));
-                } else {
-                  await logout();
-                  showSnackBar('Please login with IITH email-ID');
-                  Navigator.of(context).pop(); //POP THE LOADING SCREEN
-                }
+                // } 
+                // else {
+                //   await logout();
+                //   showSnackBar('Please login with IITH email-ID');
+                //   Navigator.of(context).pop(); //POP THE LOADING SCREEN
+                // }
               }
             } else {
               await logout();
