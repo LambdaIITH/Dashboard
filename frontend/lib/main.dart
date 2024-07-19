@@ -10,7 +10,6 @@ import 'package:frontend/screens/login_screen.dart';
 import 'package:frontend/screens/splash_screen.dart';
 import 'package:frontend/services/analytics_service.dart';
 import 'package:frontend/services/api_service.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 
 void main() async {
   await dotenv.load(fileName: ".env");
@@ -61,6 +60,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'Dashboard',
       debugShowCheckedModeBanner: false,
       theme: appTheme,
       navigatorObservers: [_analyticsService.getAnalyticsObserver()],

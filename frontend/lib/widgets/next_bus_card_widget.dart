@@ -43,7 +43,7 @@ class NextBusCard extends StatelessWidget {
               // mainAxisAlignment: MainAxisAlignment.spaceAround,spaceBetween
               children: [
                 SizedBox(
-                  width: cardWidth * 0.65,
+                  width: cardWidth * 0.69,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -51,7 +51,7 @@ class NextBusCard extends StatelessWidget {
                       Text(
                         'In next',
                         style: GoogleFonts.inter(
-                            fontSize: 16.0,
+                            fontSize: 15.0,
                             fontWeight: FontWeight.w400,
                             color: const Color(0xff6A6A6A),
                             letterSpacing: -0.2),
@@ -60,7 +60,7 @@ class NextBusCard extends StatelessWidget {
                         waitingTime,
                         style: GoogleFonts.inter(
                             color: const Color(0xff6A6A6A),
-                            fontSize: 25.0,
+                            fontSize: 24.0,
                             fontWeight: FontWeight.w500,
                             letterSpacing: -0.2),
                       ),
@@ -73,36 +73,32 @@ class NextBusCard extends StatelessWidget {
                             child: Text(
                               from,
                               style: GoogleFonts.inter(
-                                fontSize: 16.0,
+                                fontSize: 15.0,
                                 fontWeight: FontWeight.w500,
                                 letterSpacing: -0.2,
                                 color: const Color(0xff6A6A6A),
                               ),
                               overflow: TextOverflow.ellipsis,
-                              maxLines: 2,
+                              maxLines: 1,
                             ),
                           ),
                           const SizedBox(width: 8),
                           Container(
-                            margin: EdgeInsets.only(top: 2),
-                            child: SvgIcon("assets/icons/arrow.svg"),
+                            margin: const EdgeInsets.only(top: 2),
+                            child: const SvgIcon("assets/icons/arrow.svg"),
                           ),
-                          // const Icon(
-                          //   Icons.arrow_forward_rounded,
-                          //   size: 22,
-                          // ),
                           const SizedBox(width: 8),
                           Flexible(
                             child: Text(
                               destination,
                               style: GoogleFonts.inter(
-                                fontSize: 16.0,
+                                fontSize: 15.0,
                                 fontWeight: FontWeight.w500,
                                 letterSpacing: -0.2,
                                 color: const Color(0xff6A6A6A),
                               ),
                               overflow: TextOverflow.ellipsis,
-                              maxLines: 2,
+                              maxLines: 1,
                             ),
                           ),
                         ],
@@ -113,7 +109,7 @@ class NextBusCard extends StatelessWidget {
                 ),
                 const Spacer(),
                 SizedBox(
-                  width: cardWidth * 0.3,
+                  width: cardWidth * 0.27,
                   child: Image.asset(
                       isEv ? "assets/icons/ev.png" : "assets/icons/bus.png"),
                 ),
@@ -130,8 +126,8 @@ class NextBusCard extends StatelessWidget {
                   height: 20,
                   // padding: EdgeInsets.symmetric(horizontal: 10, vertical: 2),
                   decoration: BoxDecoration(
-                      color: isEv ? Color(0xff0FBF00) : Color(0xff8850FF),
-                      borderRadius: BorderRadius.only(
+                      color: isEv ? const Color(0xff0FBF00) : const Color(0xff8850FF),
+                      borderRadius: const BorderRadius.only(
                           topRight: Radius.circular(12),
                           bottomLeft: Radius.circular(12))),
                   child: Center(
