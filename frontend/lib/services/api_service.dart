@@ -589,7 +589,7 @@ class ApiServices {
     }
   }
 
-Future<Map<String, dynamic>> searchLostAndFoundItems(String search) async {
+  Future<Map<String, dynamic>> searchLostAndFoundItems(String search) async {
     try {
       final response = await dio.get('/lost/search?query=$search');
       final response2 = await dio.get('/found/search?query=$search');
