@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/models/lost_and_found_model.dart';
-import 'package:frontend/services/analytics_service.dart';
-import 'package:frontend/utils/bold_text.dart';
-import 'package:frontend/widgets/lost_found_add_item.dart';
-import 'package:frontend/widgets/lost_found_item.dart';
-import 'package:frontend/services/api_service.dart';
+import 'package:dashbaord/models/lost_and_found_model.dart';
+import 'package:dashbaord/services/analytics_service.dart';
+import 'package:dashbaord/utils/bold_text.dart';
+import 'package:dashbaord/widgets/lost_found_add_item.dart';
+import 'package:dashbaord/widgets/lost_found_item.dart';
+import 'package:dashbaord/services/api_service.dart';
 
 class LostAndFoundScreen extends StatefulWidget {
   const LostAndFoundScreen({super.key});

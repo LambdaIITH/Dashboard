@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/cab_sharing_screen.dart';
+import 'package:dashbaord/screens/cab_sharing_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class CabAddSuccess extends StatelessWidget {

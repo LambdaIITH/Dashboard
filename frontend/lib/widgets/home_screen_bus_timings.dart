@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/bus_timings_screen.dart';
-import 'package:frontend/utils/bus_schedule.dart';
-import 'package:frontend/utils/normal_text.dart';
+import 'package:dashbaord/screens/bus_timings_screen.dart';
+import 'package:dashbaord/utils/bus_schedule.dart';
+import 'package:dashbaord/utils/normal_text.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class HomeScreenBusTimings extends StatefulWidget {

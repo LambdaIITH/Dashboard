@@ -1,19 +1,19 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:frontend/models/mess_menu_model.dart';
-import 'package:frontend/models/user_model.dart';
-import 'package:frontend/screens/cab_sharing_screen.dart';
-import 'package:frontend/screens/lost_and_found_screen.dart';
-import 'package:frontend/services/analytics_service.dart';
-import 'package:frontend/services/api_service.dart';
-import 'package:frontend/services/shared_service.dart';
-import 'package:frontend/utils/bus_schedule.dart';
-import 'package:frontend/utils/loading_widget.dart';
-import 'package:frontend/widgets/home_card_no_options.dart';
-import 'package:frontend/widgets/home_screen_appbar.dart';
-import 'package:frontend/widgets/home_screen_bus_timings.dart';
-import 'package:frontend/widgets/home_screen_mess_menu.dart';
+import 'package:dashbaord/models/mess_menu_model.dart';
+import 'package:dashbaord/models/user_model.dart';
+import 'package:dashbaord/screens/cab_sharing_screen.dart';
+import 'package:dashbaord/screens/lost_and_found_screen.dart';
+import 'package:dashbaord/services/analytics_service.dart';
+import 'package:dashbaord/services/api_service.dart';
+import 'package:dashbaord/services/shared_service.dart';
+import 'package:dashbaord/utils/bus_schedule.dart';
+import 'package:dashbaord/utils/loading_widget.dart';
+import 'package:dashbaord/widgets/home_card_no_options.dart';
+import 'package:dashbaord/widgets/home_screen_appbar.dart';
+import 'package:dashbaord/widgets/home_screen_bus_timings.dart';
+import 'package:dashbaord/widgets/home_screen_mess_menu.dart';
 import 'package:in_app_update/in_app_update.dart';
 
 class HomeScreen extends StatefulWidget {

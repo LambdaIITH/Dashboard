@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/lost_and_found_add_item_screen.dart';
-import 'package:frontend/utils/normal_text.dart';
+import 'package:dashbaord/screens/lost_and_found_add_item_screen.dart';
+import 'package:dashbaord/utils/normal_text.dart';
 
 class LostFoundAddItem extends StatelessWidget {
   const LostFoundAddItem({

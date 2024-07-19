@@ -1,4 +1,4 @@
-import 'package:frontend/constants/enums/lost_and_found.dart';
+import 'package:dashbaord/constants/enums/lost_and_found.dart';
 
 class LostAndFoundModel {
   final LostOrFound lostOrFound;

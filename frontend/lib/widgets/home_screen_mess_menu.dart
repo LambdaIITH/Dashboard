@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/models/mess_menu_model.dart';
-import 'package:frontend/screens/mess_menu_screen.dart';
-import 'package:frontend/widgets/home_mess_component.dart';
+import 'package:dashbaord/models/mess_menu_model.dart';
+import 'package:dashbaord/screens/mess_menu_screen.dart';
+import 'package:dashbaord/widgets/home_mess_component.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 

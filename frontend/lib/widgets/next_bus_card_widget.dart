@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/utils/svg_icon.dart';
+import 'package:dashbaord/utils/svg_icon.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class NextBusCard extends StatelessWidget {

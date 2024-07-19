@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/constants/enums/lost_and_found.dart';
-import 'package:frontend/models/lost_and_found_model.dart';
-import 'package:frontend/screens/lost_and_found_item_screen.dart';
-import 'package:frontend/utils/normal_text.dart';
-import 'package:frontend/widgets/custom_carousel.dart';
+import 'package:dashbaord/constants/enums/lost_and_found.dart';
+import 'package:dashbaord/models/lost_and_found_model.dart';
+import 'package:dashbaord/screens/lost_and_found_item_screen.dart';
+import 'package:dashbaord/utils/normal_text.dart';
+import 'package:dashbaord/widgets/custom_carousel.dart';
 
 class LostFoundItem extends StatelessWidget {
   const LostFoundItem({

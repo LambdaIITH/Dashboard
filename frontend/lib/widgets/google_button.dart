@@ -1,10 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:frontend/screens/home_screen.dart';
-import 'package:frontend/services/analytics_service.dart';
-import 'package:frontend/services/api_service.dart';
-import 'package:frontend/utils/loading_widget.dart';
+import 'package:dashbaord/screens/home_screen.dart';
+import 'package:dashbaord/services/analytics_service.dart';
+import 'package:dashbaord/services/api_service.dart';
+import 'package:dashbaord/utils/loading_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 

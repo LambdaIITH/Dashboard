@@ -1,10 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:frontend/models/user_model.dart';
-import 'package:frontend/screens/login_screen.dart';
-import 'package:frontend/services/analytics_service.dart';
-import 'package:frontend/services/api_service.dart';
+import 'package:dashbaord/models/user_model.dart';
+import 'package:dashbaord/screens/login_screen.dart';
+import 'package:dashbaord/services/analytics_service.dart';
+import 'package:dashbaord/services/api_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:package_info_plus/package_info_plus.dart';

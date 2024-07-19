@@ -1,4 +1,4 @@
-import 'package:frontend/models/travellers.dart';
+import 'package:dashbaord/models/travellers.dart';
 
 class BookingModel {
   final int id;

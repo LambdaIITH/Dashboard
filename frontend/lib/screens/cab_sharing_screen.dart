@@ -1,14 +1,14 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/cab_add_screen.dart';
-import 'package:frontend/services/analytics_service.dart';
-import 'package:frontend/utils/loading_widget.dart';
-import 'package:frontend/widgets/cab_details.dart';
-import 'package:frontend/widgets/cab_search_form.dart';
+import 'package:dashbaord/screens/cab_add_screen.dart';
+import 'package:dashbaord/services/analytics_service.dart';
+import 'package:dashbaord/utils/loading_widget.dart';
+import 'package:dashbaord/widgets/cab_details.dart';
+import 'package:dashbaord/widgets/cab_search_form.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:frontend/services/api_service.dart';
-import 'package:frontend/models/booking_model.dart';
+import 'package:dashbaord/services/api_service.dart';
+import 'package:dashbaord/models/booking_model.dart';
 
 class CabSharingScreen extends StatefulWidget {
   final String usersEmail;

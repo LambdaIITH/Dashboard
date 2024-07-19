@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/widgets/drawer_option.dart';
+import 'package:dashbaord/widgets/drawer_option.dart';
 
 class HomeScreenDrawer extends StatelessWidget {
   const HomeScreenDrawer({
