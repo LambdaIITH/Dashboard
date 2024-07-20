@@ -79,7 +79,7 @@ class HomeCardNoOptions extends StatelessWidget {
                 decoration: BoxDecoration(color: Colors.white.withOpacity(0.5)),
                 child: Center(
                     child: SizedBox(
-                        height: 120,
+                        height: 100,
                         child: Image.asset(
                           "assets/icons/comingsoon.png",
                         ))),
