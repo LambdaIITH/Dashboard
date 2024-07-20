@@ -160,7 +160,7 @@ class _HomeScreenBusTimingsState extends State<HomeScreenBusTimings> {
                 padding: const EdgeInsets.only(left: 18, top: 15),
                 child: Text(
                   'Bus Timings',
-                  style: GoogleFonts.inter().copyWith(
+                  style: GoogleFonts.inter(
                     fontWeight: FontWeight.bold,
                     fontSize: 28,
                   ),
@@ -220,7 +220,7 @@ class _HomeScreenBusTimingsState extends State<HomeScreenBusTimings> {
                 padding: const EdgeInsets.only(left: 18, top: 15),
                 child: Text(
                   'Bus Timings',
-                  style: GoogleFonts.inter().copyWith(
+                  style: GoogleFonts.inter(
                     fontWeight: FontWeight.bold,
                     fontSize: 28,
                   ),

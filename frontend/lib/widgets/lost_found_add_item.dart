@@ -46,9 +46,11 @@ class LostFoundAddItem extends StatelessWidget {
           const SizedBox(height: 24),
           const Padding(
               padding: EdgeInsets.symmetric(horizontal: 10),
-              child: NormalText(
-                text: 'Add a Listing',
-                size: 16,
+              child: Center(
+                child: NormalText(
+                  text: 'Add an Item',
+                  size: 16,
+                ),
               )),
           const SizedBox(height: 10),
         ],

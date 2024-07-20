@@ -105,7 +105,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       setState(() {
-        image = user.photoURL ?? 'https://media.istockphoto.com/id/519078727/photo/male-silhouette-as-avatar-profile-picture.jpg?s=2048x2048&w=is&k=20&c=craUhUZK7FB8wYiGDHF0Az0T9BY1bmRHasCHoQbNLlg=';
+        image = user.photoURL ??
+            'https://media.istockphoto.com/id/519078727/photo/male-silhouette-as-avatar-profile-picture.jpg?s=2048x2048&w=is&k=20&c=craUhUZK7FB8wYiGDHF0Az0T9BY1bmRHasCHoQbNLlg=';
         changeState();
       });
     } else {
@@ -184,7 +185,7 @@ class _HomeScreenState extends State<HomeScreen> {
     fetchBus();
   }
 
-   checkForUpdates() async {
+  checkForUpdates() async {
     await Future.delayed(const Duration(seconds: 30));
     try {
       var updateInfo = await InAppUpdate.checkForUpdate();
@@ -236,6 +237,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       HomeScreenMessMenu(messMenu: messMenu),
                       const SizedBox(height: 20),
                       HomeCardNoOptions(
+                        isComingSoon: false,
                         title: 'Cab Sharing',
                         child: 'assets/icons/cab-sharing-icon.svg',
                         onTap: () {
@@ -250,8 +252,23 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 20),
                       HomeCardNoOptions(
+                        isLnF: true,
                         title: 'Lost & Found',
                         child: 'assets/icons/magnifying-icon.svg',
+                        onTap: widget.isGuest
+                            ? showError
+                            : () => Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const LostAndFoundScreen(),
+                                  ),
+                                ),
+                      ),
+                      const SizedBox(height: 20),
+                      HomeCardNoOptions(
+                        isLnF: true,
+                        title: 'Timetable',
+                        child: 'assets/icons/calendar.svg',
                         onTap: widget.isGuest
                             ? showError
                             : () => Navigator.of(context).push(

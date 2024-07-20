@@ -92,7 +92,7 @@ class HomeScreenMessMenu extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 18, top: 15),
                 child: Text(
                   'Mess Menu',
-                  style: GoogleFonts.inter().copyWith(
+                  style: GoogleFonts.inter(
                     fontWeight: FontWeight.bold,
                     fontSize: 28,
                   ),
@@ -146,7 +146,7 @@ class HomeScreenMessMenu extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 18, top: 15),
                 child: Text(
                   'Mess Menu',
-                  style: GoogleFonts.inter().copyWith(
+                  style: GoogleFonts.inter(
                     fontWeight: FontWeight.bold,
                     fontSize: 28,
                   ),

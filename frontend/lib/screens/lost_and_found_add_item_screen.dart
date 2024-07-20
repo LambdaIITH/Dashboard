@@ -1,4 +1,3 @@
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:dashbaord/constants/enums/lost_and_found.dart';
@@ -7,6 +6,7 @@ import 'package:dashbaord/utils/bold_text.dart';
 import 'package:dashbaord/utils/normal_text.dart';
 import 'package:dashbaord/utils/show_message.dart';
 import 'package:dashbaord/widgets/custom_carousel.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 
 class LostAndFoundAddItemScreen extends StatefulWidget {
@@ -56,9 +56,9 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
   }
 
   void createListing() async {
-    if (_images.isEmpty) {
+    if (_images.length < 3) {
       showMessage(
-        msg: "Images cannot be empty",
+        msg: "Please add atleast 3 images",
         context: context,
       );
       return;
@@ -107,6 +107,13 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
     }
   }
 
+  updateButtonStatus() {
+    return _itemDescriptionController.text.trim().isNotEmpty &&
+        _itemNameController.text.trim().isNotEmpty &&
+        _images.length >= 3 &&
+        _lostOrFound != null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -145,16 +152,19 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
                           height: 350,
                           fromMemory: true,
                         ),
-                        Positioned(
-                          right: 10,
-                          top: 10,
-                          child: CircleAvatar(
-                            backgroundColor: Colors.black12,
-                            child: IconButton(
-                              icon: const Icon(
-                                Icons.add,
+                        Container(
+                          alignment: Alignment.centerRight,
+                          child: Positioned(
+                            right: 10,
+                            top: 10,
+                            child: CircleAvatar(
+                              backgroundColor: Colors.black12,
+                              child: IconButton(
+                                icon: const Icon(
+                                  Icons.add,
+                                ),
+                                onPressed: pickImage,
                               ),
-                              onPressed: pickImage,
                             ),
                           ),
                         )
@@ -192,29 +202,54 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    SizedBox(
-                      width: min(200, screenWidth * 0.35),
+                    Container(
+                      width: screenWidth * 0.4,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12)),
                       child: TextField(
-                        decoration: const InputDecoration(
-                          contentPadding: EdgeInsets.all(10),
+                        onChanged: (v) {
+                          setState(() {});
+                        },
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black,
+                        ),
+                        decoration: InputDecoration(
+                          contentPadding: const EdgeInsets.all(10),
                           filled: true,
                           fillColor: Colors.black12,
                           hintText: 'Title...',
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none),
                         ),
                         controller: _itemNameController,
                       ),
                     ),
                     SizedBox(
-                      width: min(200, screenWidth * 0.35),
+                      width: screenWidth * 0.4,
                       child: DropdownButtonFormField(
-                        decoration: const InputDecoration(
-                          contentPadding: EdgeInsets.all(10),
+                        hint: Text(
+                          'Lost / Found',
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        decoration: InputDecoration(
+                          contentPadding: const EdgeInsets.all(10),
                           filled: true,
                           fillColor: Colors.black12,
-                          hintText: 'Lost / Found',
+                          // hintText: 'Lost / Found',
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none),
                         ),
                         onChanged: (value) {
-                          _lostOrFound = value;
+                          setState(() {
+                            _lostOrFound = value;
+                          });
                         },
                         items: const [
                           DropdownMenuItem(
@@ -231,15 +266,26 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: TextField(
-                  decoration: const InputDecoration(
-                    contentPadding: EdgeInsets.all(10),
+                  style: GoogleFonts.inter(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black,
+                  ),
+                  onChanged: (v) {
+                    setState(() {});
+                  },
+                  decoration: InputDecoration(
+                    contentPadding: const EdgeInsets.all(10),
                     filled: true,
                     fillColor: Colors.black12,
-                    hintText: 'Add Details...',
+                    hintText: 'Add more details about the item.',
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none),
                   ),
                   controller: _itemDescriptionController,
                   minLines: 5,
@@ -247,18 +293,58 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              ListTile(
-                contentPadding:
-                    EdgeInsets.symmetric(horizontal: screenWidth * 0.3),
-                title: FilledButton(
-                  style: ButtonStyle(
-                    backgroundColor: WidgetStateColor.resolveWith(
-                        (_) => const Color(0xB2FE724C)),
+              // ListTile(
+              //   contentPadding:
+              //       EdgeInsets.symmetric(horizontal: screenWidth * 0.3),
+              //   title: FilledButton(
+              //     style: ButtonStyle(
+              //       backgroundColor: WidgetStateColor.resolveWith(
+              //           (_) => const Color(0xB2FE724C)),
+              //     ),
+              //     onPressed: createListing,
+              //     child: const Text('Post'),
+              //   ),
+              // )
+
+              Container(
+                alignment: Alignment.bottomCenter,
+                margin: const EdgeInsets.only(bottom: 16),
+                child: TextButton(
+                  onPressed: !updateButtonStatus()
+                      ? null
+                      : () {
+                          createListing();
+                        },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10.0),
+                      color: !updateButtonStatus()
+                          ? Colors.grey
+                          : const Color.fromRGBO(254, 114, 76, 0.70),
+                      boxShadow: const [
+                        BoxShadow(
+                          color:
+                              Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
+                          offset: Offset(0, 8), // Offset in the x, y direction
+                          blurRadius: 21.0,
+                          spreadRadius: 4.0,
+                        ),
+                      ],
+                    ),
+                    width: double.infinity,
+                    height: 60,
+                    alignment: Alignment.center,
+                    child: Text(
+                      'Add Cab',
+                      style: GoogleFonts.inter(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black,
+                      ),
+                    ),
                   ),
-                  onPressed: createListing,
-                  child: const Text('Post'),
                 ),
-              )
+              ),
             ],
           ),
         ),

@@ -1,3 +1,4 @@
+import 'package:dashbaord/utils/loading_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:dashbaord/models/lost_and_found_model.dart';
 import 'package:dashbaord/services/analytics_service.dart';
@@ -123,7 +124,7 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
                 ),
               );
             default:
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: CustomLoadingScreen());
           }
         },
       ),
