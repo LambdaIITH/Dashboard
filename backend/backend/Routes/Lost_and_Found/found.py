@@ -1,15 +1,17 @@
 import os, shutil
 import json
 from fastapi import APIRouter, HTTPException, Request, status, UploadFile, File, Form
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Tuple
 from Routes.Auth.cookie import get_user_id
 from utils import *
 from models import LfItem, LfResponse
 from queries.found import *
 from utils import S3Client
-
+from .funcs import get_image_dict, authorize_edit_delete
 
 router = APIRouter(prefix="/found", tags=["found"])
+
+
 
 # add found item 
 @router.post("/add_item")
@@ -52,14 +54,9 @@ async def get_all_found_item_names() -> List[Dict[str, Any]]:
             cur.execute("SELECT id,item_name FROM found ORDER BY created_at DESC")
             rows = cur.fetchall()
             
-            cur.execute("SELECT image_url, item_id from found_images")
+            cur.execute("SELECT item_id, image_url from found_images")
             images = cur.fetchall()
-            
-            image_dict = {}
-            for image in images:
-                if image[1] not in image_dict:
-                    image_dict[image[1]] = []
-                image_dict[image[1]].append(image[0])
+            image_dict = get_image_dict(images)
                 
             rows = list(map(lambda x: {"id": x[0], "name": x[1], "images": image_dict.get(x[0], [])}, rows))
             return rows        
@@ -73,8 +70,13 @@ async def get_all_found_item_names() -> List[Dict[str, Any]]:
 def show_found_items(id: int) -> LfResponse:
     try:   
         with conn.cursor() as cur: 
+            print('hello')
             cur.execute(get_particular_found_item(id))
-            found_item = cur.fetchall()[0]
+            found_item = cur.fetchall()
+            
+            if found_item == []:
+                raise HTTPException(status_code=404, detail="Item not found")
+            found_item = found_item[0]
             cur.execute(get_all_image_uris(id))
             found_images = cur.fetchall()
             image_urls = list(map(lambda x: x[0], found_images))
@@ -82,7 +84,7 @@ def show_found_items(id: int) -> LfResponse:
             return res
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Failed to fetch items")
+        raise HTTPException(status_code=500, detail=f"Failed to fetch items: {e}")
 
 
 # delete a found item 
@@ -90,13 +92,7 @@ def show_found_items(id: int) -> LfResponse:
 def delete_found_item( request: Request, item_id: int = Form(...)) -> Dict[str, str]: 
     user_id = get_user_id(request)
     try: 
-        with conn.cursor() as cur: 
-            cur.execute( f"SELECT found.user_id FROM found WHERE found.id = {item_id}" )
-            authorized_id = cur.fetchone()[0] 
-        
-        authorized_id = str(authorized_id) 
-        if authorized_id != user_id: 
-            raise HTTPException( status_code=status.HTTP_401_UNAUTHORIZED , detail="User not Authorized" )
+        authorize_edit_delete("found", item_id, user_id, conn)
     except Exception as e: 
         raise HTTPException( status_code=500, detail= f"Error: {e}" )
     
@@ -115,17 +111,11 @@ def delete_found_item( request: Request, item_id: int = Form(...)) -> Dict[str, 
 
 # Update a found item    
 @router.put( "/edit_item" )
-def edit_selected_item( request: Request, item_id: int = Form(...),  form_data:str = Form(...),images: List[UploadFile]  = File(default = None) ) -> Dict[str, str]:
+def edit_selected_item( request: Request, item_id: int = Form(...),  form_data:str = Form(...) ) -> Dict[str, str]:
     # checking authorization
     user_id = get_user_id(request)
     try: 
-        with conn.cursor() as cur: 
-            cur.execute( f"SELECT found.user_id FROM found WHERE found.id = {item_id}" )
-            authorized_id = cur.fetchone()[0] 
-        
-        authorized_id = str(authorized_id) 
-        if authorized_id != user_id: 
-            raise HTTPException( status_code=status.HTTP_401_UNAUTHORIZED , detail="User not Authorized" )
+        authorize_edit_delete("found", item_id, user_id, conn)
     except Exception as e: 
         raise HTTPException( status_code=500, detail= f"Error: {e}" )
     
@@ -138,17 +128,7 @@ def edit_selected_item( request: Request, item_id: int = Form(...),  form_data:s
             cur.execute( update_in_found_table( item_id, form_data_dict ) )
             row = cur.fetchone()
             item = LfItem.from_row(row)
-            
-        
-            
-            S3Client.deleteFromCloud( item_id, "found")
-            cur.execute(delete_an_item_images(item_id))
-            if images is not None:
-                image_paths = S3Client.uploadToCloud(images, item_id, "found")
-                cur.execute(insert_found_images(image_paths, item_id))
-                
-            conn.commit()
-    
+        conn.commit()
             
         return {"message": "item updated"}
     except Exception as e: 
@@ -161,7 +141,15 @@ def search(query : str, max_results: int = 100) -> List[Dict[str, Any]]:
         with conn.cursor() as cur: 
             cur.execute( search_found_items( query, max_results ) )
             res = cur.fetchall()
-            res = list( map( lambda x: {"id": x[0], "name": x[1]}, res ) )
+            if len(res) == 0:
+                return []
+            cur.execute(get_some_image_uris([x[0] for x in res]))
+            images = cur.fetchall()
+            
+            image_dict = get_image_dict(images)
+            res = list( map( lambda x: {"id": x[0], "name": x[1], "images": image_dict.get(x[0], [])}, res ) )
+    
+            
         return res
     except Exception as e: 
         raise HTTPException(status_code=500, detail=f"Error: {e}")

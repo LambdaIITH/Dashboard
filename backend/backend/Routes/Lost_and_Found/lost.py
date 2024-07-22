@@ -7,6 +7,7 @@ from utils import *
 from queries.lost import *
 from models import LfItem, LfResponse
 from utils import S3Client
+from .funcs import *
 router = APIRouter(prefix="/lost", tags=["lost"])
 
 # add lost item 
@@ -51,27 +52,27 @@ async def get_all_lost_item_names() -> List[Dict[str, Any]]:
             cur.execute("SELECT image_url, item_id from lost_images")
             images = cur.fetchall()
             
-            image_dict = {}
-            for image in images:
-                if image[1] not in image_dict:
-                    image_dict[image[1]] = []
-                image_dict[image[1]].append(image[0])
-            
+            image_dict = get_image_dict(images)
             rows = list(map(lambda x: {"id": x[0], "name": x[1], "images": image_dict.get(x[0], [])}, rows))
                 
             return rows        
        
     except Exception as e: 
+        conn.rollback()
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="failed to fetch items")
          
 
 # show some lost items with images 
 @router.get("/item/{id}")
-def show_lost_items(id: str) -> LfResponse:
+def show_lost_items(id: int) -> LfResponse:
     try:   
         with conn.cursor() as cur: 
             cur.execute(get_particular_lost_item(id))
-            lost_item = cur.fetchall()[0]
+            
+            lost_item = cur.fetchall()
+            if lost_item == []:
+                raise HTTPException(status_code=404, detail="Item not found")
+            lost_item = lost_item[0]
             cur.execute(get_all_image_uris(id))
             lost_images = cur.fetchall()
             image_urls = list(map(lambda x: x[0], lost_images))
@@ -80,7 +81,8 @@ def show_lost_items(id: str) -> LfResponse:
 
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Failed to fetch items")
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to fetch items: {e}")
 
 
 # delete a lost item 
@@ -88,13 +90,7 @@ def show_lost_items(id: str) -> LfResponse:
 def delete_lost_item(request: Request, item_id: int = Form(...) ) -> Dict[str, str]:   
     user_id = get_user_id(request)
     try: 
-        
-        with conn.cursor() as cur: 
-            cur.execute( f"SELECT lost.user_id FROM lost WHERE lost.id = {item_id}" )
-            authorized_id = cur.fetchone()[0] 
-        
-        if authorized_id != user_id: 
-            raise HTTPException( status_code=status.HTTP_401_UNAUTHORIZED , detail="User not Authorized" )
+        authorize_edit_delete("lost", item_id, user_id, conn)
     except Exception as e: 
         raise HTTPException( status_code=500, detail= f"Error: {e}" )
         
@@ -109,22 +105,19 @@ def delete_lost_item(request: Request, item_id: int = Form(...) ) -> Dict[str, s
         return {"message": "Item deleted successfully!"}
                
     except Exception as e: 
+        conn.rollback()
         raise HTTPException(status_code=500, detail="Failed to fetch items")
 
 
 # Update a lost item    
 @router.put( "/edit_item" )
-def edit_selected_item(request: Request, item_id: int = Form(...),  form_data:str = Form(...),images: List[UploadFile]  = File(default = None) ) -> Dict[str, str]:
+def edit_selected_item(request: Request, item_id: int = Form(...),  form_data:str = Form(...)) -> Dict[str, str]:
     # checking authorization
     user_id = get_user_id(request)
     try: 
-        with conn.cursor() as cur: 
-            cur.execute( f"SELECT lost.user_id FROM lost WHERE lost.id = {item_id}" )
-            authorized_id = cur.fetchone()[0] 
-        
-        if authorized_id != user_id: 
-            raise HTTPException( status_code=status.HTTP_401_UNAUTHORIZED , detail="User not Authorized" )
+        authorize_edit_delete("lost", item_id, user_id, conn)
     except Exception as e: 
+        conn.rollback()
         raise HTTPException( status_code=500, detail= f"Error: {e}" )
     
     
@@ -137,12 +130,6 @@ def edit_selected_item(request: Request, item_id: int = Form(...),  form_data:st
             row = cur.fetchone()
             item = LfItem.from_row(row)
             
-        
-            S3Client.deleteFromCloud( item_id, "lost" )
-            cur.execute(delete_an_item_images(item_id))
-            if images is not None:
-                image_paths = S3Client.uploadToCloud(images, item_id, "lost")
-                cur.execute(insert_lost_images(image_paths, item_id))
             conn.commit()
         
             
@@ -159,7 +146,16 @@ def search(query : str, max_results: int = 100) -> List[Dict[str, Any]] :
         with conn.cursor() as cur: 
             cur.execute( search_lost_items( query, max_results ) )
             res = cur.fetchall()
-            res = list( map( lambda x: {"id": x[0], "name": x[1]}, res ) )
+            
+            if len(res) == 0:
+                return []
+            cur.execute(get_some_image_uris([x[0] for x in res]))
+            images = cur.fetchall()
+            
+            image_dict = get_image_dict(images)
+            res = list( map( lambda x: {"id": x[0], "name": x[1], "images": image_dict.get(x[0], [])}, res ) )
+    
         return res
     except Exception as e: 
+        conn.rollback()
         raise HTTPException(status_code=500, detail=f"Error: {e}")
