@@ -245,7 +245,11 @@ class _HomeScreenState extends State<HomeScreen> {
                               ? showError()
                               : Navigator.of(context).push(MaterialPageRoute(
                                   builder: (context) => CabSharingScreen(
-                                    usersEmail: userModel?.email ?? '',
+                                    image: image,
+                                    user: userModel ??
+                                        UserModel(
+                                            email: "user@iith.ac.in",
+                                            name: "User"),
                                   ),
                                 ));
                         },

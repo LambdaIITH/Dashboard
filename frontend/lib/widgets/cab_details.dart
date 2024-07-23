@@ -1,3 +1,4 @@
+import 'package:dashbaord/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:dashbaord/services/api_service.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,14 +8,14 @@ import 'package:dashbaord/models/booking_model.dart';
 class CabCard extends StatefulWidget {
   final bool isExpanded;
   final BookingModel cab;
-  final String usersEmail;
+  final UserModel user;
   final Function onRefresh;
 
   const CabCard(
       {super.key,
       this.isExpanded = false,
       required this.cab,
-      required this.usersEmail,
+      required this.user,
       required this.onRefresh});
 
   @override
@@ -328,8 +329,8 @@ class _CabCardState extends State<CabCard> {
   }
 
   bool isUserAlreadyATraveller() {
-    return widget.cab.ownerEmail == widget.usersEmail ||
-        widget.cab.travellers.any((t) => t.email == widget.usersEmail);
+    return widget.cab.ownerEmail == widget.user.email ||
+        widget.cab.travellers.any((t) => t.email == widget.user.email);
   }
 
   @override
@@ -520,7 +521,7 @@ class _CabCardState extends State<CabCard> {
                           ),
                           !isUserAlreadyATraveller()
                               ? widget.cab.requests
-                                      .any((r) => r.email == widget.usersEmail)
+                                      .any((r) => r.email == widget.user.email)
                                   ? Expanded(
                                       flex: 1,
                                       child: Align(
@@ -590,7 +591,7 @@ class _CabCardState extends State<CabCard> {
                                         ),
                                       ),
                                     )
-                              : widget.cab.ownerEmail == widget.usersEmail
+                              : widget.cab.ownerEmail == widget.user.email
                                   ? Expanded(
                                       flex: 1,
                                       child: Align(
@@ -666,11 +667,11 @@ class _CabCardState extends State<CabCard> {
                                     )
                         ],
                       ),
-                      widget.cab.ownerEmail == widget.usersEmail &&
+                      widget.cab.ownerEmail == widget.user.email &&
                               widget.cab.requests.isNotEmpty
                           ? const SizedBox(height: 15.0)
                           : const SizedBox(),
-                      widget.cab.ownerEmail == widget.usersEmail &&
+                      widget.cab.ownerEmail == widget.user.email &&
                               widget.cab.requests.isNotEmpty
                           ? Column(
                               mainAxisAlignment: MainAxisAlignment.start,

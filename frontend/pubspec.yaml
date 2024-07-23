@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.5+5
+version: 1.0.7+7
 
 environment:
   sdk: '>=3.2.3 <4.0.0'
@@ -56,7 +56,7 @@ dependencies:
   web: ^0.5.1
   shared_preferences: ^2.2.3
   cached_network_image: ^3.3.1
-  # flutter_native_splash: ^2.4.1
+  flutter_native_splash: ^2.4.1
   in_app_update: ^4.2.3
   package_info_plus: ^8.0.0
   url_launcher: ^6.3.0
@@ -72,17 +72,17 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
 
-# flutter_native_splash:
-#   color: "#ffffff"
-#   image: assets/icons/logo.png
-#   color_dark: "#ffffff"
-#   image_dark: assets/icons/logo.png
+flutter_native_splash:
+  color: "#ffffff"
+  image: assets/icons/logo.png
+  color_dark: "#ffffff"
+  image_dark: assets/icons/logo.png
 
-#   android_12:
-#     image: assets/icons/logo.png
-#     icon_background_color: "#ffffff"
-#     image_dark: assets/icons/logo.png
-#     icon_background_color_dark: "#ffffff"
+  android_12:
+    image: assets/icons/logo.png
+    icon_background_color: "#ffffff"
+    image_dark: assets/icons/logo.png
+    icon_background_color_dark: "#ffffff"
 
 
 # For information on the generic Dart part of this file, see the

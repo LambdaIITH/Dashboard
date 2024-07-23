@@ -1,3 +1,4 @@
+import 'package:dashbaord/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:dashbaord/models/booking_model.dart';
 import 'package:dashbaord/models/travellers.dart';
@@ -8,8 +9,10 @@ import 'package:dashbaord/services/api_service.dart';
 import 'package:intl/intl.dart';
 
 class CabAddScreen extends StatefulWidget {
-  final String usersEmail;
-  const CabAddScreen({Key? key, required this.usersEmail}) : super(key: key);
+  final UserModel user;
+  final String image;
+  const CabAddScreen({Key? key, required this.user, required this.image})
+      : super(key: key);
   @override
   State<CabAddScreen> createState() => _CabAddScreenState();
 }
@@ -40,7 +43,7 @@ class _CabAddScreenState extends State<CabAddScreen> {
   @override
   void initState() {
     super.initState();
-    getUserDetails();
+    // getUserDetails();
     commentController.addListener(updateButtonStatus);
   }
 
@@ -130,7 +133,7 @@ class _CabAddScreenState extends State<CabAddScreen> {
   ApiServices apiServices = ApiServices();
 
   UserModel? userDetails;
-  void getUserDetails() async {
+  Future<void> getUserDetails() async {
     final user = await apiServices.getUserDetails(context);
     setState(() {
       userDetails = user;
@@ -147,21 +150,29 @@ class _CabAddScreenState extends State<CabAddScreen> {
 
   void createCab() async {
     // Check for phone number
+    await getUserDetails();
+
     if (userDetails?.phone == null || userDetails?.phone == '') {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Phone Number not added'),
-          content: const Text(
+          title: Text(
+            'Attention!',
+            style: GoogleFonts.inter(),
+          ),
+          content: Text(
             'Please update your phone number in the profile section before adding a cab.',
+            style: GoogleFonts.inter(),
           ),
           actions: <Widget>[
             TextButton(
               child: const Text('OK'),
               onPressed: () {
-                if (Navigator.of(context).canPop()) {
-                  Navigator.of(context).pop();
-                }
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (ctx) => ProfileScreen(
+                            user: widget.user, image: widget.image)));
               },
             ),
           ],
@@ -201,8 +212,11 @@ class _CabAddScreenState extends State<CabAddScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-              builder: (context) =>
-                  CabAddSuccess(usersEmail: widget.usersEmail)),
+            builder: (context) => CabAddSuccess(
+              user: widget.user,
+              image: widget.image,
+            ),
+          ),
         );
       } else {
         showErrorDialog(context, res["error"]);
