@@ -116,12 +116,12 @@ class LfResponse(BaseModel):
     item_description: str 
     created_at: datetime
     image_urls: List[str] 
-    @classmethod
-    def from_im_items(cls, item: LfItem):
-        return LfResponse(item_name = item.item_name, item_description= item.item_description, created_at= item.created_at, image_urls= item.image_urls)
+    user_email: str
+    username: str
+    
     @classmethod
     def from_row(cls, row: tuple, image_urls: List[str] ):
-        return LfResponse(id = row[0], item_name=row[1], item_description=row[2], created_at=row[3], image_urls=image_urls)
+        return LfResponse(id = row[0], item_name=row[1], item_description=row[2], created_at=row[3], image_urls=image_urls,user_email=row[6], username=row[7])
     
 class image_info(BaseModel):
     id: int

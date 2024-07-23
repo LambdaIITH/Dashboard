@@ -3,7 +3,7 @@ from pypika import Query, Table, functions as fn, Order
 from typing import Dict, Any
 
 lost_table, lost_images_table = Table('lost'), Table('lost_images')
-
+users = Table("users")
 def insert_in_lost_table( form_data: Dict[str, Any], user_id: int ): 
     query = Query.into(lost_table).columns('item_name', 'item_description', 'user_id').insert(
         form_data['item_name'], form_data['item_description'], user_id
@@ -46,7 +46,6 @@ def get_all_lost_items():
             
     return query
 
-
 def update_in_lost_table( item_id: int, form_data: Dict[str, Any]):
     query = Query.update(lost_table)
 
@@ -59,7 +58,11 @@ def update_in_lost_table( item_id: int, form_data: Dict[str, Any]):
     return query
 
 def get_particular_lost_item(item_id: int):
-    query = Query.from_(lost_table).select('*').where(lost_table['id'] == item_id)
+    query = (Query.from_(lost_table)
+             .join(users)
+             .on(users['id'] == lost_table['user_id'])
+             .select('*')
+             .where(lost_table['id'] == item_id))
     return str(query)
 
 def delete_an_item_images(item_id:int):
@@ -77,4 +80,8 @@ def search_lost_items(search_query: str, max_results: int= 10):
     .orderby(lost_table['created_at'], order=Order.desc)
     .limit(max_results)
     )
+    return str(query)
+
+def get_some_image_uris(item_ids : list):
+    query = Query.from_(lost_images_table).select(lost_images_table['item_id'], lost_images_table['image_url']).where(lost_images_table['item_id'].isin(item_ids))
     return str(query)
