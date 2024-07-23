@@ -5,7 +5,6 @@ from typing import Dict, List, Union
 from Routes.Auth.cookie import get_user_id
 from fastapi import Depends, FastAPI, HTTPException, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
-from pytz import timezone
 from utils import conn, queries
 from queries.user import get_user_email
 import Routes.CabSharing.schemas as schemas
@@ -68,8 +67,8 @@ async def create_booking(
     try:
         booking_id = queries.create_booking(
             conn,
-            start_time=booking.start_time.astimezone(timezone("Asia/Kolkata")),
-            end_time=booking.end_time.astimezone(timezone("Asia/Kolkata")),
+            start_time=booking.start_time,
+            end_time=booking.end_time,
             capacity=booking.capacity,
             from_loc=from_id,
             to_loc=to_id,
@@ -113,8 +112,8 @@ async def update_booking(
 
         queries.update_booking(
             conn,
-            start_time=patch.start_time.astimezone(timezone("Asia/Kolkata")),
-            end_time=patch.end_time.astimezone(timezone("Asia/Kolkata")),
+            start_time=patch.start_time,
+            end_time=patch.end_time,
             cab_id=booking_id,
         )
         conn.commit()
