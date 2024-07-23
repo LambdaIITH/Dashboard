@@ -7,23 +7,25 @@ import 'package:google_fonts/google_fonts.dart';
 class HomeCardNoOptions extends StatelessWidget {
   final String title;
   final dynamic child;
-  final bool isimage;
+  final bool isLnF;
+  final bool isComingSoon;
   final void Function() onTap;
-  const HomeCardNoOptions({
-    super.key,
-    required this.title,
-    required this.child,
-    required this.onTap,
-    this.isimage = true,
-  });
+  const HomeCardNoOptions(
+      {super.key,
+      required this.title,
+      required this.child,
+      required this.onTap,
+      this.isLnF = false,
+      this.isComingSoon = true});
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     return InkWell(
-      onTap: onTap,
+      onTap: isComingSoon ? null : onTap,
       child: Container(
-        height: isimage ? 140 : 180,
+        clipBehavior: Clip.hardEdge,
+        height: 140,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(10),
@@ -36,33 +38,52 @@ class HomeCardNoOptions extends StatelessWidget {
             ),
           ],
         ),
-        clipBehavior: Clip.hardEdge,
         child: Stack(
           children: [
-            Positioned(
-              top: 15,
-              left: 18,
-              child: Text(
-                title,
-                style: GoogleFonts.inter().copyWith(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 28,
-                ),
-              ),
-            ),
-            isimage
-                ? Positioned(
-                    bottom: -13,
-                    right: -7,
-                    child: SvgPicture.asset(
-                      child,
-                      width: min(0.5 * screenWidth, 200),
+            Stack(
+              children: [
+                Positioned(
+                  top: 15,
+                  left: 18,
+                  child: Text(
+                    title,
+                    style: GoogleFonts.inter(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 28,
                     ),
-                  )
-                : Positioned(
-                    bottom: 13,
-                    child: SizedBox(width: 350, child: child),
                   ),
+                ),
+                isLnF
+                    ? Positioned(
+                        bottom: -13,
+                        right: -7,
+                        child: SvgPicture.asset(
+                          child,
+                          width: min(0.42 * screenWidth, 200),
+                        ),
+                      )
+                    : Positioned(
+                        bottom: -13,
+                        right: -7,
+                        child: SvgPicture.asset(
+                          child,
+                          width: min(0.5 * screenWidth, 200),
+                        ),
+                      )
+              ],
+            ),
+            if (isComingSoon)
+              Container(
+                // width: double.infinity,
+                // height: double.infinity,
+                decoration: BoxDecoration(color: Colors.white.withOpacity(0.5)),
+                child: Center(
+                    child: SizedBox(
+                        height: 100,
+                        child: Image.asset(
+                          "assets/icons/comingsoon.png",
+                        ))),
+              )
           ],
         ),
       ),

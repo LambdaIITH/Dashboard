@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/widgets/calendar_item.dart';
+import 'package:dashbaord/widgets/calendar_item.dart';
 
 class TimeTableScreen extends StatefulWidget {
   const TimeTableScreen({super.key});

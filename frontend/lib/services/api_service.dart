@@ -1,17 +1,19 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:frontend/models/booking_model.dart';
-import 'package:frontend/models/mess_menu_model.dart';
-import 'package:frontend/models/user_model.dart';
+import 'package:dashbaord/constants/enums/lost_and_found.dart';
+import 'package:dashbaord/models/booking_model.dart';
+import 'package:dashbaord/models/mess_menu_model.dart';
+import 'package:dashbaord/models/user_model.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
-import 'package:frontend/utils/bus_schedule.dart';
+import 'package:dashbaord/utils/bus_schedule.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -137,6 +139,30 @@ class ApiServices {
         return null;
       }
 
+      final data = response.data;
+      return UserModel(
+          email: data['email'],
+          name: data['name'],
+          cr: data['cr'],
+          phone: data['phone_number'],
+          id: data['id']);
+    } catch (e) {
+      debugPrint("Failed to fetch bus schedule: $e");
+      return null;
+    }
+  }
+
+  Future<UserModel?> updatePhoneNumber(
+      BuildContext context, String phone) async {
+    try {
+      debugPrint("Making request to: ${dio.options.baseUrl}/user");
+      final response =
+          await dio.patch('/user/update', data: {"phone_number": phone});
+
+      if (response.statusCode == 401) {
+        await logout(context);
+        return null;
+      }
       final data = response.data;
       return UserModel(
           email: data['email'],
@@ -420,4 +446,208 @@ class ApiServices {
   }
 
   // ====================PROFILE PAGE ENDS===================================
+  // ====================Lost and found starts=====================================
+  Future<Map<String, dynamic>> getLostAndFoundItems() async {
+    try {
+      final response = await dio.get('/lost/all');
+      final response2 = await dio.get('/found/all');
+      final items = (response.data as List).map(
+        (e) {
+          e['lostOrFound'] = LostOrFound.lost;
+          return e;
+        },
+      ).toList();
+      items.addAll(
+        (response2.data as List).map(
+          (e) {
+            e['lostOrFound'] = LostOrFound.found;
+            return e;
+          },
+        ),
+      );
+      debugPrint(items.toString());
+      return {'status': response.statusCode, 'items': items};
+    } on DioException catch (e) {
+      if (e.response != null) {
+        return {
+          'error': e.response?.data['detail'],
+          'status': e.response?.statusCode
+        };
+      }
+      debugPrint("get lf items failed: $e");
+      return {
+        'error': 'get Lost and Found items failed',
+        'status': e.response?.statusCode
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> addLostAndFoundItem({
+    required String itemName,
+    required String itemDescription,
+    required LostOrFound lostOrFound,
+    required List<String> images,
+  }) async {
+    try {
+      final url =
+          "/${lostOrFound == LostOrFound.lost ? "lost" : "found"}/add_item";
+
+      final multiPartList = await Future.wait(images.map((path) async {
+        return MultipartFile.fromFile(path, filename: path.split('/').last);
+      }).toList());
+
+      final formData = FormData.fromMap({
+        "form_data": jsonEncode({
+          "item_name": itemName,
+          "item_description": itemDescription,
+        }),
+        "images": multiPartList,
+      });
+
+      final response = await dio.post(url, data: formData);
+      debugPrint(response.statusMessage);
+      debugPrint("success");
+      return {'status': response.statusCode};
+    } on DioException catch (e) {
+      if (e.response != null) {
+        debugPrint(e.response.toString());
+        return {
+          'error': e.response?.data?['detail'],
+          'status': e.response?.statusCode
+        };
+      }
+      debugPrint("add lf items failed: $e");
+      return {
+        'error': 'add Lost and Found items failed',
+        'status': e.response?.statusCode
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> getLostAndFoundItem({
+    required String id,
+    required LostOrFound lostOrFound,
+  }) async {
+    try {
+      final url =
+          "/${lostOrFound == LostOrFound.lost ? "lost" : "found"}/item/$id";
+
+      // TODO
+      final response = await dio.get(url);
+      response.data['lostOrFound'] = lostOrFound == LostOrFound.found
+          ? LostOrFound.found
+          : LostOrFound.lost;
+      return {'status': response.statusCode, 'item': response.data};
+    } on DioException catch (e) {
+      if (e.response != null) {
+        return {
+          'error': e.response?.data['detail'],
+          'status': e.response?.statusCode
+        };
+      }
+      debugPrint("get lf items failed: $e");
+      return {
+        'error': 'get Lost and Found items failed',
+        'status': e.response?.statusCode
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> deleteLostAndFoundItem({
+    required String id,
+    required LostOrFound lostOrFound,
+  }) async {
+    try {
+      final url =
+          "/${lostOrFound == LostOrFound.lost ? "lost" : "found"}/delete_item";
+
+      final formData = FormData.fromMap({"item_id": id});
+      final response = await dio.delete(url, data: formData);
+      return {'status': response.statusCode};
+    } on DioException catch (e) {
+      if (e.response != null) {
+        return {
+          'error': e.response?.data['detail'],
+          'status': e.response?.statusCode
+        };
+      }
+      debugPrint("get lf items failed: $e");
+      return {
+        'error': 'get Lost and Found items failed',
+        'status': e.response?.statusCode
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> editLostAndFounditem({
+    required String itemName,
+    required String id,
+    required String itemDescription,
+    required LostOrFound lostOrFound,
+    required List<String> images,
+  }) async {
+    try {
+      final url =
+          "/${lostOrFound == LostOrFound.lost ? "lost" : "found"}/edit_item";
+
+      // TODO
+      final response = await dio.put(url, data: {
+        "id": id,
+        "itemName": itemName,
+        "itemDescription": itemDescription,
+        "images": images,
+      });
+      return {'status': response.statusCode};
+    } on DioException catch (e) {
+      if (e.response != null) {
+        return {
+          'error': e.response?.data['detail'],
+          'status': e.response?.statusCode
+        };
+      }
+      debugPrint("edit lf items failed: $e");
+      return {
+        'error': 'edit Lost and Found items failed',
+        'status': e.response?.statusCode
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> searchLostAndFoundItems(String search) async {
+    try {
+      final response = await dio.get('/lost/search?query=$search');
+      final response2 = await dio.get('/found/search?query=$search');
+      final items = (response.data as List).map(
+        (e) {
+          e['lostOrFound'] = LostOrFound.lost;
+          return e;
+        },
+      ).toList();
+      items.addAll(
+        (response2.data as List).map(
+          (e) {
+            e['lostOrFound'] = LostOrFound.found;
+            return e;
+          },
+        ),
+      );
+      debugPrint('searching: ${response.statusCode}');
+      debugPrint(items.toString());
+      return {'status': response.statusCode, 'items': items};
+    } on DioException catch (e) {
+      if (e.response != null) {
+        return {
+          'error': e.response?.data['detail'],
+          'status': e.response?.statusCode
+        };
+      }
+      debugPrint("get lf items failed: $e");
+      return {
+        'error': 'get Lost and Found items failed',
+        'status': e.response?.statusCode
+      };
+    }
+  }
+
+  // ====================Lost and found ends=====================================
 }

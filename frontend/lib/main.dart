@@ -3,14 +3,13 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:frontend/constants/app_theme.dart';
-import 'package:frontend/firebase_options.dart';
-import 'package:frontend/screens/home_screen.dart';
-import 'package:frontend/screens/login_screen.dart';
-import 'package:frontend/screens/splash_screen.dart';
-import 'package:frontend/services/analytics_service.dart';
-import 'package:frontend/services/api_service.dart';
-import 'package:package_info_plus/package_info_plus.dart';
+import 'package:dashbaord/constants/app_theme.dart';
+import 'package:dashbaord/firebase_options.dart';
+import 'package:dashbaord/screens/home_screen.dart';
+import 'package:dashbaord/screens/login_screen.dart';
+import 'package:dashbaord/screens/splash_screen.dart';
+import 'package:dashbaord/services/analytics_service.dart';
+import 'package:dashbaord/services/api_service.dart';
 
 void main() async {
   await dotenv.load(fileName: ".env");
@@ -61,6 +60,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'Dashboard',
       debugShowCheckedModeBanner: false,
       theme: appTheme,
       navigatorObservers: [_analyticsService.getAnalyticsObserver()],

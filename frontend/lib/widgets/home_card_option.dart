@@ -50,7 +50,7 @@ class HomeCardOption extends StatelessWidget {
                     width: 0.3 * screenWidth,
                     child: Text(
                       title,
-                      style: GoogleFonts.inter().copyWith(
+                      style: GoogleFonts.inter(
                         fontWeight: FontWeight.w500,
                         fontSize: 20,
                         color: const Color(0xff454545),

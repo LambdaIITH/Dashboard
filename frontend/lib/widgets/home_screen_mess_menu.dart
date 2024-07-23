@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/models/mess_menu_model.dart';
-import 'package:frontend/screens/mess_menu_screen.dart';
-import 'package:frontend/widgets/home_mess_component.dart';
+import 'package:dashbaord/models/mess_menu_model.dart';
+import 'package:dashbaord/screens/mess_menu_screen.dart';
+import 'package:dashbaord/widgets/home_mess_component.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
@@ -92,7 +92,7 @@ class HomeScreenMessMenu extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 18, top: 15),
                 child: Text(
                   'Mess Menu',
-                  style: GoogleFonts.inter().copyWith(
+                  style: GoogleFonts.inter(
                     fontWeight: FontWeight.bold,
                     fontSize: 28,
                   ),
@@ -146,7 +146,7 @@ class HomeScreenMessMenu extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 18, top: 15),
                 child: Text(
                   'Mess Menu',
-                  style: GoogleFonts.inter().copyWith(
+                  style: GoogleFonts.inter(
                     fontWeight: FontWeight.bold,
                     fontSize: 28,
                   ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/widgets/home_card_option.dart';
+import 'package:dashbaord/widgets/home_card_option.dart';
 
 class HomeCardTwoOptions extends StatelessWidget {
   final String title;

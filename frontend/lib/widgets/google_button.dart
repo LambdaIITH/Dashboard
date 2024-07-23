@@ -1,10 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:frontend/screens/home_screen.dart';
-import 'package:frontend/services/analytics_service.dart';
-import 'package:frontend/services/api_service.dart';
-import 'package:frontend/utils/loading_widget.dart';
+import 'package:dashbaord/screens/home_screen.dart';
+import 'package:dashbaord/services/analytics_service.dart';
+import 'package:dashbaord/services/api_service.dart';
+import 'package:dashbaord/utils/loading_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -38,66 +39,65 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
     );
   }
 
-  // Future<void> silentLogin() async {
-  //   try {
-  //     final GoogleSignInAccount? googleUser =
-  //         await _googleSignIn.signInSilently();
-  //     if (googleUser == null) {
-  //       return;
-  //     }
+  Future<void> silentLogin() async {
+    try {
+      final GoogleSignInAccount? googleUser =
+          await _googleSignIn.signInSilently();
+      if (googleUser == null) {
+        return;
+      }
 
-  //     final GoogleSignInAuthentication googleAuth =
-  //         await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
 
-  //     final AuthCredential credential = GoogleAuthProvider.credential(
-  //       accessToken: googleAuth.accessToken,
-  //       idToken: googleAuth.idToken,
-  //     );
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
 
-  //     await FirebaseAuth.instance.signInWithCredential(credential);
+      await FirebaseAuth.instance.signInWithCredential(credential);
 
-  //     var result = await ApiServices().login(googleAuth.idToken ?? 'aa45');
+      var result = await ApiServices().login(googleAuth.idToken ?? 'aa45');
 
-  //     if (result['status'] == 401) {
-  //       showSnackBar(result['error']);
-  //       return;
-  //     }
-  //     if (result['user'] == null) {
-  //       showSnackBar('Failed to sign in with Google.');
-  //       return;
-  //     }
-  //     // successfully logged in
-  //     analyticsService.logEvent(name: "Google Login");
+      if (result['status'] == 401) {
+        showSnackBar(result['error']);
+        return;
+      }
+      if (result['user'] == null) {
+        showSnackBar('Failed to sign in with Google.');
+        return;
+      }
+      // successfully logged in
+      analyticsService.logEvent(name: "Google Login");
 
-  //     var email = FirebaseAuth.instance.currentUser?.email ?? '';
+      var email = FirebaseAuth.instance.currentUser?.email ?? '';
 
-  //     if (email.isEmpty) {
-  //       await logout();
-  //       showSnackBar('Error!');
-  //     } else {
-  //       // verifying iith users
-  //       var splitted = email.split('@');
-  //       if (splitted.length > 1 && splitted[1].contains("iith.ac.in")) {
-  //         Navigator.of(context).pushReplacement(MaterialPageRoute(
-  //           builder: (context) => const HomeScreen(
-  //             isGuest: false,
-  //           ),
-  //         ));
-  //       } else {
-  //         await logout();
-  //         showSnackBar('Please login with IITH email-ID');
-  //       }
-  //     }
-  //   } catch (error) {
-  //     showSnackBar('Failed to sign in with Google.');
-  //   }
-  // }
+      if (email.isEmpty) {
+        await logout();
+        showSnackBar('Error!');
+      } else {
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: (context) => const HomeScreen(
+            isGuest: false,
+          ),
+        ));
+      }
+    } catch (error) {
+      showSnackBar('Failed to sign in with Google.');
+    }
+  }
 
   Future<bool> signInWithGoogle() async {
     timeDilation = 1;
     FirebaseAuth auth = FirebaseAuth.instance;
     try {
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      final GoogleSignInAccount? googleUser;
+      if (kIsWeb) {
+        googleUser = await _googleSignIn.signInSilently();
+      } else {
+        googleUser = await _googleSignIn.signIn();
+      }
+
       if (googleUser == null) {
         return false;
       }
@@ -156,7 +156,7 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
   @override
   void initState() {
     super.initState();
-    // silentLogin();
+    silentLogin();
   }
 
   @override
@@ -181,25 +181,21 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
               if (email.isEmpty) {
                 await logout();
                 showSnackBar('Something went wrong');
-                Navigator.of(context).pop(); //POP THE LOADING SCREEN
+                Navigator.of(context).popUntil(
+                    (route) => route.isFirst); //POP THE LOADING SCREEN
               } else {
-                //verifying iith users
-                var splitted = email.split('@');
-                if (splitted.length > 1 && splitted[1].contains("iith.ac.in")) {
-                  Navigator.of(context).pushReplacement(MaterialPageRoute(
-                    builder: (context) => const HomeScreen(
-                      isGuest: false,
+                Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                      builder: (context) => const HomeScreen(
+                        isGuest: false,
+                      ),
                     ),
-                  ));
-                } else {
-                  await logout();
-                  showSnackBar('Please login with IITH email-ID');
-                  Navigator.of(context).pop(); //POP THE LOADING SCREEN
-                }
+                    (Route<dynamic> route) => false);
               }
             } else {
               await logout();
-              Navigator.of(context).pop(); //POP THE LOADING SCREEN
+              Navigator.of(context)
+                  .popUntil((route) => route.isFirst); //POP THE LOADING SCREEN
             }
           },
           borderRadius: BorderRadius.circular(12),

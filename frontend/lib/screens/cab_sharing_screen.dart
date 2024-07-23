@@ -1,18 +1,25 @@
 import 'dart:async';
 
+import 'package:dashbaord/models/user_model.dart';
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/cab_add_screen.dart';
-import 'package:frontend/services/analytics_service.dart';
-import 'package:frontend/utils/loading_widget.dart';
-import 'package:frontend/widgets/cab_details.dart';
-import 'package:frontend/widgets/cab_search_form.dart';
+import 'package:dashbaord/screens/cab_add_screen.dart';
+import 'package:dashbaord/services/analytics_service.dart';
+import 'package:dashbaord/utils/loading_widget.dart';
+import 'package:dashbaord/widgets/cab_details.dart';
+import 'package:dashbaord/widgets/cab_search_form.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:frontend/services/api_service.dart';
-import 'package:frontend/models/booking_model.dart';
+import 'package:dashbaord/services/api_service.dart';
+import 'package:dashbaord/models/booking_model.dart';
 
 class CabSharingScreen extends StatefulWidget {
-  final String usersEmail;
-  const CabSharingScreen({Key? key, required this.usersEmail})
+  final UserModel user;
+  final String image;
+  final bool isMyRide;
+  const CabSharingScreen(
+      {Key? key,
+      required this.user,
+      required this.image,
+      this.isMyRide = false})
       : super(key: key);
   @override
   State<CabSharingScreen> createState() => _CabSharingScreenState();
@@ -45,6 +52,7 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
   @override
   void initState() {
     super.initState();
+    isTabOneSelected = !widget.isMyRide;
     analyticsService.logScreenView(screenName: "Cab Share Screen");
     getAllCabs();
     getUserCabs();
@@ -89,7 +97,7 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
 
   List<BookingModel> allBookings = [];
   List<BookingModel> allBookingsSTORED = [];
-  void getAllCabs() async {
+  getAllCabs() async {
     final cabs = await apiServices.getBookings(context);
     if (cabs.isEmpty && allBookingsSTORED.isNotEmpty) {
       return;
@@ -105,7 +113,7 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
     changeLoadingState();
   }
 
-  void searchCabs(DateTime? startTime, DateTime? endTime,
+  searchCabs(DateTime? startTime, DateTime? endTime,
       String? searchSelectedOption, String? searchSelectedOption2) async {
     final cabs = await apiServices.getBookings(context,
         fromLoc: selectedOption,
@@ -118,7 +126,7 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
   }
 
   List<BookingModel> userBookings = [];
-  void getUserCabs() async {
+  getUserCabs() async {
     final cabs = await apiServices.getUserBookings(context);
     setState(() {
       userBookings = cabs;
@@ -126,7 +134,7 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
     changeLoadingState();
   }
 
-  void openFilterDialog() {
+  openFilterDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -352,7 +360,7 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
                                 );
                               },
                               cab: allBookings[inx],
-                              usersEmail: widget.usersEmail,
+                              user: widget.user,
                             )
                           : null,
                     ),
@@ -392,7 +400,7 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
                           );
                         },
                         cab: userBookings[inx],
-                        usersEmail: widget.usersEmail,
+                        user: widget.user,
                       ),
                     ),
                   ),
@@ -448,12 +456,13 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
       floatingActionButton: isTabOneSelected
           ? Container()
           : FloatingActionButton(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => CabAddScreen(
-                      usersEmail: widget.usersEmail,
+                      user: widget.user,
+                      image: widget.image,
                     ),
                   ),
                 );

@@ -1,19 +1,19 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:frontend/models/mess_menu_model.dart';
-import 'package:frontend/models/user_model.dart';
-import 'package:frontend/screens/cab_sharing_screen.dart';
-import 'package:frontend/screens/lost_and_found_screen.dart';
-import 'package:frontend/services/analytics_service.dart';
-import 'package:frontend/services/api_service.dart';
-import 'package:frontend/services/shared_service.dart';
-import 'package:frontend/utils/bus_schedule.dart';
-import 'package:frontend/utils/loading_widget.dart';
-import 'package:frontend/widgets/home_card_no_options.dart';
-import 'package:frontend/widgets/home_screen_appbar.dart';
-import 'package:frontend/widgets/home_screen_bus_timings.dart';
-import 'package:frontend/widgets/home_screen_mess_menu.dart';
+import 'package:dashbaord/models/mess_menu_model.dart';
+import 'package:dashbaord/models/user_model.dart';
+import 'package:dashbaord/screens/cab_sharing_screen.dart';
+import 'package:dashbaord/screens/lost_and_found_screen.dart';
+import 'package:dashbaord/services/analytics_service.dart';
+import 'package:dashbaord/services/api_service.dart';
+import 'package:dashbaord/services/shared_service.dart';
+import 'package:dashbaord/utils/bus_schedule.dart';
+import 'package:dashbaord/utils/loading_widget.dart';
+import 'package:dashbaord/widgets/home_card_no_options.dart';
+import 'package:dashbaord/widgets/home_screen_appbar.dart';
+import 'package:dashbaord/widgets/home_screen_bus_timings.dart';
+import 'package:dashbaord/widgets/home_screen_mess_menu.dart';
 import 'package:in_app_update/in_app_update.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -105,7 +105,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       setState(() {
-        image = user.photoURL ?? '';
+        image = user.photoURL ??
+            'https://media.istockphoto.com/id/519078727/photo/male-silhouette-as-avatar-profile-picture.jpg?s=2048x2048&w=is&k=20&c=craUhUZK7FB8wYiGDHF0Az0T9BY1bmRHasCHoQbNLlg=';
         changeState();
       });
     } else {
@@ -184,7 +185,7 @@ class _HomeScreenState extends State<HomeScreen> {
     fetchBus();
   }
 
-   checkForUpdates() async {
+  checkForUpdates() async {
     await Future.delayed(const Duration(seconds: 30));
     try {
       var updateInfo = await InAppUpdate.checkForUpdate();
@@ -236,6 +237,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       HomeScreenMessMenu(messMenu: messMenu),
                       const SizedBox(height: 20),
                       HomeCardNoOptions(
+                        isComingSoon: false,
                         title: 'Cab Sharing',
                         child: 'assets/icons/cab-sharing-icon.svg',
                         onTap: () {
@@ -243,15 +245,34 @@ class _HomeScreenState extends State<HomeScreen> {
                               ? showError()
                               : Navigator.of(context).push(MaterialPageRoute(
                                   builder: (context) => CabSharingScreen(
-                                    usersEmail: userModel?.email ?? '',
+                                    image: image,
+                                    user: userModel ??
+                                        UserModel(
+                                            email: "user@iith.ac.in",
+                                            name: "User"),
                                   ),
                                 ));
                         },
                       ),
                       const SizedBox(height: 20),
                       HomeCardNoOptions(
+                        isLnF: true,
                         title: 'Lost & Found',
                         child: 'assets/icons/magnifying-icon.svg',
+                        onTap: widget.isGuest
+                            ? showError
+                            : () => Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const LostAndFoundScreen(),
+                                  ),
+                                ),
+                      ),
+                      const SizedBox(height: 20),
+                      HomeCardNoOptions(
+                        isLnF: true,
+                        title: 'Timetable',
+                        child: 'assets/icons/calendar.svg',
                         onTap: widget.isGuest
                             ? showError
                             : () => Navigator.of(context).push(

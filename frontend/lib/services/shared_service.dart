@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:frontend/models/mess_menu_model.dart';
-import 'package:frontend/utils/bus_schedule.dart';
+import 'package:dashbaord/models/mess_menu_model.dart';
+import 'package:dashbaord/utils/bus_schedule.dart';
 
 class SharedService {
   static const String _keyName = 'user_name';

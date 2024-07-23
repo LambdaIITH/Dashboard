@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/lost_and_found_add_item_screen.dart';
-import 'package:frontend/utils/normal_text.dart';
+import 'package:dashbaord/screens/lost_and_found_add_item_screen.dart';
+import 'package:dashbaord/utils/normal_text.dart';
 
 class LostFoundAddItem extends StatelessWidget {
   const LostFoundAddItem({
@@ -46,9 +46,11 @@ class LostFoundAddItem extends StatelessWidget {
           const SizedBox(height: 24),
           const Padding(
               padding: EdgeInsets.symmetric(horizontal: 10),
-              child: NormalText(
-                text: 'Add a Listing',
-                size: 16,
+              child: Center(
+                child: NormalText(
+                  text: 'Add an Item',
+                  size: 16,
+                ),
               )),
           const SizedBox(height: 10),
         ],

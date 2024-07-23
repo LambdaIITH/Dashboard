@@ -1,15 +1,18 @@
+import 'package:dashbaord/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:frontend/models/booking_model.dart';
-import 'package:frontend/models/travellers.dart';
-import 'package:frontend/models/user_model.dart';
-import 'package:frontend/screens/cab_add_success.dart';
+import 'package:dashbaord/models/booking_model.dart';
+import 'package:dashbaord/models/travellers.dart';
+import 'package:dashbaord/models/user_model.dart';
+import 'package:dashbaord/screens/cab_add_success.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:frontend/services/api_service.dart';
+import 'package:dashbaord/services/api_service.dart';
 import 'package:intl/intl.dart';
 
 class CabAddScreen extends StatefulWidget {
-  final String usersEmail;
-  const CabAddScreen({Key? key, required this.usersEmail}) : super(key: key);
+  final UserModel user;
+  final String image;
+  const CabAddScreen({Key? key, required this.user, required this.image})
+      : super(key: key);
   @override
   State<CabAddScreen> createState() => _CabAddScreenState();
 }
@@ -40,7 +43,7 @@ class _CabAddScreenState extends State<CabAddScreen> {
   @override
   void initState() {
     super.initState();
-    getUserDetails();
+    // getUserDetails();
     commentController.addListener(updateButtonStatus);
   }
 
@@ -130,7 +133,7 @@ class _CabAddScreenState extends State<CabAddScreen> {
   ApiServices apiServices = ApiServices();
 
   UserModel? userDetails;
-  void getUserDetails() async {
+  Future<void> getUserDetails() async {
     final user = await apiServices.getUserDetails(context);
     setState(() {
       userDetails = user;
@@ -147,21 +150,29 @@ class _CabAddScreenState extends State<CabAddScreen> {
 
   void createCab() async {
     // Check for phone number
+    await getUserDetails();
+
     if (userDetails?.phone == null || userDetails?.phone == '') {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Phone Number not added'),
-          content: const Text(
+          title: Text(
+            'Attention!',
+            style: GoogleFonts.inter(),
+          ),
+          content: Text(
             'Please update your phone number in the profile section before adding a cab.',
+            style: GoogleFonts.inter(),
           ),
           actions: <Widget>[
             TextButton(
               child: const Text('OK'),
               onPressed: () {
-                if (Navigator.of(context).canPop()) {
-                  Navigator.of(context).pop();
-                }
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (ctx) => ProfileScreen(
+                            user: widget.user, image: widget.image)));
               },
             ),
           ],
@@ -201,8 +212,11 @@ class _CabAddScreenState extends State<CabAddScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-              builder: (context) =>
-                  CabAddSuccess(usersEmail: widget.usersEmail)),
+            builder: (context) => CabAddSuccess(
+              user: widget.user,
+              image: widget.image,
+            ),
+          ),
         );
       } else {
         showErrorDialog(context, res["error"]);
@@ -299,7 +313,7 @@ class _CabAddScreenState extends State<CabAddScreen> {
                         ),
                       ),
                       Padding(
-                        padding: EdgeInsets.all(10.0),
+                        padding: const EdgeInsets.all(10.0),
                         child: InkWell(
                           borderRadius: BorderRadius.circular(12),
                           onTap: () {
@@ -477,7 +491,7 @@ class _CabAddScreenState extends State<CabAddScreen> {
                           color: const Color(0xffADADAD),
                         ),
                         border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(
+                        contentPadding: const EdgeInsets.symmetric(
                           horizontal: 20.0,
                           vertical: 8.0,
                         ),
@@ -491,7 +505,7 @@ class _CabAddScreenState extends State<CabAddScreen> {
           ),
           Container(
             alignment: Alignment.bottomCenter,
-            margin: EdgeInsets.only(bottom: 16),
+            margin: const EdgeInsets.only(bottom: 16),
             child: TextButton(
               onPressed: !updateButtonStatus()
                   ? null
@@ -574,7 +588,7 @@ class _CabAddScreenState extends State<CabAddScreen> {
         controller: TextEditingController(
           text: dateTime == null
               ? ''
-              : "${DateFormat('yyyy-MM-dd – kk:mm').format(dateTime)}",
+              : DateFormat('yyyy-MM-dd – kk:mm').format(dateTime),
         ),
       ),
     );
