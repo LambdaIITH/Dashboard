@@ -49,7 +49,7 @@ async def get_all_lost_item_names() -> List[Dict[str, Any]]:
         with conn.cursor() as cur: 
             cur.execute("SELECT id, item_name FROM lost ORDER BY created_at DESC")
             rows = cur.fetchall()
-            cur.execute("SELECT image_url, item_id from lost_images")
+            cur.execute("SELECT item_id, image_url from lost_images")
             images = cur.fetchall()
             
             image_dict = get_image_dict(images)
