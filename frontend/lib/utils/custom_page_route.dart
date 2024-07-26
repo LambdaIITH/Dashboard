@@ -14,7 +14,7 @@ class CustomPageRoute extends PageRouteBuilder {
           CurvedAnimation(
               parent: animation,
               curve:
-                  const Interval(0, 0.55))
+                  const Interval(0, 0.4))
           ),
       child: child,
     );

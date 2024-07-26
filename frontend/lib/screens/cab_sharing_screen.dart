@@ -461,7 +461,7 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
                 Navigator.push(
                   context,
                   CustomPageRoute(
-                    startPos: const Offset(0, -1),
+                    startPos: const Offset(0, 1),
                     child: CabAddScreen(
                       user: widget.user,
                       image: widget.image,

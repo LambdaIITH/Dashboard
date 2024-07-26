@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dashbaord/utils/custom_page_route.dart';
 import 'package:flutter/material.dart';
 import 'package:dashbaord/models/user_model.dart';
 import 'package:dashbaord/screens/login_screen.dart';
@@ -79,8 +80,11 @@ class HomeScreenAppBar extends StatelessWidget {
                   if (user == null) {
                     return;
                   }
-                  Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => ProfileScreen(user: user!, image: image,),
+                  Navigator.of(context).push(CustomPageRoute(
+                    child: ProfileScreen(
+                      user: user!,
+                      image: image,
+                    ),
                   ));
                 },
                 child: ClipOval(
