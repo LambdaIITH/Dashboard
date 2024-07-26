@@ -1,3 +1,4 @@
+import 'package:dashbaord/utils/custom_page_route.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -93,12 +94,14 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         changeState();
       });
+      saveUserData('User', 'user@iith.ac.in');
       return;
     }
     setState(() {
       userModel = response;
       changeState();
     });
+    saveUserData(response.name, response.email);
   }
 
   void fetchUserProfile() {
@@ -109,6 +112,10 @@ class _HomeScreenState extends State<HomeScreen> {
             'https://media.istockphoto.com/id/519078727/photo/male-silhouette-as-avatar-profile-picture.jpg?s=2048x2048&w=is&k=20&c=craUhUZK7FB8wYiGDHF0Az0T9BY1bmRHasCHoQbNLlg=';
         changeState();
       });
+
+      SharedService().saveUserImage(
+          image: user.photoURL ??
+              'https://media.istockphoto.com/id/519078727/photo/male-silhouette-as-avatar-profile-picture.jpg?s=2048x2048&w=is&k=20&c=craUhUZK7FB8wYiGDHF0Az0T9BY1bmRHasCHoQbNLlg=');
     } else {
       showError(msg: "User not logged in");
       setState(() {
@@ -135,9 +142,9 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  saveUserData(String name, String email, String image) async {
+  saveUserData(String name, String email) async {
     final ss = SharedService();
-    await ss.saveUserDetails(name: name, email: email, imageUrl: image);
+    await ss.saveUserDetails(name: name, email: email);
   }
 
   int status = 0;
@@ -166,10 +173,10 @@ class _HomeScreenState extends State<HomeScreen> {
     fetchMessMenu();
     fetchBus();
     analyticsService.logScreenView(screenName: "HomeScreen");
-    if (status >= totalOperation) {
-      saveUserData(userModel?.name ?? 'User',
-          userModel?.email ?? 'user@iith.ac.in', image);
-    }
+    // if (status >= totalOperation) {
+    //   saveUserData(userModel?.name ?? 'User',
+    //       userModel?.email ?? 'user@iith.ac.in', image);
+    // }
   }
 
   Future<void> _refresh() async {
@@ -243,8 +250,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         onTap: () {
                           widget.isGuest
                               ? showError()
-                              : Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (context) => CabSharingScreen(
+                              : Navigator.of(context).push(CustomPageRoute(
+                                  child: CabSharingScreen(
                                     image: image,
                                     user: userModel ??
                                         UserModel(
@@ -262,8 +269,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         onTap: widget.isGuest
                             ? showError
                             : () => Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) =>
+                                  CustomPageRoute(
+                                    child:
                                         const LostAndFoundScreen(),
                                   ),
                                 ),
@@ -276,8 +283,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         onTap: widget.isGuest
                             ? showError
                             : () => Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) =>
+                                  CustomPageRoute(
+                                    child:
                                         const LostAndFoundScreen(),
                                   ),
                                 ),

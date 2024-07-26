@@ -1,3 +1,4 @@
+import 'package:dashbaord/utils/custom_page_route.dart';
 import 'package:flutter/material.dart';
 import 'package:dashbaord/models/mess_menu_model.dart';
 import 'package:dashbaord/screens/mess_menu_screen.dart';
@@ -66,8 +67,7 @@ class HomeScreenMessMenu extends StatelessWidget {
           return;
         }
         Navigator.of(context).push(
-          MaterialPageRoute(
-              builder: (context) => MessMenuScreen(messMenu: messMenu!)),
+          CustomPageRoute(child: MessMenuScreen(messMenu: messMenu!)),
         );
       },
       child: Container(
@@ -120,8 +120,7 @@ class HomeScreenMessMenu extends StatelessWidget {
           return;
         }
         Navigator.of(context).push(
-          MaterialPageRoute(
-              builder: (context) => MessMenuScreen(messMenu: messMenu!)),
+          CustomPageRoute(child: MessMenuScreen(messMenu: messMenu!)),
         );
       },
       child: Container(

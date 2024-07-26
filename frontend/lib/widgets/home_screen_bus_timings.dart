@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:dashbaord/utils/custom_page_route.dart';
 import 'package:flutter/material.dart';
 import 'package:dashbaord/screens/bus_timings_screen.dart';
 import 'package:dashbaord/utils/bus_schedule.dart';
@@ -132,11 +133,15 @@ class _HomeScreenBusTimingsState extends State<HomeScreenBusTimings> {
         if (widget.busSchedule == null) {
           return;
         }
-        Navigator.of(context).push(
-          MaterialPageRoute(
-              builder: (context) =>
-                  BusTimingsScreen(busSchedule: widget.busSchedule!)),
-        );
+        Navigator.push(
+            context,
+            CustomPageRoute(
+                child: BusTimingsScreen(busSchedule: widget.busSchedule!)));
+        // Navigator.of(context).push(
+        //   MaterialPageRoute(
+        //       builder: (context) =>
+        //           BusTimingsScreen(busSchedule: widget.busSchedule!)),
+        // );
       },
       child: Container(
         decoration: BoxDecoration(
@@ -192,12 +197,16 @@ class _HomeScreenBusTimingsState extends State<HomeScreenBusTimings> {
     }
 
     return InkWell(
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(
-            builder: (context) => BusTimingsScreen(
-                  busSchedule: widget.busSchedule!,
-                )),
-      ),
+      onTap: () => Navigator.push(
+          context,
+          CustomPageRoute(
+              child: BusTimingsScreen(busSchedule: widget.busSchedule!))),
+      // Navigator.of(context).push(
+      //   MaterialPageRoute(
+      //       builder: (context) => BusTimingsScreen(
+      //             busSchedule: widget.busSchedule!,
+      //           )),
+      // ),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,

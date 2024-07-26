@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:dashbaord/utils/svg_icon.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -29,6 +31,7 @@ class NextBusCard extends StatelessWidget {
         color: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: Container(
+
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
@@ -37,7 +40,6 @@ class NextBusCard extends StatelessWidget {
           alignment: Alignment.centerLeft,
           width: double.infinity,
           padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
-          // height: 141.0,
           child: Stack(children: [
             Row(
               // mainAxisAlignment: MainAxisAlignment.spaceAround,spaceBetween
@@ -109,7 +111,7 @@ class NextBusCard extends StatelessWidget {
                 ),
                 const Spacer(),
                 SizedBox(
-                  width: cardWidth * 0.27,
+                  width: min(cardWidth * 0.27, 150),
                   child: Image.asset(
                       isEv ? "assets/icons/ev.png" : "assets/icons/bus.png"),
                 ),

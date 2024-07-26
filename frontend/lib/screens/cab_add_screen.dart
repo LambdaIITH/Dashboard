@@ -1,4 +1,5 @@
 import 'package:dashbaord/screens/profile_screen.dart';
+import 'package:dashbaord/utils/custom_page_route.dart';
 import 'package:flutter/material.dart';
 import 'package:dashbaord/models/booking_model.dart';
 import 'package:dashbaord/models/travellers.dart';
@@ -170,8 +171,8 @@ class _CabAddScreenState extends State<CabAddScreen> {
               onPressed: () {
                 Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(
-                        builder: (ctx) => ProfileScreen(
+                    CustomPageRoute(
+                        child: ProfileScreen(
                             user: widget.user, image: widget.image)));
               },
             ),

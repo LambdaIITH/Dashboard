@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:dashbaord/models/user_model.dart';
+import 'package:dashbaord/utils/custom_page_route.dart';
 import 'package:flutter/material.dart';
 import 'package:dashbaord/screens/cab_add_screen.dart';
 import 'package:dashbaord/services/analytics_service.dart';
@@ -314,7 +315,7 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
                   ],
                 ),
                 const SizedBox(width: 10.0),
-                GestureDetector(
+                InkWell(
                   onTap: openFilterDialog,
                   child: const Icon(
                     Icons.filter_alt_outlined,
@@ -459,8 +460,9 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
               onPressed: () async {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => CabAddScreen(
+                  CustomPageRoute(
+                    startPos: const Offset(0, -1),
+                    child: CabAddScreen(
                       user: widget.user,
                       image: widget.image,
                     ),

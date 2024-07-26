@@ -13,12 +13,17 @@ class SharedService {
   Future<void> saveUserDetails({
     required String name,
     required String email,
-    required String imageUrl,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keyName, name);
     await prefs.setString(_keyEmail, email);
-    await prefs.setString(_keyImageUrl, imageUrl);
+  }
+
+  Future<void> saveUserImage({
+    required String image,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyImageUrl, image);
   }
 
   Future<Map<String, String?>> getUserDetails() async {

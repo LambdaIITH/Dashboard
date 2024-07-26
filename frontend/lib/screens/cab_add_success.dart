@@ -3,6 +3,8 @@ import 'package:dashbaord/screens/cab_sharing_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../utils/custom_page_route.dart';
+
 class CabAddSuccess extends StatelessWidget {
   final UserModel user;
   final String image;
@@ -14,8 +16,9 @@ class CabAddSuccess extends StatelessWidget {
       Future.delayed(const Duration(seconds: 2), () {
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(
-            builder: (context) => CabSharingScreen(
+          CustomPageRoute(
+            startPos: const Offset(-1, 0),
+            child: CabSharingScreen(
               user: user,
               image: image,
               isMyRide: true,
