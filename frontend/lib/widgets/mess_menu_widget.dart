@@ -17,12 +17,14 @@ class ShowMessMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textColor =
+        Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
-          color: const Color(0xffFBFBFB),
+          color: Theme.of(context).cardColor,
           shape: BoxShape.rectangle,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
@@ -44,7 +46,7 @@ class ShowMessMenu extends StatelessWidget {
               text: TextSpan(
                 text: whichMeal,
                 style: GoogleFonts.inter(
-                  color: Colors.black,
+                  color: textColor,
                   fontSize: 20,
                   fontWeight: FontWeight.w500,
                 ),
@@ -52,7 +54,7 @@ class ShowMessMenu extends StatelessWidget {
                   TextSpan(
                     text: '\n$time',
                     style: GoogleFonts.inter(
-                      color: const Color.fromARGB(255, 114, 114, 114),
+                      color: Theme.of(context).textTheme.bodySmall?.color,
                       fontSize: 14.0,
                       fontWeight: FontWeight.w500,
                     ),
@@ -73,25 +75,28 @@ class ShowMessMenu extends StatelessWidget {
                   children: [
                     Text.rich(
                       TextSpan(
-                        children: messMenu(meals),
+                        children: messMenu(meals, context),
                       ),
                       style: GoogleFonts.inter(
-                        color: const Color(0xff292929),
+                        color: Theme.of(context).textTheme.labelLarge?.color,
                         fontSize: 16.0,
                         fontWeight: FontWeight.w400,
                       ),
                     ),
-                    Text('Extras:', style: GoogleFonts.inter(
-                        color: const Color(0xff292929),
+                    Text(
+                      'Extras:',
+                      style: GoogleFonts.inter(
+                        color: Theme.of(context).textTheme.labelLarge?.color,
                         fontSize: 16.0,
                         fontWeight: FontWeight.w400,
-                      ),),
+                      ),
+                    ),
                     Text.rich(
                       TextSpan(
-                        children: messMenu(extras),
+                        children: messMenu(extras, context),
                       ),
                       style: GoogleFonts.inter(
-                        color: const Color(0xff292929),
+                        color: Theme.of(context).textTheme.labelLarge?.color,
                         fontSize: 16.0,
                         fontWeight: FontWeight.w400,
                       ),
@@ -106,13 +111,18 @@ class ShowMessMenu extends StatelessWidget {
     );
   }
 
-  List<TextSpan> messMenu(List<String> data) {
+  List<TextSpan> messMenu(List<String> data, BuildContext context) {
     List<TextSpan> spans = [];
     for (int i = 0; i < data.length; i++) {
       spans.add(
         TextSpan(
           text: '${i + 1}. ',
-          style: const TextStyle(fontWeight: FontWeight.w900, color: Color.fromARGB(255, 69, 69, 69)),
+          style: GoogleFonts.inter(
+            fontWeight: FontWeight.w900,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? const Color.fromARGB(255, 180, 180, 180)
+                : const Color.fromARGB(255, 69, 69, 69),
+          ),
         ),
       );
       spans.add(TextSpan(text: '${data[i]}\t\t'));
@@ -120,5 +130,4 @@ class ShowMessMenu extends StatelessWidget {
     spans.add(const TextSpan(text: '\n'));
     return spans;
   }
-
 }

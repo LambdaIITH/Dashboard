@@ -14,18 +14,20 @@ class MessMenuScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textColor =
+        Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
     return Scaffold(
       appBar: AppBar(
         title: Text('Mess Menu',
             style: GoogleFonts.inter(
               fontSize: 28,
               fontWeight: FontWeight.w700,
-              color: Colors.black,
+              color: textColor,
             )),
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back,
-            color: Colors.black,
+            // color: Colors.black,
             size: 30.0,
           ),
           onPressed: () {
@@ -60,18 +62,22 @@ class MessMenuPage extends StatefulWidget {
 class _MessMenuPageState extends State<MessMenuPage> {
   String whichDay = 'Sunday';
   final List<bool> selectedOption = [true, false];
-  final List<Widget> messToggleButtons = [
-    Text(
-      'Mess A',
-      style: GoogleFonts.inter(
-          fontSize: 16.0, fontWeight: FontWeight.w700, color: const Color.fromARGB(255, 47, 47, 47)),
-    ),
-    Text(
-      'Mess B',
-      style: GoogleFonts.inter(
-          fontSize: 16.0, fontWeight: FontWeight.w700, color: const Color.fromARGB(255, 47, 47, 47)),
-    )
-  ];
+  // final List<Widget> messToggleButtons = [
+  //   Text(
+  //     'Mess A',
+  //     style: GoogleFonts.inter(
+  //         fontSize: 16.0,
+  //         fontWeight: FontWeight.w700,
+  //         color: const Color.fromARGB(255, 47, 47, 47)),
+  //   ),
+  //   Text(
+  //     'Mess B',
+  //     style: GoogleFonts.inter(
+  //         fontSize: 16.0,
+  //         fontWeight: FontWeight.w700,
+  //         color: const Color.fromARGB(255, 47, 47, 47)),
+  //   )
+  // ];
 
   String getCurrentDay() {
     DateTime now = DateTime.now();
@@ -90,6 +96,8 @@ class _MessMenuPageState extends State<MessMenuPage> {
 
   @override
   Widget build(BuildContext context) {
+    final textColor =
+        Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
     final meals = selectedOption[0]
         ? widget.messMenu.udh[whichDay]
         : widget.messMenu.ldh[whichDay];
@@ -121,6 +129,7 @@ class _MessMenuPageState extends State<MessMenuPage> {
                     child: Text(
                       value,
                       style: GoogleFonts.inter(
+                        color: textColor,
                         fontSize: 15.0,
                         fontWeight: FontWeight.w600,
                         letterSpacing: -0.2,
@@ -133,29 +142,29 @@ class _MessMenuPageState extends State<MessMenuPage> {
                     whichDay = value!;
                   });
                 },
-                focusColor: Colors.white,
+                focusColor: textColor,
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 3, 30, 0),
-              child: ToggleButtons(
-                  direction: Axis.horizontal,
-                  onPressed: (index) {
-                    setState(() {
-                      for (var i = 0; i < selectedOption.length; i++) {
-                        selectedOption[i] = i == index;
-                      }
-                    });
-                  },
-                  borderRadius: const BorderRadius.all(Radius.circular(7.0)),
-                  fillColor: const Color.fromARGB(255, 198, 198, 198),
-                  constraints: const BoxConstraints(
-                    minHeight: 38.0,
-                    minWidth: 85.0,
-                  ),
-                  isSelected: selectedOption,
-                  children: messToggleButtons),
-            )
+            // Padding(
+            //   padding: const EdgeInsets.fromLTRB(0, 3, 30, 0),
+            //   child: ToggleButtons(
+            //       direction: Axis.horizontal,
+            //       onPressed: (index) {
+            //         setState(() {
+            //           for (var i = 0; i < selectedOption.length; i++) {
+            //             selectedOption[i] = i == index;
+            //           }
+            //         });
+            //       },
+            //       borderRadius: const BorderRadius.all(Radius.circular(7.0)),
+            //       fillColor: const Color.fromARGB(255, 198, 198, 198),
+            //       constraints: const BoxConstraints(
+            //         minHeight: 38.0,
+            //         minWidth: 85.0,
+            //       ),
+            //       isSelected: selectedOption,
+            //       children: messToggleButtons),
+            // )
           ],
         ),
         Column(

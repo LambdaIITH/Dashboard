@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:dashbaord/extensions.dart';
 import 'package:dashbaord/utils/custom_page_route.dart';
 import 'package:flutter/material.dart';
 import 'package:dashbaord/screens/bus_timings_screen.dart';
@@ -137,20 +138,15 @@ class _HomeScreenBusTimingsState extends State<HomeScreenBusTimings> {
             context,
             CustomPageRoute(
                 child: BusTimingsScreen(busSchedule: widget.busSchedule!)));
-        // Navigator.of(context).push(
-        //   MaterialPageRoute(
-        //       builder: (context) =>
-        //           BusTimingsScreen(busSchedule: widget.busSchedule!)),
-        // );
       },
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.customColors.customContainerColor,
           borderRadius: BorderRadius.circular(10),
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(
-              color: Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
-              offset: Offset(0, 4), // Offset in the x, y direction
+              color: context.customColors.customShadowColor, // Shadow color
+              offset: const Offset(0, 4), // Offset in the x, y direction
               blurRadius: 10.0,
               spreadRadius: 0.0,
             ),
@@ -201,20 +197,14 @@ class _HomeScreenBusTimingsState extends State<HomeScreenBusTimings> {
           context,
           CustomPageRoute(
               child: BusTimingsScreen(busSchedule: widget.busSchedule!))),
-      // Navigator.of(context).push(
-      //   MaterialPageRoute(
-      //       builder: (context) => BusTimingsScreen(
-      //             busSchedule: widget.busSchedule!,
-      //           )),
-      // ),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.customColors.customContainerColor,
           borderRadius: BorderRadius.circular(10),
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(
-              color: Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
-              offset: Offset(0, 4), // Offset in the x, y direction
+              color: context.customColors.customShadowColor,
+              offset: const Offset(0, 4), // Offset in the x, y direction
               blurRadius: 10.0,
               spreadRadius: 0.0,
             ),
@@ -230,6 +220,7 @@ class _HomeScreenBusTimingsState extends State<HomeScreenBusTimings> {
                 child: Text(
                   'Bus Timings',
                   style: GoogleFonts.inter(
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
                     fontWeight: FontWeight.bold,
                     fontSize: 28,
                   ),
@@ -264,7 +255,7 @@ class _HomeScreenBusTimingsState extends State<HomeScreenBusTimings> {
       margin: const EdgeInsets.symmetric(horizontal: 10),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xffFBFBFB),
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
@@ -291,7 +282,7 @@ class _HomeScreenBusTimingsState extends State<HomeScreenBusTimings> {
           NormalText(
             text: waitTime,
             size: 14,
-            color: const Color(0xff404040),
+            color: Theme.of(context).textTheme.titleSmall?.color,
           ),
         ],
       ),

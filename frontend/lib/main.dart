@@ -10,6 +10,7 @@ import 'package:dashbaord/screens/login_screen.dart';
 import 'package:dashbaord/screens/splash_screen.dart';
 import 'package:dashbaord/services/analytics_service.dart';
 import 'package:dashbaord/services/api_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   await dotenv.load(fileName: ".env");
@@ -20,6 +21,10 @@ void main() async {
 
   final apiServices = ApiServices();
   await apiServices.configureDio();
+  // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+  //   systemNavigationBarColor: Colors.blue, // navigation bar color
+  //   statusBarColor: Colors.pink, // status bar color
+  // ));
   runApp(const MyApp());
 }
 
@@ -34,18 +39,27 @@ class _MyAppState extends State<MyApp> {
   bool isLoading = true;
   bool isLoggedIn = false;
 
+  int status = 0;
+  int totalOperation = 1;
+  void changeState() {
+    setState(() {
+      status++;
+      if (status >= totalOperation) {
+        isLoading = false;
+      }
+    });
+  }
+
   getAuthStatus() {
     FirebaseAuth auth = FirebaseAuth.instance;
     User? user = auth.currentUser;
 
     setState(() {
-      if (user == null) {
-        isLoading = false;
-      } else {
+      if (user != null) {
         isLoggedIn = true;
       }
-      isLoading = false;
     });
+    changeState();
   }
 
   final FirebaseAnalyticsService _analyticsService = FirebaseAnalyticsService();
@@ -55,6 +69,39 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     FlutterNativeSplash.remove();
     getAuthStatus();
+    getThemeMode();
+  }
+
+  getThemeMode() async {
+    const String themeKey = 'is_dark';
+    final prefs = await SharedPreferences.getInstance();
+    int? mode = prefs.getInt(themeKey);
+    setState(() {
+      _mode = mode;
+    });
+    changeState();
+  }
+
+  setThemeMode(int val) async {
+    const String themeKey = 'is_dark';
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(themeKey, val);
+  }
+
+  int? _mode;
+
+  void handleThemeChange(int theme) {
+    setState(() {
+      if (theme == 1) {
+        _mode = 1;
+      } else if (theme == 2) {
+        _mode = 2;
+      } else {
+        _mode = 0;
+      }
+    });
+
+    setThemeMode(theme);
   }
 
   @override
@@ -62,20 +109,28 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       title: 'Dashboard',
       debugShowCheckedModeBanner: false,
-      theme: appTheme,
+      theme: lightTheme,
+      darkTheme: darkTheme,
+      themeMode: _mode == null || _mode == 0
+          ? ThemeMode.system
+          : _mode == 1
+              ? ThemeMode.light
+              : ThemeMode.dark,
       navigatorObservers: [_analyticsService.getAnalyticsObserver()],
       home: isLoading
           ? SplashScreen(nextPage: Container())
           : isLoggedIn
-              ? const SplashScreen(
+              ? SplashScreen(
                   nextPage: HomeScreen(
+                    onThemeChanged: handleThemeChange,
                     isGuest: false,
                   ),
                   isLoading: false,
                 )
-              : const SplashScreen(
+              : SplashScreen(
                   isLoading: false,
                   nextPage: LoginScreenWrapper(
+                    onThemeChanged: handleThemeChange,
                     timeDilationFactor: 4.0,
                   )),
     );

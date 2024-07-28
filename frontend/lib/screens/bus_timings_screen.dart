@@ -14,18 +14,20 @@ class BusTimingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textColor =
+        Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
     return Scaffold(
       appBar: AppBar(
         title: Text('Bus Timings',
             style: GoogleFonts.inter(
               fontSize: 28,
               fontWeight: FontWeight.w700,
-              color: Colors.black,
+              color: textColor,
             )),
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back,
-            color: Colors.black,
+            // color: textColor,
             size: 30.0,
           ),
           onPressed: () {
@@ -92,25 +94,6 @@ class _BusSchedulePageState extends State<BusSchedulePage> {
       style: GoogleFonts.inter(
         fontSize: 13.0,
         fontWeight: FontWeight.w400,
-        color: Colors.black,
-      ),
-    )
-  ];
-
-  final List<Widget> fullScheduleWidget = [
-    Text(
-      'Upcoming',
-      style: GoogleFonts.inter(
-        fontSize: 18.0,
-        fontWeight: FontWeight.w600,
-        color: Colors.black,
-      ),
-    ),
-    Text(
-      'Full Schedule',
-      style: GoogleFonts.inter(
-        fontSize: 18.0,
-        fontWeight: FontWeight.w600,
         color: Colors.black,
       ),
     )
@@ -248,6 +231,7 @@ class _BusSchedulePageState extends State<BusSchedulePage> {
     return Text(
       '* indicates EV',
       style: GoogleFonts.inter(
+        color: Theme.of(context).textTheme.displayLarge?.color,
         fontSize: 14,
       ),
     );
@@ -255,6 +239,24 @@ class _BusSchedulePageState extends State<BusSchedulePage> {
 
   @override
   Widget build(BuildContext context) {
+    final textColor =
+        Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
+    final List<Widget> fullScheduleWidget = [
+      Text(
+        'Upcoming',
+        style: GoogleFonts.inter(
+            fontSize: 18.0, fontWeight: FontWeight.w600, color: textColor),
+      ),
+      Text(
+        'Full Schedule',
+        style: GoogleFonts.inter(
+          fontSize: 18.0,
+          fontWeight: FontWeight.w600,
+          color: textColor,
+        ),
+      )
+    ];
+
     return Column(
       children: [
         const SizedBox(
@@ -290,8 +292,7 @@ class _BusSchedulePageState extends State<BusSchedulePage> {
                             Text(
                               "No upcoming buses available",
                               style: GoogleFonts.inter(
-                                fontSize: 14,
-                              ),
+                                  fontSize: 14, color: textColor),
                             ),
                           ],
                         ),

@@ -4,7 +4,8 @@ import 'package:dashbaord/services/analytics_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ContinueAsGuest extends StatelessWidget {
-  const ContinueAsGuest({super.key});
+  final ValueChanged<int> onThemeChanged;
+  const ContinueAsGuest({super.key, required this.onThemeChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +24,8 @@ class ContinueAsGuest extends StatelessWidget {
             //TODO: handle this
             analyticsService.logEvent(name: "Guest Login");
             Navigator.of(context).pushReplacement(MaterialPageRoute(
-              builder: (context) => const HomeScreen(
+              builder: (context) => HomeScreen(
+                onThemeChanged: onThemeChanged,
                 isGuest: true,
               ),
             ));
@@ -35,7 +37,8 @@ class ContinueAsGuest extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontSize: 20,
                 fontWeight: FontWeight.w500,
-                color: const Color(0xff454545),
+                color: Colors.black
+                // color: Theme.of(context).brightness == Brightness.light ? const Color(0xff454545) : Color.fromARGB(255, 200, 200, 200),
               ),
             ),
           ),

@@ -5,14 +5,14 @@ class NormalText extends StatelessWidget {
   const NormalText({
     super.key,
     required this.text,
-    this.color = Colors.black,
+    this.color,
     this.size = 18,
     this.limit = 10,
     this.center = false,
   });
 
   final String text;
-  final Color color;
+  final Color? color;
   final double size;
   final int limit;
   final bool center;
@@ -36,7 +36,7 @@ class NormalText extends StatelessWidget {
       maxLines: limit,
       overflow: TextOverflow.ellipsis,
       style: GoogleFonts.inter(
-        color: color,
+        color: color ?? Theme.of(context).textTheme.bodySmall?.color,
         fontSize: getResponsiveFontSize(context),
         fontWeight: FontWeight.w500,
       ),

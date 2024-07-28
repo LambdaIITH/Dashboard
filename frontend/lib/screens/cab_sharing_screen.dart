@@ -59,25 +59,6 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
     getUserCabs();
   }
 
-  final List<Widget> tabNames = [
-    Text(
-      'All Rides',
-      style: GoogleFonts.inter(
-        fontSize: 18.0,
-        fontWeight: FontWeight.w600,
-        color: Colors.black,
-      ),
-    ),
-    Text(
-      'My Rides',
-      style: GoogleFonts.inter(
-        fontSize: 18.0,
-        fontWeight: FontWeight.w600,
-        color: Colors.black,
-      ),
-    ),
-  ];
-
   void updateSearchForm({
     DateTime? start,
     DateTime? end,
@@ -218,6 +199,27 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final textColor =
+        Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
+
+    final List<Widget> tabNames = [
+      Text(
+        'All Rides',
+        style: GoogleFonts.inter(
+          fontSize: 18.0,
+          fontWeight: FontWeight.w600,
+          color: textColor,
+        ),
+      ),
+      Text(
+        'My Rides',
+        style: GoogleFonts.inter(
+          fontSize: 18.0,
+          fontWeight: FontWeight.w600,
+          color: textColor,
+        ),
+      ),
+    ];
     Widget allRides = RefreshIndicator(
       onRefresh: () {
         return Future.delayed(
@@ -332,12 +334,12 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
                     children: [
                       Container(
                         alignment: Alignment.topCenter,
-                        child: const Text(
+                        child: Text(
                           'No rides found',
                           style: TextStyle(
                             fontSize: 18.0,
                             fontWeight: FontWeight.w600,
-                            color: Colors.black,
+                            color: textColor,
                           ),
                         ),
                       )
@@ -420,7 +422,7 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
                           style: GoogleFonts.inter(
                             fontSize: 18.0,
                             fontWeight: FontWeight.w600,
-                            color: Colors.black,
+                            color: textColor,
                           ),
                         ),
                       )
@@ -432,21 +434,20 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
     );
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
         title: Text(
           'Cab Sharing',
           style: GoogleFonts.inter(
             fontSize: 28,
             fontWeight: FontWeight.w700,
-            color: Colors.black,
+            color: textColor,
           ),
         ),
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back,
-            color: Colors.black,
+            // color: Colors.black,
             size: 30.0,
           ),
           onPressed: () {

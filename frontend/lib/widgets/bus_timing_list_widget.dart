@@ -1,3 +1,4 @@
+import 'package:dashbaord/extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -18,7 +19,7 @@ class BusTimingList extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
-        color: const Color.fromARGB(102, 229, 229, 229),
+        color: context.customColors.customBusScheduleColor,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -31,6 +32,7 @@ class BusTimingList extends StatelessWidget {
                 child: Text(
                   from,
                   style: GoogleFonts.inter(
+                    color: Theme.of(context).textTheme.displayLarge?.color,
                     fontSize: 15.0,
                     fontWeight: FontWeight.w600,
                     letterSpacing: -0.2,
@@ -44,6 +46,7 @@ class BusTimingList extends StatelessWidget {
                 child: Text(
                   destination,
                   style: GoogleFonts.inter(
+                    color: Theme.of(context).textTheme.displayLarge?.color,
                     fontSize: 15.0,
                     fontWeight: FontWeight.w600,
                     letterSpacing: -0.2,
@@ -68,6 +71,7 @@ class BusTimingList extends StatelessWidget {
                   child: Text(
                     value == 1 ? '$key*' : key, // Display key and value
                     style: GoogleFonts.inter(
+                      color: Theme.of(context).textTheme.displayLarge?.color,
                       fontSize: 16.0,
                       fontWeight: FontWeight.w600,
                       letterSpacing: -0.2,

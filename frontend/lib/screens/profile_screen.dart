@@ -8,16 +8,18 @@ import 'package:dashbaord/services/api_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ProfileScreen extends StatefulWidget {
   final UserModel user;
   final String image;
-  const ProfileScreen({
-    super.key,
-    required this.user,
-    required this.image,
-  });
+  final ValueChanged<int> onThemeChanged;
+  const ProfileScreen(
+      {super.key,
+      required this.user,
+      required this.image,
+      required this.onThemeChanged});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -29,7 +31,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
+    getThemeMode();
     analyticsService.logScreenView(screenName: "Profile Screen");
+  }
+
+  int? _mode;
+
+  getThemeMode() async {
+    const String themeKey = 'is_dark';
+    final prefs = await SharedPreferences.getInstance();
+    int? mode = prefs.getInt(themeKey);
+    setState(() {
+      _mode = mode;
+    });
   }
 
   Future<void> _showLogoutDialog(BuildContext context) async {
@@ -47,20 +61,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: <Widget>[
                 Text(
                   'Are you sure you want to log out?',
-                  style: GoogleFonts.inter(fontSize: 15),
+                  style: GoogleFonts.inter(fontSize: 16),
                 ),
               ],
             ),
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('No'),
+              child: Text(
+                'No',
+                style: GoogleFonts.inter(fontSize: 16),
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: const Text('Yes'),
+              child: Text(
+                'Yes',
+                style: GoogleFonts.inter(fontSize: 16),
+              ),
               onPressed: () {
                 analyticsService.logEvent(name: "Logout");
                 Navigator.of(context).pop();
@@ -90,7 +110,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
-            builder: (context) => const LoginScreen(
+            builder: (context) => LoginScreen(
+                  onThemeChanged: widget.onThemeChanged,
                   timeDilation: 1,
                 )),
         (Route<dynamic> route) => false,
@@ -129,19 +150,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final textColor =
+        Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xffFCFCFC),
+        // backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: Text('Profile',
             style: GoogleFonts.inter(
               fontSize: 28,
               fontWeight: FontWeight.w700,
-              color: Colors.black,
+              color: textColor,
             )),
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back,
-            color: Colors.black,
+            // color: textColor,
             size: 30.0,
           ),
           onPressed: () {
@@ -149,118 +173,205 @@ class _ProfileScreenState extends State<ProfileScreen> {
           },
         ),
       ),
-      body: Container(
-        color: const Color(0xffFCFCFC),
-        child: Stack(
-          children: [
-            SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 40),
-                  CircleAvatar(
-                    radius: 80,
-                    // replaces google image with size parameter changed to improve image resolution
-                    backgroundImage: CachedNetworkImageProvider(
-                        widget.image.replaceFirst(RegExp(r'=s\d+'), '=s240')),
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(height: 40),
+                CircleAvatar(
+                  radius: 80,
+                  // replaces google image with size parameter changed to improve image resolution
+                  backgroundImage: CachedNetworkImageProvider(
+                      widget.image.replaceFirst(RegExp(r'=s\d+'), '=s240')),
+                ),
+                const SizedBox(height: 15),
+                Text(
+                  widget.user.name,
+                  style: GoogleFonts.inter(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w700,
+                    color: textColor,
                   ),
-                  const SizedBox(height: 15),
-                  Text(
-                    widget.user.name,
-                    style: GoogleFonts.inter(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black,
-                    ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  widget.user.getRollNumber(),
+                  style: GoogleFonts.inter(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w500,
+                    // color: Colors.black45,
+                    color: Theme.of(context).textTheme.bodyMedium?.color,
                   ),
-                  const SizedBox(height: 5),
-                  Text(
-                    widget.user.getRollNumber(),
-                    style: GoogleFonts.inter(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black45,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  ProfileButton(
-                    buttonName: "Edit Phone Number",
-                    iconName: Icons.edit_rounded,
-                    onPressed: () {
-                      showModalBottomSheet(
-                          isScrollControlled: true,
-                          context: context,
-                          builder: (ctx) => EditPhoneNumber(
-                              user: widget.user,
-                              onUpdate: (newPhoneNumber) {
-                                updatePhoneNumber(newPhoneNumber);
-                              }));
-                    },
-                  ),
-                  ProfileButton(
-                    buttonName: 'Feedback',
-                    iconName: Icons.feedback_rounded,
-                    onPressed: () {
-                      openURL('https://iith-dashboard.feedbase.app');
-                    },
-                  ),
-                  ProfileButton(
-                    buttonName: 'Logout',
-                    iconName: Icons.logout_rounded,
-                    onPressed: () {
-                      _showLogoutDialog(context);
-                    },
-                  ),
-                  const SizedBox(height: 45),
-                ],
-              ),
-            ),
-            Container(
-              alignment: Alignment.bottomCenter,
-              margin: const EdgeInsets.only(bottom: 25),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  GestureDetector(
-                    onDoubleTap: () async {
-                      await openURL("https://iith.dev");
-                    },
-                    onLongPress: () async {
-                      await openURL("mailto:lambda@iith.dev");
-                    },
-                    child: Text(
-                      'Made with 🖤 by Lambda',
-                      style: GoogleFonts.inter(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.black45,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  FutureBuilder<PackageInfo>(
-                    future: PackageInfo.fromPlatform(),
-                    builder: (BuildContext context,
-                        AsyncSnapshot<PackageInfo> snapshot) {
-                      if (snapshot.hasData) {
-                        return Text(
-                          snapshot.data!.version,
-                          style: GoogleFonts.inter(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black45,
-                          ),
+                ),
+                const SizedBox(height: 20),
+                ProfileButton(
+                  buttonName: 'Theme',
+                  iconName: Icons.light_mode,
+                  onPressed: () {
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return ThemeBottomSheet(
+                          changeState: (value) {
+                            setState(() {
+                              _mode = value;
+                            });
+                          },
+                          current: _mode ?? 0,
+                          onThemeChanged: widget.onThemeChanged,
                         );
-                      } else {
-                        return const Text('Debug App');
-                      }
-                    },
-                  ),
-                ],
-              ),
+                      },
+                    );
+                  },
+                ),
+                ProfileButton(
+                  buttonName: "Edit Phone Number",
+                  iconName: Icons.edit_rounded,
+                  onPressed: () {
+                    showModalBottomSheet(
+                        isScrollControlled: true,
+                        context: context,
+                        builder: (ctx) => EditPhoneNumber(
+                            user: widget.user,
+                            onUpdate: (newPhoneNumber) {
+                              updatePhoneNumber(newPhoneNumber);
+                            }));
+                  },
+                ),
+                ProfileButton(
+                  buttonName: 'Feedback',
+                  iconName: Icons.feedback_rounded,
+                  onPressed: () {
+                    openURL('https://iith-dashboard.feedbase.app');
+                  },
+                ),
+                ProfileButton(
+                  buttonName: 'Logout',
+                  iconName: Icons.logout_rounded,
+                  onPressed: () {
+                    _showLogoutDialog(context);
+                  },
+                ),
+                const SizedBox(height: 45),
+              ],
             ),
-          ],
-        ),
+          ),
+          Container(
+            alignment: Alignment.bottomCenter,
+            margin: const EdgeInsets.only(bottom: 25),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                GestureDetector(
+                  onDoubleTap: () async {
+                    await openURL("https://iith.dev");
+                  },
+                  onLongPress: () async {
+                    await openURL("mailto:lambda@iith.dev");
+                  },
+                  child: Text(
+                    'Made with 🖤 by Lambda',
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Theme.of(context).textTheme.bodyMedium?.color,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                FutureBuilder<PackageInfo>(
+                  future: PackageInfo.fromPlatform(),
+                  builder: (BuildContext context,
+                      AsyncSnapshot<PackageInfo> snapshot) {
+                    if (snapshot.hasData) {
+                      return Text(
+                        snapshot.data!.version,
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Theme.of(context).textTheme.bodyMedium?.color,
+                        ),
+                      );
+                    } else {
+                      return const Text('Debug App');
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ThemeBottomSheet extends StatefulWidget {
+  final int current;
+  final ValueChanged<int> onThemeChanged;
+  final ValueChanged<int> changeState;
+  const ThemeBottomSheet(
+      {super.key,
+      this.current = 0,
+      required this.onThemeChanged,
+      required this.changeState});
+  @override
+  _ThemeBottomSheetState createState() => _ThemeBottomSheetState();
+}
+
+class _ThemeBottomSheetState extends State<ThemeBottomSheet> {
+  int _selectedTheme = 0; // 0: System, 1: Light, 2: Dark
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedTheme = widget.current;
+  }
+
+  void _handleThemeChange(int? value) {
+    setState(() {
+      _selectedTheme = value!;
+    });
+    widget.onThemeChanged(value ?? 0);
+    widget.changeState(value ?? 0);
+    // Navigator.pop(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final textColor =
+        Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Text(
+            'Theme',
+            style: GoogleFonts.inter(
+                color: textColor, fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          RadioListTile<int>(
+            title: const Text('System Default'),
+            value: 0,
+            groupValue: _selectedTheme,
+            onChanged: _handleThemeChange,
+          ),
+          RadioListTile<int>(
+            title: const Text('Light'),
+            value: 1,
+            groupValue: _selectedTheme,
+            onChanged: _handleThemeChange,
+          ),
+          RadioListTile<int>(
+            title: const Text('Dark'),
+            value: 2,
+            groupValue: _selectedTheme,
+            onChanged: _handleThemeChange,
+          ),
+        ],
       ),
     );
   }
@@ -356,7 +467,7 @@ class _EditPhoneNumberState extends State<EditPhoneNumber> {
                 style: GoogleFonts.inter(
                   fontSize: 26,
                   fontWeight: FontWeight.w700,
-                  color: Colors.black,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
               ),
               const SizedBox(height: 10),
@@ -365,7 +476,7 @@ class _EditPhoneNumberState extends State<EditPhoneNumber> {
                 style: GoogleFonts.inter(
                   fontSize: 20,
                   fontWeight: FontWeight.w500,
-                  color: Colors.black,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
               ),
               const SizedBox(height: 20),
@@ -373,8 +484,8 @@ class _EditPhoneNumberState extends State<EditPhoneNumber> {
                 'Note: Do not enter country code [+91]',
                 style: GoogleFonts.inter(
                   fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black,
+                  fontWeight: FontWeight.w400,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
               ),
               TextField(
@@ -411,7 +522,7 @@ class _EditPhoneNumberState extends State<EditPhoneNumber> {
                 style: GoogleFonts.inter(
                   fontSize: 20,
                   fontWeight: FontWeight.w500,
-                  color: Colors.black,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
               ),
               const SizedBox(height: 20),
@@ -428,7 +539,7 @@ class _EditPhoneNumberState extends State<EditPhoneNumber> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10.0),
                       color: !buttonStatus
-                          ? Colors.grey
+                          ? const Color.fromARGB(255, 113, 113, 113)
                           : const Color.fromRGBO(254, 114, 76, 0.70),
                       boxShadow: const [
                         BoxShadow(
@@ -477,6 +588,9 @@ class ProfileButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
+      splashColor: Colors.transparent,
+      hoverColor: Colors.transparent,
+      highlightColor: Colors.transparent,
       onTap: () {
         if (onPressed != null) {
           onPressed!();
@@ -492,7 +606,7 @@ class ProfileButton extends StatelessWidget {
           padding: const EdgeInsets.all(20),
           width: double.infinity,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).textTheme.titleMedium?.color,
             borderRadius: BorderRadius.circular(10),
             boxShadow: const [
               BoxShadow(
@@ -508,7 +622,7 @@ class ProfileButton extends StatelessWidget {
               Icon(
                 iconName,
                 size: 30,
-                color: Colors.black,
+                // color: Colors.black,
               ),
               const SizedBox(width: 20),
               Text(
@@ -516,7 +630,7 @@ class ProfileButton extends StatelessWidget {
                 style: GoogleFonts.inter(
                   fontSize: 20,
                   fontWeight: FontWeight.w500,
-                  color: Colors.black,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
               ),
             ],

@@ -35,7 +35,8 @@ class _CabCardState extends State<CabCard> {
   late String endLocation;
   late List<Map<String, String>> travellers;
 
-  TextEditingController commentController = TextEditingController(text: "I am interested to join.");
+  TextEditingController commentController =
+      TextEditingController(text: "I am interested to join.");
 
   String convertDateFormat(DateTime inputDate) {
     String formattedDate = DateFormat('E, d MMM y').format(inputDate);
@@ -143,10 +144,122 @@ class _CabCardState extends State<CabCard> {
                 // onPressed: () => Navigator.of(context).pop(),
                 child: Text('Close',
                     style: GoogleFonts.inter(
-                        fontSize: 14, fontWeight: FontWeight.w600)),
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600)),
               ),
             ),
           ],
+        );
+      },
+    );
+  }
+
+  void _showBottomSheet(BuildContext context, commentController, joinCab) {
+    showModalBottomSheet(
+      isScrollControlled: true,
+      context: context,
+      builder: (BuildContext context) {
+        return SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: Container(
+              width: double.infinity,
+              // height: context.size!.height * 0.5,
+              padding: const EdgeInsets.all(25),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Comment',
+                    style: GoogleFonts.inter(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Please enter a comment to help the owner understand why you want to join this ride',
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Enter your comment here',
+                      hintStyle: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: const BorderRadius.all(Radius.circular(10)),
+                        borderSide: BorderSide(
+                          color:
+                              Theme.of(context).textTheme.bodyMedium?.color ??
+                                  Colors.black12,
+                          width: 1,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: const BorderRadius.all(Radius.circular(10)),
+                        borderSide: BorderSide(
+                          color:
+                              Theme.of(context).textTheme.bodyMedium?.color ??
+                                  Colors.black12,
+                          width: 1,
+                        ),
+                      ),
+                    ),
+                    maxLines: 4,
+                    controller: commentController,
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          joinCab(context);
+                          Navigator.pop(context);
+                          widget.onRefresh();
+                        },
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.fromLTRB(18, 8, 18, 8),
+                          // alignment: Alignment.centerLeft,
+                          backgroundColor:
+                              const Color.fromRGBO(254, 114, 76, 0.70),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: Text(
+                          'Join',
+                          style: GoogleFonts.inter(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color:
+                                  Theme.of(context).textTheme.bodyLarge?.color),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
         );
       },
     );
@@ -341,6 +454,9 @@ class _CabCardState extends State<CabCard> {
 
   @override
   Widget build(BuildContext context) {
+    final textColor =
+        Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
+
     final cab = widget.cab;
     note = cab.travellers[0].comments;
     date = convertDateFormat(cab.startTime);
@@ -370,7 +486,7 @@ class _CabCardState extends State<CabCard> {
         curve: Curves.easeInOut,
         width: double.infinity,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           boxShadow: const [
             BoxShadow(
               color: Color.fromRGBO(51, 51, 51, 0.10),
@@ -398,7 +514,7 @@ class _CabCardState extends State<CabCard> {
                           style: GoogleFonts.inter(
                             fontSize: 15,
                             fontWeight: FontWeight.w500,
-                            color: Colors.black,
+                            color: textColor,
                           ),
                         ),
                         const SizedBox(height: 3.0),
@@ -407,7 +523,7 @@ class _CabCardState extends State<CabCard> {
                           style: GoogleFonts.inter(
                             fontSize: 15,
                             fontWeight: FontWeight.w500,
-                            color: Colors.black,
+                            color: textColor,
                           ),
                         ),
                       ],
@@ -421,7 +537,10 @@ class _CabCardState extends State<CabCard> {
                           style: GoogleFonts.inter(
                             fontSize: 12,
                             fontWeight: FontWeight.w400,
-                            color: const Color.fromARGB(255, 77, 77, 77),
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? const Color.fromARGB(255, 170, 170, 170)
+                                    : const Color.fromARGB(255, 77, 77, 77),
                           ),
                           children: <TextSpan>[
                             TextSpan(
@@ -429,7 +548,7 @@ class _CabCardState extends State<CabCard> {
                               style: GoogleFonts.inter(
                                 fontSize: 24,
                                 fontWeight: FontWeight.w700,
-                                color: Colors.black,
+                                color: textColor,
                               ),
                             ),
                           ],
@@ -450,14 +569,14 @@ class _CabCardState extends State<CabCard> {
                                 style: GoogleFonts.inter(
                                   fontSize: 18,
                                   fontWeight: FontWeight.w600,
-                                  color: Colors.black,
+                                  color: textColor,
                                 ),
                                 overflow: TextOverflow.ellipsis),
                           ),
                           const SizedBox(width: 8.0),
                           const Icon(
                             Icons.arrow_forward,
-                            color: Colors.black,
+                            // color: Colors.black,
                             size: 20,
                           ),
                           const SizedBox(width: 8.0),
@@ -468,7 +587,7 @@ class _CabCardState extends State<CabCard> {
                               style: GoogleFonts.inter(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.black,
+                                color: textColor,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -483,7 +602,9 @@ class _CabCardState extends State<CabCard> {
                         _isExpanded
                             ? Icons.keyboard_arrow_up_rounded
                             : Icons.keyboard_arrow_down_rounded,
-                        color: const Color(0xffADADAD),
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? const Color.fromARGB(255, 183, 183, 183)
+                            : const Color(0xffADADAD),
                         size: 50,
                       ),
                     )
@@ -552,7 +673,7 @@ class _CabCardState extends State<CabCard> {
                                             style: GoogleFonts.inter(
                                               fontSize: 16,
                                               fontWeight: FontWeight.w600,
-                                              color: Colors.black,
+                                              color: textColor,
                                             ),
                                           ),
                                         ),
@@ -585,7 +706,7 @@ class _CabCardState extends State<CabCard> {
                                             style: GoogleFonts.inter(
                                               fontSize: 16,
                                               fontWeight: FontWeight.w600,
-                                              color: Colors.black,
+                                              color: textColor,
                                             ),
                                           ),
                                         ),
@@ -623,7 +744,7 @@ class _CabCardState extends State<CabCard> {
                                             style: GoogleFonts.inter(
                                               fontSize: 16,
                                               fontWeight: FontWeight.w600,
-                                              color: Colors.black,
+                                              color: textColor,
                                             ),
                                           ),
                                         ),
@@ -659,7 +780,7 @@ class _CabCardState extends State<CabCard> {
                                             style: GoogleFonts.inter(
                                               fontSize: 16,
                                               fontWeight: FontWeight.w600,
-                                              color: Colors.black,
+                                              color: textColor,
                                             ),
                                           ),
                                         ),
@@ -682,7 +803,7 @@ class _CabCardState extends State<CabCard> {
                                   style: GoogleFonts.inter(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w600,
-                                    color: Colors.black,
+                                    color: textColor,
                                   ),
                                 ),
                                 const SizedBox(height: 5.0),
@@ -735,7 +856,7 @@ class _CabCardState extends State<CabCard> {
                                                       fontSize: 12,
                                                       fontWeight:
                                                           FontWeight.w600,
-                                                      color: Colors.black,
+                                                      color: textColor,
                                                     ),
                                                   ),
                                                 ),
@@ -759,7 +880,7 @@ class _CabCardState extends State<CabCard> {
                             style: GoogleFonts.inter(
                               fontSize: 18,
                               fontWeight: FontWeight.w600,
-                              color: Colors.black,
+                              color: textColor,
                             ),
                           ),
                           const SizedBox(height: 5.0),
@@ -782,7 +903,7 @@ class _CabCardState extends State<CabCard> {
                                             style: GoogleFonts.inter(
                                               fontSize: 12,
                                               fontWeight: FontWeight.w500,
-                                              color: Colors.black,
+                                              color: textColor,
                                             ),
                                             overflow: TextOverflow.ellipsis,
                                           ),
@@ -807,7 +928,7 @@ class _CabCardState extends State<CabCard> {
                                               style: GoogleFonts.inter(
                                                 fontSize: 12,
                                                 fontWeight: FontWeight.w600,
-                                                color: Colors.black,
+                                                color: textColor,
                                               ),
                                             ),
                                           ),
@@ -895,110 +1016,3 @@ class _CabCardState extends State<CabCard> {
 //   }
 // }
 
-void _showBottomSheet(BuildContext context, commentController, joinCab) {
-  showModalBottomSheet(
-    isScrollControlled: true,
-    context: context,
-    builder: (BuildContext context) {
-      return SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
-          child: Container(
-            width: double.infinity,
-            // height: context.size!.height * 0.5,
-            padding: const EdgeInsets.all(25),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Comment',
-                  style: GoogleFonts.inter(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.black,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  'Please enter a comment to help the owner understand why you want to join this ride',
-                  style: GoogleFonts.inter(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                TextField(
-                  decoration: const InputDecoration(
-                    hintText: 'Enter your comment here',
-                    hintStyle: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black45,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                      borderSide: BorderSide(
-                        color: Colors.black12,
-                        width: 1,
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                      borderSide: BorderSide(
-                        color: Colors.black12,
-                        width: 1,
-                      ),
-                    ),
-                  ),
-                  maxLines: 4,
-                  controller: commentController,
-                  style: GoogleFonts.inter(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        // if (commentController.text.trim().isEmpty) {
-                        //   return;
-                        // }
-                        joinCab(context);
-                        Navigator.pop(context);
-                      },
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.fromLTRB(18, 8, 18, 8),
-                        // alignment: Alignment.centerLeft,
-                        backgroundColor:
-                            const Color.fromRGBO(254, 114, 76, 0.70),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: Text(
-                        'Join',
-                        style: GoogleFonts.inter(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    },
-  );
-}

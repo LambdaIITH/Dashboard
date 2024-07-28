@@ -9,12 +9,14 @@ import 'package:google_fonts/google_fonts.dart';
 class HomeScreenAppBar extends StatelessWidget {
   const HomeScreenAppBar(
       {super.key,
+      required this.onThemeChanged,
       required this.user,
       required this.image,
       required this.isGuest});
   final UserModel? user;
   final String image;
   final bool isGuest;
+  final ValueChanged<int> onThemeChanged;
 
   String getGreeting() {
     final hour = DateTime.now().hour;
@@ -29,6 +31,8 @@ class HomeScreenAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textColor =
+        Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
     final greeting = getGreeting();
 
     return Row(
@@ -40,7 +44,7 @@ class HomeScreenAppBar extends StatelessWidget {
               TextSpan(
                 text: '$greeting\n',
                 style: GoogleFonts.inter(
-                  color: Colors.black,
+                  color: textColor,
                   fontSize: 28,
                   fontWeight: FontWeight.w600,
                   letterSpacing: -0.2,
@@ -49,7 +53,7 @@ class HomeScreenAppBar extends StatelessWidget {
               TextSpan(
                 text: user?.name.split(' ').first ?? 'User',
                 style: GoogleFonts.inter(
-                  color: Colors.black,
+                  color: textColor,
                   fontSize: 36,
                   fontWeight: FontWeight.w600,
                   letterSpacing: -0.2,
@@ -63,7 +67,10 @@ class HomeScreenAppBar extends StatelessWidget {
                 onTap: () {
                   Navigator.pushAndRemoveUntil(
                       context,
-                      MaterialPageRoute(builder: (ctx) => const LoginScreen()),
+                      MaterialPageRoute(
+                          builder: (ctx) => LoginScreen(
+                                onThemeChanged: onThemeChanged,
+                              )),
                       (Route<dynamic> route) => false);
                 },
                 child: Container(
@@ -84,6 +91,7 @@ class HomeScreenAppBar extends StatelessWidget {
                     child: ProfileScreen(
                       user: user!,
                       image: image,
+                      onThemeChanged: onThemeChanged,
                     ),
                   ));
                 },

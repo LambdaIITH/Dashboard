@@ -7,8 +7,10 @@ import 'package:flutter/scheduler.dart' show timeDilation;
 
 class LoginScreenWrapper extends StatelessWidget {
   final double timeDilationFactor;
-  
-  const LoginScreenWrapper({super.key, this.timeDilationFactor = 1.0});
+  final ValueChanged<int> onThemeChanged;
+
+  const LoginScreenWrapper(
+      {super.key, this.timeDilationFactor = 1.0, required this.onThemeChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -18,13 +20,18 @@ class LoginScreenWrapper extends StatelessWidget {
         timeDilation = 1.0;
         return true;
       },
-      child: LoginScreen(timeDilation: timeDilationFactor),
+      child: LoginScreen(
+        timeDilation: timeDilationFactor,
+        onThemeChanged: onThemeChanged,
+      ),
     );
   }
 }
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key, this.timeDilation = 1.0});
+  final ValueChanged<int> onThemeChanged;
+  const LoginScreen(
+      {super.key, this.timeDilation = 1.0, required this.onThemeChanged});
   final double timeDilation;
 
   @override
@@ -47,9 +54,11 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         toolbarHeight: 0.0,
-        systemOverlayStyle: const SystemUiOverlayStyle(statusBarColor: Colors.white),
+        systemOverlayStyle:
+          SystemUiOverlayStyle(statusBarColor: Theme.of(context).scaffoldBackgroundColor),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -68,7 +77,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: GoogleFonts.inter(
                           fontSize: 28,
                           fontWeight: FontWeight.w500,
-                          color: const Color(0xff454545),
+                          color: Theme.of(context).brightness == Brightness.light ? const Color(0xff454545) : const Color.fromARGB(255, 180, 180, 180),
                         ),
                         children: [
                           TextSpan(
@@ -76,7 +85,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             style: GoogleFonts.inter(
                               fontSize: 32,
                               fontWeight: FontWeight.w700,
-                              color: const Color(0xff272D2F),
+                              color:  Theme.of(context).brightness == Brightness.light ? const Color(0xff272D2F) : const Color.fromARGB(255, 162, 162, 162),
                             ),
                           ),
                         ],
@@ -99,11 +108,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 style: GoogleFonts.inter(
                   fontSize: 24,
                   fontWeight: FontWeight.w300,
-                  color: const Color(0xff555555),
+                  color: Theme.of(context).brightness == Brightness.light ? const Color(0xff555555) : const Color.fromARGB(255, 192, 192, 192) ,
                 ),
               ),
               const SizedBox(height: 28),
-              const ContinueAsGuest(),
+              ContinueAsGuest(
+                onThemeChanged: widget.onThemeChanged,
+              ),
               Container(
                 margin: const EdgeInsets.fromLTRB(0, 12, 0, 12),
                 alignment: Alignment.center,
@@ -116,7 +127,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
-              const CustomGoogleButton(),
+              CustomGoogleButton(
+                onThemeChanged: widget.onThemeChanged,
+              ),
               const SizedBox(height: 42),
             ],
           ),

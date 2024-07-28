@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:dashbaord/extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -21,18 +22,20 @@ class HomeCardNoOptions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+    final textColor =
+        Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
     return InkWell(
       onTap: isComingSoon ? null : onTap,
       child: Container(
         clipBehavior: Clip.hardEdge,
         height: 140,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.customColors.customContainerColor,
           borderRadius: BorderRadius.circular(10),
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(
-              color: Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
-              offset: Offset(0, 4), // Offset in the x, y direction
+              color: context.customColors.customShadowColor, // Shadow color
+              offset: const Offset(0, 4), // Offset in the x, y direction
               blurRadius: 10.0,
               spreadRadius: 0.0,
             ),
@@ -48,6 +51,7 @@ class HomeCardNoOptions extends StatelessWidget {
                   child: Text(
                     title,
                     style: GoogleFonts.inter(
+                      color: textColor,
                       fontWeight: FontWeight.bold,
                       fontSize: 28,
                     ),
@@ -74,9 +78,10 @@ class HomeCardNoOptions extends StatelessWidget {
             ),
             if (isComingSoon)
               Container(
-                // width: double.infinity,
-                // height: double.infinity,
-                decoration: BoxDecoration(color: Colors.white.withOpacity(0.5)),
+                decoration: BoxDecoration(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? const Color.fromARGB(255, 57, 57, 57).withOpacity(0.5)
+                        : Colors.white.withOpacity(0.5)),
                 child: Center(
                     child: SizedBox(
                         height: 100,

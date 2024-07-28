@@ -1,5 +1,3 @@
-import 'package:dashbaord/screens/profile_screen.dart';
-import 'package:dashbaord/utils/custom_page_route.dart';
 import 'package:flutter/material.dart';
 import 'package:dashbaord/models/booking_model.dart';
 import 'package:dashbaord/models/travellers.dart';
@@ -169,11 +167,13 @@ class _CabAddScreenState extends State<CabAddScreen> {
             TextButton(
               child: const Text('OK'),
               onPressed: () {
-                Navigator.pushReplacement(
-                    context,
-                    CustomPageRoute(
-                        child: ProfileScreen(
-                            user: widget.user, image: widget.image)));
+                //TODO:
+
+                // Navigator.pushReplacement(
+                //     context,
+                //     CustomPageRoute(
+                //         child: ProfileScreen(
+                //             user: widget.user, image: widget.image)));
               },
             ),
           ],
@@ -250,19 +250,21 @@ class _CabAddScreenState extends State<CabAddScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final textColor =
+        Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
     return Scaffold(
-      backgroundColor: const Color(0xffFCFCFC),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text('Add a Cab',
             style: GoogleFonts.inter(
               fontSize: 28,
               fontWeight: FontWeight.w700,
-              color: Colors.black,
+              color: textColor,
             )),
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back,
-            color: Colors.black,
+            // color: Colors.black,
             size: 30.0,
           ),
           onPressed: () {
@@ -285,7 +287,7 @@ class _CabAddScreenState extends State<CabAddScreen> {
                       Container(
                         height: 48,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: Theme.of(context).cardColor,
                           borderRadius: BorderRadius.circular(10.0),
                           boxShadow: const [
                             BoxShadow(
@@ -306,7 +308,7 @@ class _CabAddScreenState extends State<CabAddScreen> {
                               style: GoogleFonts.inter(
                                 fontSize: 17,
                                 fontWeight: FontWeight.w500,
-                                color: Colors.black,
+                                color: textColor,
                               ),
                             ),
                           ),
@@ -334,7 +336,7 @@ class _CabAddScreenState extends State<CabAddScreen> {
                               child: Icon(
                                 isFrom ? Icons.arrow_forward : Icons.arrow_back,
                                 size: 25.0,
-                                color: Colors.black,
+                                // color: Colors.black,
                               ),
                             ),
                           ),
@@ -344,7 +346,7 @@ class _CabAddScreenState extends State<CabAddScreen> {
                         child: Container(
                           height: 48,
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: Theme.of(context).cardColor,
                             borderRadius: BorderRadius.circular(10.0),
                             boxShadow: const [
                               BoxShadow(
@@ -375,7 +377,7 @@ class _CabAddScreenState extends State<CabAddScreen> {
                                   style: GoogleFonts.inter(
                                     fontSize: 17,
                                     fontWeight: FontWeight.w500,
-                                    color: Colors.black,
+                                    color: textColor,
                                   ),
                                 ),
                               );
@@ -420,7 +422,7 @@ class _CabAddScreenState extends State<CabAddScreen> {
                         ),
                       ],
                       borderRadius: BorderRadius.circular(10.0),
-                      color: Colors.white,
+                      color: Theme.of(context).cardColor,
                     ),
                     child: DropdownButtonFormField<String>(
                         borderRadius: BorderRadius.circular(10.0),
@@ -437,7 +439,7 @@ class _CabAddScreenState extends State<CabAddScreen> {
                               style: GoogleFonts.inter(
                                 fontSize: 17,
                                 fontWeight: FontWeight.w500,
-                                color: Colors.black,
+                                color: textColor,
                               ),
                             ),
                           );
@@ -462,24 +464,24 @@ class _CabAddScreenState extends State<CabAddScreen> {
                   const SizedBox(height: 12.0),
                   Container(
                     decoration: BoxDecoration(
-                      boxShadow: const [
-                        BoxShadow(
-                          color:
-                              Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
-                          offset: Offset(0, 8), // Offset in the x, y direction
-                          blurRadius: 21.0,
-                          spreadRadius: 0.0,
-                        ),
-                      ],
-                      borderRadius: BorderRadius.circular(10.0),
-                      color: Colors.white,
-                    ),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color.fromRGBO(
+                                51, 51, 51, 0.10), // Shadow color
+                            offset:
+                                Offset(0, 8), // Offset in the x, y direction
+                            blurRadius: 21.0,
+                            spreadRadius: 0.0,
+                          ),
+                        ],
+                        borderRadius: BorderRadius.circular(10.0),
+                        color: Theme.of(context).cardColor),
                     child: TextFormField(
                       maxLines: 4,
                       style: GoogleFonts.inter(
                         fontSize: 17,
                         fontWeight: FontWeight.w500,
-                        color: Colors.black,
+                        color: textColor,
                       ),
                       controller: commentController,
                       textAlignVertical: TextAlignVertical.center,
@@ -535,7 +537,7 @@ class _CabAddScreenState extends State<CabAddScreen> {
                   style: GoogleFonts.inter(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
-                    color: Colors.black,
+                    color: textColor,
                   ),
                 ),
               ),
@@ -559,7 +561,7 @@ class _CabAddScreenState extends State<CabAddScreen> {
           ),
         ],
         borderRadius: BorderRadius.circular(10.0),
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
       ),
       child: TextFormField(
         textAlignVertical: TextAlignVertical.center,
@@ -567,7 +569,7 @@ class _CabAddScreenState extends State<CabAddScreen> {
         style: GoogleFonts.inter(
           fontSize: 20,
           fontWeight: FontWeight.w400,
-          color: Colors.black,
+          color: Theme.of(context).textTheme.bodyLarge?.color,
         ),
         decoration: InputDecoration(
           suffixIcon: const Icon(

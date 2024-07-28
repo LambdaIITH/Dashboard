@@ -20,7 +20,8 @@ class NextBusCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-
+    final textColor =
+        Theme.of(context).textTheme.titleLarge?.color ?? Colors.black;
     // TODO: Use Fractionally sized box later
     // Calculates cardsize by taking screenWidth and subtracting padding
     double cardWidth = screenWidth - 78;
@@ -28,12 +29,11 @@ class NextBusCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
       child: Card(
         elevation: 3,
-        color: Colors.white,
+        color: Theme.of(context).textTheme.titleMedium?.color,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: Container(
-
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).textTheme.titleMedium?.color,
             borderRadius: BorderRadius.circular(12),
             // border: Border.all(color: Colors.black,width: 1.3),
           ),
@@ -55,13 +55,13 @@ class NextBusCard extends StatelessWidget {
                         style: GoogleFonts.inter(
                             fontSize: 15.0,
                             fontWeight: FontWeight.w400,
-                            color: const Color(0xff6A6A6A),
+                            color: textColor,
                             letterSpacing: -0.2),
                       ),
                       Text(
                         waitingTime,
                         style: GoogleFonts.inter(
-                            color: const Color(0xff6A6A6A),
+                            color: textColor,
                             fontSize: 24.0,
                             fontWeight: FontWeight.w500,
                             letterSpacing: -0.2),
@@ -78,7 +78,7 @@ class NextBusCard extends StatelessWidget {
                                 fontSize: 15.0,
                                 fontWeight: FontWeight.w500,
                                 letterSpacing: -0.2,
-                                color: const Color(0xff6A6A6A),
+                                color: textColor,
                               ),
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
@@ -97,7 +97,7 @@ class NextBusCard extends StatelessWidget {
                                 fontSize: 15.0,
                                 fontWeight: FontWeight.w500,
                                 letterSpacing: -0.2,
-                                color: const Color(0xff6A6A6A),
+                                color: textColor,
                               ),
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
@@ -115,7 +115,9 @@ class NextBusCard extends StatelessWidget {
                   child: Image.asset(
                       isEv ? "assets/icons/ev.png" : "assets/icons/bus.png"),
                 ),
-                const SizedBox(width: 8,)
+                const SizedBox(
+                  width: 12,
+                )
               ],
             ),
             Row(
@@ -128,7 +130,9 @@ class NextBusCard extends StatelessWidget {
                   height: 20,
                   // padding: EdgeInsets.symmetric(horizontal: 10, vertical: 2),
                   decoration: BoxDecoration(
-                      color: isEv ? const Color(0xff0FBF00) : const Color(0xff8850FF),
+                      color: isEv
+                          ? const Color(0xff0FBF00)
+                          : const Color(0xff8850FF),
                       borderRadius: const BorderRadius.only(
                           topRight: Radius.circular(12),
                           bottomLeft: Radius.circular(12))),

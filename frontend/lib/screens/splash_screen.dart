@@ -40,8 +40,8 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 0.0,
-        systemOverlayStyle:
-            const SystemUiOverlayStyle(statusBarColor: Colors.white),
+        systemOverlayStyle: SystemUiOverlayStyle(
+            statusBarColor: Theme.of(context).scaffoldBackgroundColor),
       ),
       body: Stack(
         children: [
@@ -64,7 +64,9 @@ class _SplashScreenState extends State<SplashScreen> {
                   style: GoogleFonts.inter(
                     fontSize: 42,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xff272D2F),
+                    color: Theme.of(context).brightness == Brightness.light
+                        ? const Color(0xff272D2F)
+                        : const Color.fromARGB(255, 142, 142, 142),
                   ),
                   children: [
                     TextSpan(
@@ -72,7 +74,9 @@ class _SplashScreenState extends State<SplashScreen> {
                       style: GoogleFonts.inter(
                         fontSize: 42,
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xff272D2F),
+                        color: Theme.of(context).brightness == Brightness.light
+                            ? const Color(0xff272D2F)
+                            : const Color.fromARGB(255, 142, 142, 142),
                       ),
                     )
                   ]),

@@ -10,7 +10,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class CustomGoogleButton extends StatefulWidget {
-  const CustomGoogleButton({super.key});
+  final ValueChanged<int> onThemeChanged;
+  const CustomGoogleButton({super.key, required this.onThemeChanged});
 
   @override
   State<CustomGoogleButton> createState() => _CustomGoogleButtonState();
@@ -77,8 +78,9 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
         showSnackBar('Error!');
       } else {
         Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (context) => const HomeScreen(
+          builder: (context) => HomeScreen(
             isGuest: false,
+            onThemeChanged: widget.onThemeChanged,
           ),
         ));
       }
@@ -186,8 +188,9 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
               } else {
                 Navigator.of(context).pushAndRemoveUntil(
                     MaterialPageRoute(
-                      builder: (context) => const HomeScreen(
+                      builder: (context) => HomeScreen(
                         isGuest: false,
+                        onThemeChanged: widget.onThemeChanged,
                       ),
                     ),
                     (Route<dynamic> route) => false);
@@ -215,7 +218,7 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
                     style: GoogleFonts.inter(
                       fontSize: 20,
                       fontWeight: FontWeight.w500,
-                      color: const Color(0xff454545),
+                      color: Colors.black,
                     ),
                   ),
                 ),

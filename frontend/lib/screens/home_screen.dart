@@ -19,10 +19,9 @@ import 'package:in_app_update/in_app_update.dart';
 
 class HomeScreen extends StatefulWidget {
   final bool isGuest;
-  const HomeScreen({
-    super.key,
-    required this.isGuest,
-  });
+  final ValueChanged<int> onThemeChanged;
+  const HomeScreen(
+      {super.key, required this.isGuest, required this.onThemeChanged});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -173,10 +172,6 @@ class _HomeScreenState extends State<HomeScreen> {
     fetchMessMenu();
     fetchBus();
     analyticsService.logScreenView(screenName: "HomeScreen");
-    // if (status >= totalOperation) {
-    //   saveUserData(userModel?.name ?? 'User',
-    //       userModel?.email ?? 'user@iith.ac.in', image);
-    // }
   }
 
   Future<void> _refresh() async {
@@ -193,7 +188,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   checkForUpdates() async {
-    await Future.delayed(const Duration(seconds: 30));
+    await Future.delayed(const Duration(seconds: 10));
     try {
       var updateInfo = await InAppUpdate.checkForUpdate();
       if (updateInfo.updateAvailability == UpdateAvailability.updateAvailable) {
@@ -219,7 +214,6 @@ class _HomeScreenState extends State<HomeScreen> {
     timeDilation = 1;
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: const Color(0xfffcfcfc),
       body: isLoading
           ? const CustomLoadingScreen()
           : SafeArea(
@@ -233,6 +227,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       const SizedBox(height: 24),
                       HomeScreenAppBar(
+                          onThemeChanged: widget.onThemeChanged,
                           image: image,
                           user: userModel,
                           isGuest: widget.isGuest),
@@ -270,8 +265,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ? showError
                             : () => Navigator.of(context).push(
                                   CustomPageRoute(
-                                    child:
-                                        const LostAndFoundScreen(),
+                                    child: const LostAndFoundScreen(),
                                   ),
                                 ),
                       ),
@@ -284,8 +278,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ? showError
                             : () => Navigator.of(context).push(
                                   CustomPageRoute(
-                                    child:
-                                        const LostAndFoundScreen(),
+                                    child: const LostAndFoundScreen(),
                                   ),
                                 ),
                       ),
