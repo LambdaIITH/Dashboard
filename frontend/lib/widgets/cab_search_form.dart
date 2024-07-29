@@ -23,8 +23,7 @@ class CabSearch extends StatefulWidget {
 
 class _CabSearchState extends State<CabSearch> {
   late DateTime selectedStartDate = DateTime.now();
-  late DateTime selectedEndDate = DateTime.now()
-      .add(const Duration(hours: 1)); 
+  late DateTime selectedEndDate = DateTime.now().add(const Duration(hours: 1));
   String? selectedOption;
   String? selectedOption2;
   List<String> locations = [
@@ -232,7 +231,7 @@ class _CabSearchState extends State<CabSearch> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(10.0),
         boxShadow: const [
           BoxShadow(
@@ -247,13 +246,14 @@ class _CabSearchState extends State<CabSearch> {
         isExpanded: true,
         decoration: const InputDecoration(
           border: InputBorder.none,
-          contentPadding: EdgeInsets.fromLTRB(15 , 5, 0, 5),
+          contentPadding: EdgeInsets.fromLTRB(15, 5, 0, 5),
         ),
         items: locations.map((location) {
           return DropdownMenuItem<String>(
             value: location,
             child: Text(location,
                 style: GoogleFonts.inter(
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                   fontSize: 15,
                   fontWeight: FontWeight.w500,
                 )),
@@ -284,7 +284,7 @@ class _CabSearchState extends State<CabSearch> {
       String label, DateTime dateTime, bool isStartDate) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(10.0),
         boxShadow: const [
           BoxShadow(
@@ -296,9 +296,13 @@ class _CabSearchState extends State<CabSearch> {
       ),
       child: TextFormField(
         readOnly: true,
-        style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w500),
+        style: GoogleFonts.inter(
+            color: Theme.of(context).textTheme.bodyLarge?.color,
+            fontSize: 15,
+            fontWeight: FontWeight.w500),
         decoration: InputDecoration(
-          suffixIcon: const Icon(Icons.calendar_today, color: Color(0xffADADAD)),
+          suffixIcon:
+              const Icon(Icons.calendar_today, color: Color(0xffADADAD)),
           hintText: label,
           hintStyle: GoogleFonts.inter(
               fontSize: 15,

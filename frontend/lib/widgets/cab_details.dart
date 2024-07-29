@@ -628,14 +628,14 @@ class _CabCardState extends State<CabCard> {
                               padding: const EdgeInsets.fromLTRB(10, 6, 10, 6),
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10.0),
-                                color: Colors.grey[200],
+                                color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[600] : Colors.grey[200],
                               ),
                               child: Text(
                                 "Note: $note",
                                 style: GoogleFonts.inter(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
-                                  color: Colors.black,
+                                  color: Theme.of(context).textTheme.bodyLarge?.color,
                                 ),
                               ),
                             ),

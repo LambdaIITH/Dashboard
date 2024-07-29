@@ -269,7 +269,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     await openURL("https://iith.dev");
                   },
                   onLongPress: () async {
-                    await openURL("mailto:lambda@iith.dev");
+                    await openURL("mailto:support@iith.dev");
                   },
                   child: Text(
                     'Made with 🖤 by Lambda',

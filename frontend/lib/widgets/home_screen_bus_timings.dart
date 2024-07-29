@@ -273,11 +273,14 @@ class _HomeScreenBusTimingsState extends State<HomeScreenBusTimings> {
         children: [
           SizedBox(
             // width: 0.3 * screenWidth,
-            child: NormalText(text: from),
+            child: NormalText(
+                color: Theme.of(context).textTheme.bodyLarge?.color,
+                text: from),
           ),
           const Icon(Icons.arrow_forward_rounded),
           SizedBox(width: 0.02 * screenWidth),
-          NormalText(text: to),
+          NormalText(
+              color: Theme.of(context).textTheme.bodyLarge?.color, text: to),
           const Spacer(),
           NormalText(
             text: waitTime,
