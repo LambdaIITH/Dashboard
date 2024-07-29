@@ -15,6 +15,7 @@ import 'package:dashbaord/widgets/home_card_no_options.dart';
 import 'package:dashbaord/widgets/home_screen_appbar.dart';
 import 'package:dashbaord/widgets/home_screen_bus_timings.dart';
 import 'package:dashbaord/widgets/home_screen_mess_menu.dart';
+import 'package:flutter/services.dart';
 import 'package:in_app_update/in_app_update.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -213,6 +214,14 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     timeDilation = 1;
     return Scaffold(
+      appBar: AppBar(
+        toolbarHeight: 0.0,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarBrightness: Theme.of(context).brightness,
+          // Status bar color
+          statusBarColor: Theme.of(context).scaffoldBackgroundColor,
+        ),
+      ),
       key: _scaffoldKey,
       body: isLoading
           ? const CustomLoadingScreen()
@@ -245,8 +254,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         onTap: () {
                           widget.isGuest
                               ? showError()
-                              : Navigator.of(context).push(CustomPageRoute(
-                                  child: CabSharingScreen(
+                              : Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (ctx) => CabSharingScreen(
                                     image: image,
                                     user: userModel ??
                                         UserModel(
@@ -258,14 +267,18 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 20),
                       HomeCardNoOptions(
+                        isComingSoon: false,
                         isLnF: true,
                         title: 'Lost & Found',
                         child: 'assets/icons/magnifying-icon.svg',
                         onTap: widget.isGuest
                             ? showError
                             : () => Navigator.of(context).push(
-                                  CustomPageRoute(
-                                    child: const LostAndFoundScreen(),
+                                  MaterialPageRoute(
+                                    builder: (ctx) => LostAndFoundScreen(
+                                      currentUserEmail:
+                                          userModel?.email ?? 'user@iith.ac.in',
+                                    ),
                                   ),
                                 ),
                       ),
@@ -277,9 +290,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         onTap: widget.isGuest
                             ? showError
                             : () => Navigator.of(context).push(
-                                  CustomPageRoute(
-                                    child: const LostAndFoundScreen(),
-                                  ),
+                                  MaterialPageRoute(
+                                      builder: (ctx) => Container()),
                                 ),
                       ),
                       const SizedBox(

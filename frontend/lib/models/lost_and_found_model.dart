@@ -6,6 +6,8 @@ class LostAndFoundModel {
   final String? itemDescription;
   final List<String> images;
   final String id;
+  final String? userName;
+  final String? userEmail;
 
   const LostAndFoundModel({
     required this.id,
@@ -13,12 +15,16 @@ class LostAndFoundModel {
     required this.itemName,
     this.itemDescription,
     required this.images,
+    this.userEmail,
+    this.userName,
   });
 
   // not done!!
   factory LostAndFoundModel.fromJson(Map<String, dynamic> json) {
     // debugPrint(json['images'][0]);
     return LostAndFoundModel(
+      userName: json['username'],
+      userEmail: json['user_email'],
       id: json['id'].toString(),
       lostOrFound: json['lostOrFound'],
       itemName: json['name'],

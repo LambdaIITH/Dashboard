@@ -465,7 +465,6 @@ class ApiServices {
           },
         ),
       );
-      debugPrint(items.toString());
       return {'status': response.statusCode, 'items': items};
     } on DioException catch (e) {
       if (e.response != null) {
@@ -474,9 +473,56 @@ class ApiServices {
           'status': e.response?.statusCode
         };
       }
-      debugPrint("get lf items failed: $e");
       return {
         'error': 'get Lost and Found items failed',
+        'status': e.response?.statusCode
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> getLostItems() async {
+    try {
+      final response = await dio.get('/lost/all');
+      final items = (response.data as List).map(
+        (e) {
+          e['lostOrFound'] = LostOrFound.lost;
+          return e;
+        },
+      ).toList();
+      return {'status': response.statusCode, 'items': items};
+    } on DioException catch (e) {
+      if (e.response != null) {
+        return {
+          'error': e.response?.data['detail'],
+          'status': e.response?.statusCode
+        };
+      }
+      return {
+        'error': 'get Lost items failed',
+        'status': e.response?.statusCode
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> getFoundItems() async {
+    try {
+      final response = await dio.get('/found/all');
+      final items = (response.data as List).map(
+        (e) {
+          e['lostOrFound'] = LostOrFound.found;
+          return e;
+        },
+      ).toList();
+      return {'status': response.statusCode, 'items': items};
+    } on DioException catch (e) {
+      if (e.response != null) {
+        return {
+          'error': e.response?.data['detail'],
+          'status': e.response?.statusCode
+        };
+      }
+      return {
+        'error': 'get Found items failed',
         'status': e.response?.statusCode
       };
     }

@@ -265,14 +265,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 GestureDetector(
+                  onTap: () async {
+                    await openURL('https://iith.dev');
+                  },
                   onDoubleTap: () async {
-                    await openURL("https://iith.dev");
+                    await openURL("https://github.com/LambdaIITH/Dashboard");
                   },
                   onLongPress: () async {
                     await openURL("mailto:support@iith.dev");
                   },
                   child: Text(
-                    'Made with 🖤 by Lambda',
+                    'Made with 💜 by Lambda',
                     style: GoogleFonts.inter(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,

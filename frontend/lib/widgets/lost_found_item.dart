@@ -6,20 +6,19 @@ import 'package:dashbaord/utils/normal_text.dart';
 import 'package:dashbaord/widgets/custom_carousel.dart';
 
 class LostFoundItem extends StatelessWidget {
-  const LostFoundItem({
-    super.key,
-    required this.item,
-  });
+  const LostFoundItem(
+      {super.key, required this.item, required this.currentUserEmail});
 
   final LostAndFoundModel item;
+  final String currentUserEmail;
 
-  
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => LostAndFoundItemScreen(
+            currentUserEmail: currentUserEmail,
             id: item.id,
             lostOrFound: item.lostOrFound,
           ),
@@ -28,8 +27,8 @@ class LostFoundItem extends StatelessWidget {
       child: Container(
         width: 160, // Fixed height
         clipBehavior: Clip.hardEdge,
-        decoration: const BoxDecoration(
-          color: Colors.white,
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
           boxShadow: [
             BoxShadow(
               color: Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
@@ -77,8 +76,9 @@ class LostFoundItem extends StatelessWidget {
                     ],
                   ),
                 ),
-                ],
+              ],
             ),
+            const SizedBox(height: 16),
           ],
         ),
       ),

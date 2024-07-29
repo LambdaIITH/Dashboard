@@ -21,10 +21,6 @@ void main() async {
 
   final apiServices = ApiServices();
   await apiServices.configureDio();
-  // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-  //   systemNavigationBarColor: Colors.blue, // navigation bar color
-  //   statusBarColor: Colors.pink, // status bar color
-  // ));
   runApp(const MyApp());
 }
 

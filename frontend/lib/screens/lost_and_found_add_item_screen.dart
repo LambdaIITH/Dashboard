@@ -1,3 +1,4 @@
+import 'package:dashbaord/screens/lost_and_found_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:dashbaord/constants/enums/lost_and_found.dart';
 import 'package:dashbaord/services/api_service.dart';
@@ -9,7 +10,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 
 class LostAndFoundAddItemScreen extends StatefulWidget {
-  const LostAndFoundAddItemScreen({super.key});
+  const LostAndFoundAddItemScreen({super.key, required this.currentUserEmail});
+  final String currentUserEmail;
 
   @override
   State<LostAndFoundAddItemScreen> createState() =>
@@ -39,9 +41,9 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
     super.dispose();
   }
 
-  void pickImage() async {
+  void pickImage(ImageSource source) async {
     final image = await _imagePicker.pickImage(
-      source: ImageSource.camera,
+      source: source,
       imageQuality: 50, // <- Reduce Image quality
       maxHeight: 500, // <- reduce the image size
       maxWidth: 500,
@@ -54,10 +56,42 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
     });
   }
 
+  void showImageSourceDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Choose Image Source'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.camera),
+                title: const Text('Camera'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  pickImage(ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Gallery'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  pickImage(ImageSource.gallery);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   void createListing() async {
-    if (_images.length < 3) {
+    if (_images.isEmpty) {
       showMessage(
-        msg: "Please add atleast 3 images",
+        msg: "Please add atleast 1 images",
         context: context,
       );
       return;
@@ -97,7 +131,15 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
         context: context,
         msg: "Successfully item added!",
       );
-      Navigator.of(context).pop();
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => LostAndFoundScreen(
+            currentUserEmail: widget.currentUserEmail,
+          ),
+        ),
+        (route) => route.isFirst,
+      );
     } else {
       showMessage(
         context: context,
@@ -109,7 +151,7 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
   updateButtonStatus() {
     return _itemDescriptionController.text.trim().isNotEmpty &&
         _itemNameController.text.trim().isNotEmpty &&
-        _images.length >= 3 &&
+        _images.length >= 1 &&
         _lostOrFound != null;
   }
 
@@ -118,9 +160,9 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
-        title: const BoldText(
+        title: BoldText(
           text: 'Listings',
-          color: Colors.black,
+          color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black,
           size: 28,
         ),
       ),
@@ -129,8 +171,8 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
         child: Container(
           clipBehavior: Clip.hardEdge,
           width: double.infinity,
-          decoration: const BoxDecoration(
-            color: Colors.white,
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
             boxShadow: [
               BoxShadow(
                 color: Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
@@ -139,7 +181,7 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
                 spreadRadius: 0.0,
               ),
             ],
-            borderRadius: BorderRadius.all(Radius.circular(10)),
+            borderRadius: const BorderRadius.all(Radius.circular(10)),
           ),
           child: ListView(
             children: [
@@ -152,17 +194,22 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
                           fromMemory: true,
                         ),
                         Container(
+                          height: 350,
                           alignment: Alignment.centerRight,
                           child: Positioned(
                             right: 10,
                             top: 10,
-                            child: CircleAvatar(
-                              backgroundColor: Colors.black12,
+                            child: Container(
+                              margin: EdgeInsets.only(right: 8),
+                              decoration: BoxDecoration(
+                                  color: const Color.fromARGB(204, 254, 115, 76)
+                                      .withOpacity(0.5),
+                                  borderRadius: BorderRadius.circular(12)),
                               child: IconButton(
                                 icon: const Icon(
                                   Icons.add,
                                 ),
-                                onPressed: pickImage,
+                                onPressed: showImageSourceDialog,
                               ),
                             ),
                           ),
@@ -170,7 +217,7 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
                       ],
                     )
                   : InkWell(
-                      onTap: pickImage,
+                      onTap: showImageSourceDialog,
                       child: Container(
                         height: 350,
                         padding: const EdgeInsets.all(25),
@@ -187,8 +234,7 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
                               size: 80,
                             ),
                             NormalText(
-                              text:
-                                  'Make sure to add a minimum of 3 pictures from differet angles for best results.',
+                              text: 'Make sure to add a minimum of 1 picture.',
                               center: true,
                             ),
                           ],
@@ -212,7 +258,7 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
                         style: GoogleFonts.inter(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
-                          color: Colors.black,
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
                         ),
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.all(10),
@@ -250,14 +296,32 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
                             _lostOrFound = value;
                           });
                         },
-                        items: const [
+                        items: [
                           DropdownMenuItem(
                             value: LostOrFound.lost,
-                            child: Text('Lost'),
+                            child: Text(
+                              'Lost',
+                              style: GoogleFonts.inter(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .bodyLarge
+                                      ?.color),
+                            ),
                           ),
                           DropdownMenuItem(
                             value: LostOrFound.found,
-                            child: Text('Found'),
+                            child: Text(
+                              'Found',
+                              style: GoogleFonts.inter(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .bodyLarge
+                                      ?.color),
+                            ),
                           ),
                         ],
                       ),
@@ -272,7 +336,7 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
                   style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
-                    color: Colors.black,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
                   ),
                   onChanged: (v) {
                     setState(() {});
@@ -292,19 +356,6 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              // ListTile(
-              //   contentPadding:
-              //       EdgeInsets.symmetric(horizontal: screenWidth * 0.3),
-              //   title: FilledButton(
-              //     style: ButtonStyle(
-              //       backgroundColor: WidgetStateColor.resolveWith(
-              //           (_) => const Color(0xB2FE724C)),
-              //     ),
-              //     onPressed: createListing,
-              //     child: const Text('Post'),
-              //   ),
-              // )
-
               Container(
                 alignment: Alignment.bottomCenter,
                 margin: const EdgeInsets.only(bottom: 16),
@@ -334,11 +385,11 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
                     height: 60,
                     alignment: Alignment.center,
                     child: Text(
-                      'Add Cab',
+                      'Add Item',
                       style: GoogleFonts.inter(
                         fontSize: 20,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                       ),
                     ),
                   ),
