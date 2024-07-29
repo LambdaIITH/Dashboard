@@ -78,7 +78,7 @@ def get_all_image_uris(item_id : int):
 def search_found_items(search_query: str, max_results: int= 10):
     query = (Query.from_(found_table)
     .select('*')
-    .where(found_table['item_name'].like(f'%{search_query}%') | found_table['item_description'].ilike(f'%{search_query}%'))
+    .where(found_table['item_name'].ilike(f'%{search_query}%') | found_table['item_description'].ilike(f'%{search_query}%'))
     .orderby(found_table['created_at'], order=Order.desc)
     .limit(max_results)
     )
