@@ -1,4 +1,6 @@
 import 'package:dashbaord/screens/lost_and_found_screen.dart';
+import 'package:dashbaord/widgets/custom_carousel_web.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:dashbaord/constants/enums/lost_and_found.dart';
 import 'package:dashbaord/services/api_service.dart';
@@ -7,6 +9,7 @@ import 'package:dashbaord/utils/normal_text.dart';
 import 'package:dashbaord/utils/show_message.dart';
 import 'package:dashbaord/widgets/custom_carousel.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 
 class LostAndFoundAddItemScreen extends StatefulWidget {
@@ -24,7 +27,10 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
   late final ImagePicker _imagePicker;
 
   LostOrFound? _lostOrFound;
-  final List<String> _images = [];
+  // final List<String> _images = [];
+  final List<PickedFile> _images = [];
+  final List<Uint8List> _imagesWeb = [];
+  bool imagePicked = false;
 
   @override
   void initState() {
@@ -41,19 +47,55 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
     super.dispose();
   }
 
-  void pickImage(ImageSource source) async {
-    final image = await _imagePicker.pickImage(
-      source: source,
-      imageQuality: 50, // <- Reduce Image quality
-      maxHeight: 500, // <- reduce the image size
-      maxWidth: 500,
-    );
-    if (image == null) {
-      return;
+  // void pickImage(ImageSource source) async {
+
+  // final image = await _imagePicker.pickImage(
+  //   source: source,
+  //   imageQuality: 50, // <- Reduce Image quality
+  //   maxHeight: 500, // <- reduce the image size
+  //   maxWidth: 500,
+  // );
+  // if (image == null) {
+  //   return;
+  // }
+  // setState(() {
+  //   _images.add(image.path);
+  // });
+  // }
+
+  Future<void> pickImage(ImageSource source) async {
+    final pickedFile = await _imagePicker.pickImage(source: source);
+    if (pickedFile != null) {
+      final croppedFile = await ImageCropper().cropImage(
+        sourcePath: pickedFile.path,
+        aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+      );
+      if (croppedFile != null) {
+        setState(() {
+          imagePicked = true;
+          _images.add(PickedFile(croppedFile.path));
+        });
+      }
     }
-    setState(() {
-      _images.add(image.path);
-    });
+  }
+
+  Future<void> pickImageWeb(ImageSource source) async {
+    final pickedFile = await _imagePicker.pickImage(
+      source: source,
+      imageQuality: 40, // Optionally reduce the image quality
+      maxWidth: 800, // Optionally set a max width for resizing
+      maxHeight: 800, // Optionally set a max height for resizing
+    );
+
+    if (pickedFile != null) {
+      final bytes = await pickedFile.readAsBytes();
+      print(bytes);
+      setState(() {
+        _imagesWeb.add(bytes);
+        imagePicked = true;
+        // _images.add(PickedFile(pickedFile.path));
+      });
+    }
   }
 
   void showImageSourceDialog() {
@@ -70,7 +112,9 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
                 title: const Text('Camera'),
                 onTap: () {
                   Navigator.of(context).pop();
-                  pickImage(ImageSource.camera);
+                  kIsWeb
+                      ? pickImageWeb(ImageSource.camera)
+                      : pickImage(ImageSource.camera);
                 },
               ),
               ListTile(
@@ -78,7 +122,9 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
                 title: const Text('Gallery'),
                 onTap: () {
                   Navigator.of(context).pop();
-                  pickImage(ImageSource.gallery);
+                  kIsWeb
+                      ? pickImageWeb(ImageSource.gallery)
+                      : pickImage(ImageSource.gallery);
                 },
               ),
             ],
@@ -89,7 +135,7 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
   }
 
   void createListing() async {
-    if (_images.isEmpty) {
+    if (_images.isEmpty && !imagePicked) {
       showMessage(
         msg: "Please add atleast 1 images",
         context: context,
@@ -120,11 +166,11 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
     }
 
     final response = await ApiServices().addLostAndFoundItem(
-      itemName: _itemNameController.text,
-      itemDescription: _itemDescriptionController.text,
-      lostOrFound: _lostOrFound!,
-      images: _images,
-    );
+        itemName: _itemNameController.text,
+        itemDescription: _itemDescriptionController.text,
+        lostOrFound: _lostOrFound!,
+        images: _images,
+        imagesWeb: _imagesWeb);
 
     if (response['status'] == 200) {
       showMessage(
@@ -151,8 +197,72 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
   updateButtonStatus() {
     return _itemDescriptionController.text.trim().isNotEmpty &&
         _itemNameController.text.trim().isNotEmpty &&
-        _images.length >= 1 &&
+        (_images.isNotEmpty || imagePicked) &&
         _lostOrFound != null;
+  }
+
+  selectionWidget(bool isImageUploaded) {
+    if (isImageUploaded) {
+      return Column(
+        children: [
+          const SizedBox(
+            height: 24,
+          ),
+          CustomCarouselWeb(
+            imagesWeb: _imagesWeb,
+            height: 350,
+          ),
+          const SizedBox(
+            height: 24,
+          ),
+          Container(
+            padding: const EdgeInsets.all(6),
+            // margin: EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+                color: const Color.fromARGB(204, 254, 115, 76).withOpacity(0.5),
+                borderRadius: BorderRadius.circular(12)),
+            child: IconButton(
+                icon: const Icon(
+                  Icons.add,
+                ),
+                onPressed: () {
+                  showImageSourceDialog();
+                }),
+          ),
+          const SizedBox(
+            height: 24,
+          ),
+        ],
+      );
+    } else {
+      return InkWell(
+        onTap: () {
+          showImageSourceDialog();
+        },
+        child: Container(
+          height: 350,
+          padding: const EdgeInsets.all(25),
+          child: const Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              NormalText(
+                text: 'Upload images.',
+                center: true,
+              ),
+              Icon(
+                Icons.add,
+                size: 80,
+              ),
+              NormalText(
+                text: 'Make sure to add a minimum of 1 picture.',
+                center: true,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
   }
 
   @override
@@ -173,7 +283,7 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
           width: double.infinity,
           decoration: BoxDecoration(
             color: Theme.of(context).cardColor,
-            boxShadow: [
+            boxShadow: const [
               BoxShadow(
                 color: Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
                 offset: Offset(0, 4), // Offset in the x, y direction
@@ -183,64 +293,71 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
             ],
             borderRadius: const BorderRadius.all(Radius.circular(10)),
           ),
-          child: ListView(
+          child: Column(
             children: [
-              _images.isNotEmpty
-                  ? Stack(
-                      children: [
-                        CustomCarousel(
-                          images: _images,
-                          height: 350,
-                          fromMemory: true,
-                        ),
-                        Container(
-                          height: 350,
-                          alignment: Alignment.centerRight,
-                          child: Positioned(
-                            right: 10,
-                            top: 10,
-                            child: Container(
-                              margin: EdgeInsets.only(right: 8),
-                              decoration: BoxDecoration(
-                                  color: const Color.fromARGB(204, 254, 115, 76)
-                                      .withOpacity(0.5),
-                                  borderRadius: BorderRadius.circular(12)),
-                              child: IconButton(
-                                icon: const Icon(
-                                  Icons.add,
+              kIsWeb
+                  ? selectionWidget(imagePicked)
+                  : _images.isNotEmpty
+                      ? Stack(
+                          children: [
+                            CustomCarousel(
+                              images: _images.map((file) => file.path).toList(),
+                              height: 350,
+                              fromMemory: true,
+                            ),
+                            Container(
+                              height: 350,
+                              alignment: Alignment.centerRight,
+                              child: Positioned(
+                                right: 10,
+                                top: 10,
+                                child: Container(
+                                  margin: const EdgeInsets.only(right: 8),
+                                  decoration: BoxDecoration(
+                                      color: const Color.fromARGB(
+                                              204, 254, 115, 76)
+                                          .withOpacity(0.5),
+                                      borderRadius: BorderRadius.circular(12)),
+                                  child: IconButton(
+                                      icon: const Icon(
+                                        Icons.add,
+                                      ),
+                                      onPressed: () {
+                                        showImageSourceDialog();
+                                      }),
                                 ),
-                                onPressed: showImageSourceDialog,
                               ),
+                            )
+                          ],
+                        )
+                      : InkWell(
+                          onTap: () {
+                            showImageSourceDialog();
+                          },
+                          child: Container(
+                            height: 350,
+                            padding: const EdgeInsets.all(25),
+                            child: const Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                NormalText(
+                                  text: 'Upload images.',
+                                  center: true,
+                                ),
+                                Icon(
+                                  Icons.add,
+                                  size: 80,
+                                ),
+                                NormalText(
+                                  text:
+                                      'Make sure to add a minimum of 1 picture.',
+                                  center: true,
+                                ),
+                              ],
                             ),
                           ),
-                        )
-                      ],
-                    )
-                  : InkWell(
-                      onTap: showImageSourceDialog,
-                      child: Container(
-                        height: 350,
-                        padding: const EdgeInsets.all(25),
-                        child: const Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            NormalText(
-                              text: 'Upload images.',
-                              center: true,
-                            ),
-                            Icon(
-                              Icons.add,
-                              size: 80,
-                            ),
-                            NormalText(
-                              text: 'Make sure to add a minimum of 1 picture.',
-                              center: true,
-                            ),
-                          ],
                         ),
-                      ),
-                    ),
               const SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),

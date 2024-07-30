@@ -15,6 +15,7 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:dashbaord/utils/bus_schedule.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'dio_non_web_config.dart' if (dart.library.html) 'dio_web_config.dart';
@@ -532,15 +533,31 @@ class ApiServices {
     required String itemName,
     required String itemDescription,
     required LostOrFound lostOrFound,
-    required List<String> images,
+    required List<Uint8List> imagesWeb,
+    required List<PickedFile> images,
   }) async {
     try {
       final url =
           "/${lostOrFound == LostOrFound.lost ? "lost" : "found"}/add_item";
 
-      final multiPartList = await Future.wait(images.map((path) async {
-        return MultipartFile.fromFile(path, filename: path.split('/').last);
-      }).toList());
+      List<MultipartFile> multiPartList = [];
+
+      if (kIsWeb) {
+        multiPartList = await Future.wait(imagesWeb.map((img) async {
+          return MultipartFile.fromBytes(img,
+              filename:
+                  "IITH_DASHBOARD_BY_LAMBDA-lost-item-from-web-${DateTime.now().toIso8601String()}");
+        }).toList());
+      } else {
+        multiPartList = await Future.wait(images.map((img) async {
+          return MultipartFile.fromFile(img.path,
+              filename:
+                  "IITH_DASHBOARD_BY_LAMBDA-${img.path.split('/').last}-${DateTime.now().toIso8601String()}");
+        }).toList());
+      }
+
+      // Debug log to check the multipart list content
+      debugPrint('MultiPart List: $multiPartList');
 
       final formData = FormData.fromMap({
         "form_data": jsonEncode({
@@ -549,6 +566,10 @@ class ApiServices {
         }),
         "images": multiPartList,
       });
+
+      // Debug log to check the FormData content
+      debugPrint('FormData: ${formData.fields}');
+      debugPrint('FormData files: ${formData.files}');
 
       final response = await dio.post(url, data: formData);
       debugPrint(response.statusMessage);
