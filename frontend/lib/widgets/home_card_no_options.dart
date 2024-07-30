@@ -9,6 +9,7 @@ class HomeCardNoOptions extends StatelessWidget {
   final String title;
   final dynamic child;
   final bool isLnF;
+  final bool isImageShow;
   final bool isComingSoon;
   final void Function() onTap;
   const HomeCardNoOptions(
@@ -17,6 +18,7 @@ class HomeCardNoOptions extends StatelessWidget {
       required this.child,
       required this.onTap,
       this.isLnF = false,
+      this.isImageShow = true,
       this.isComingSoon = true});
 
   @override
@@ -57,23 +59,25 @@ class HomeCardNoOptions extends StatelessWidget {
                     ),
                   ),
                 ),
-                isLnF
-                    ? Positioned(
-                        bottom: -13,
-                        right: -7,
-                        child: SvgPicture.asset(
-                          child,
-                          width: min(0.42 * screenWidth, 200),
-                        ),
-                      )
-                    : Positioned(
-                        bottom: -13,
-                        right: -7,
-                        child: SvgPicture.asset(
-                          child,
-                          width: min(0.5 * screenWidth, 200),
-                        ),
-                      )
+                isImageShow
+                    ? isLnF
+                        ? Positioned(
+                            bottom: -13,
+                            right: -7,
+                            child: SvgPicture.asset(
+                              child,
+                              width: min(0.42 * screenWidth, 200),
+                            ),
+                          )
+                        : Positioned(
+                            bottom: -13,
+                            right: -7,
+                            child: SvgPicture.asset(
+                              child,
+                              width: min(0.5 * screenWidth, 200),
+                            ),
+                          )
+                    : Container()
               ],
             ),
             if (isComingSoon)
