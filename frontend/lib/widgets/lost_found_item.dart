@@ -25,11 +25,14 @@ class LostFoundItem extends StatelessWidget {
         ),
       ),
       child: Container(
+      constraints: BoxConstraints(
+        maxHeight: 200,
+      ),
         width: 160, // Fixed height
         clipBehavior: Clip.hardEdge,
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
               color: Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
               offset: Offset(0, 4), // Offset in the x, y direction
@@ -37,7 +40,7 @@ class LostFoundItem extends StatelessWidget {
               spreadRadius: 0.0,
             ),
           ],
-          borderRadius: BorderRadius.all(Radius.circular(10)),
+          borderRadius: const BorderRadius.all(Radius.circular(10)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

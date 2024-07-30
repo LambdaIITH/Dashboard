@@ -1,13 +1,12 @@
 import 'dart:math';
 
 import 'package:dashbaord/screens/lost_and_found_screen.dart';
+import 'package:dashbaord/utils/bold_text.dart';
 import 'package:dashbaord/utils/loading_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:dashbaord/constants/enums/lost_and_found.dart';
 import 'package:dashbaord/models/lost_and_found_model.dart';
-import 'package:dashbaord/screens/lost_and_found_edit_item_screen.dart';
 import 'package:dashbaord/services/api_service.dart';
-import 'package:dashbaord/utils/bold_text.dart';
 import 'package:dashbaord/utils/normal_text.dart';
 import 'package:dashbaord/utils/show_message.dart';
 import 'package:dashbaord/widgets/custom_carousel.dart';
@@ -118,7 +117,7 @@ class LostAndFoundItemScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   width: 12,
                 ),
                 Expanded(
@@ -270,11 +269,15 @@ class LostAndFoundItemScreen extends StatelessWidget {
             // itemDescription: '');
             return Scaffold(
               appBar: AppBar(
-                // title: BoldText(
-                //   text: 'Listings',
-                //   color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black,
-                //   size: 28,
-                // ),
+                title: BoldText(
+                  text: item.itemName,
+                  // text: lostOrFound == LostOrFound.lost
+                  //     ? 'Lost Item'
+                  //     : 'Found Item',
+                  color: Theme.of(context).textTheme.bodyLarge?.color ??
+                      Colors.black,
+                  size: 28,
+                ),
                 actions: [
                   if (item.userEmail == currentUserEmail)
                     PopupMenuButton(
@@ -330,7 +333,6 @@ class LostAndFoundItemScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-                
                 ],
               ),
               body: Padding(
@@ -340,7 +342,7 @@ class LostAndFoundItemScreen extends StatelessWidget {
                   width: double.infinity,
                   decoration: BoxDecoration(
                     color: Theme.of(context).cardColor,
-                    boxShadow: [
+                    boxShadow: const [
                       BoxShadow(
                         color: Color.fromRGBO(51, 51, 51, 0.10), // Shadow color
                         offset: Offset(0, 4), // Offset in the x, y direction
@@ -348,7 +350,7 @@ class LostAndFoundItemScreen extends StatelessWidget {
                         spreadRadius: 0.0,
                       ),
                     ],
-                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                    borderRadius: const BorderRadius.all(Radius.circular(10)),
                   ),
                   child: ListView(
                     children: [
@@ -376,6 +378,10 @@ class LostAndFoundItemScreen extends StatelessWidget {
                               child: NormalText(
                                 text: item.itemName,
                                 size: 18,
+                                color: Theme.of(context)
+                                    .textTheme
+                                    .bodyLarge
+                                    ?.color,
                               ),
                             ),
                             Container(
@@ -393,7 +399,10 @@ class LostAndFoundItemScreen extends StatelessWidget {
                                     ? 'Lost'
                                     : 'Found',
                                 size: 18,
-                                color: const Color(0xB2FE724C),
+                                color: Theme.of(context)
+                                    .textTheme
+                                    .bodyLarge
+                                    ?.color,
                               ),
                             ),
                           ],
@@ -412,7 +421,10 @@ class LostAndFoundItemScreen extends StatelessWidget {
                             color: Colors.black12,
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: NormalText(text: item.itemDescription!),
+                          child: NormalText(
+                            text: item.itemDescription!,
+                            color: Theme.of(context).textTheme.bodyLarge?.color,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 20),
@@ -420,34 +432,42 @@ class LostAndFoundItemScreen extends StatelessWidget {
                         contentPadding: EdgeInsets.symmetric(
                           horizontal: max(screenWidth * 0.28, 20),
                         ),
-                        title: FilledButton(
-                          onPressed: () {
+                        title: InkWell(
+                          onTap: () {
                             profileDialog(item.userName ?? '',
                                 item.userEmail ?? '', context);
                           },
-                          style: ButtonStyle(
-                            backgroundColor: WidgetStateColor.resolveWith(
-                              (_) => const Color(0xB2FE724C),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 10, horizontal: 20),
+                            decoration: BoxDecoration(
+                              color: const Color(0xB2FE724C),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Center(
+                              child: FittedBox(
+                                child: Text(
+                                  'CONTACT',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 16,
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .bodyLarge
+                                        ?.color,
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
-                          child: Text(
-                            'CONTACT',
-                            style: GoogleFonts.inter(
-                                fontSize: 16,
-                                color: Theme.of(context)
-                                    .textTheme
-                                    .bodyLarge
-                                    ?.color),
-                          ),
                         ),
-                      ),
+                      )
                     ],
                   ),
                 ),
               ),
             );
           default:
-            return CustomLoadingScreen();
+            return const CustomLoadingScreen();
         }
       },
     );
