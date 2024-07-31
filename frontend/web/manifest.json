@@ -5,7 +5,7 @@
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#ffffff",
-    "description": "A new Flutter project.",
+    "description": "IITH Dashboard PWA",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

@@ -188,6 +188,32 @@ class _HomeScreenState extends State<HomeScreen> {
     fetchBus();
   }
 
+  //TODO: delete this after orientation
+
+  List<String> headsANDmentors = [
+    'ms22btech11010@iith.ac.in',
+    'ma22btech11003@iith.ac.in',
+    'cs22btech11028@iith.ac.in',
+    'cs22btech11017@iith.ac.in',
+    'cs21btech11033@iith.ac.in',
+    'cs21btech11028@iith.ac.in',
+    'bm21btech11007@iith.ac.in',
+    'cs21btech11060@iith.ac.in',
+    'lambda@iith.ac.in'
+  ];
+
+bool isFreshersEmail(String email) {
+  if (headsANDmentors.contains(email)) return true;
+
+  final RegExp emailRegExp = RegExp(r'^[\w\.-]*24[\w\.-]*@iith\.ac\.in$');
+
+  DateTime now = DateTime.now();
+  bool isAugustFirst = now.month == 8 && now.day == 1 && now.year == 2024;
+
+  return emailRegExp.hasMatch(email) && isAugustFirst;
+}
+
+
   checkForUpdates() async {
     await Future.delayed(const Duration(seconds: 10));
     try {
@@ -282,20 +308,24 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                 ),
                       ),
-                      const SizedBox(height: 20),
-                      HomeCardNoOptions(
-                        isComingSoon: false,
-                        isImageShow: false,
-                        isLnF: true,
-                        title: 'Fresher\'s Game',
-                        child: 'assets/icons/calendar.svg',
-                        onTap: widget.isGuest
-                            ? showError
-                            : () => Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                      builder: (ctx) => GameStartScreen()),
-                                ),
-                      ),
+                      if (isFreshersEmail(
+                          userModel?.email ?? 'user@iith.ac.in'))
+                        const SizedBox(height: 20),
+                      if (isFreshersEmail(
+                          userModel?.email ?? 'user@iith.ac.in'))
+                        HomeCardNoOptions(
+                          isComingSoon: false,
+                          isImageShow: false,
+                          isLnF: true,
+                          title: 'Fresher\'s Game',
+                          child: 'assets/icons/calendar.svg',
+                          onTap: widget.isGuest
+                              ? showError
+                              : () => Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                        builder: (ctx) => GameStartScreen()),
+                                  ),
+                        ),
                       const SizedBox(height: 20),
                       HomeCardNoOptions(
                         isLnF: true,

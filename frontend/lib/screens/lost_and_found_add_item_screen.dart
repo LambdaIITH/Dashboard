@@ -293,43 +293,77 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
             ],
             borderRadius: const BorderRadius.all(Radius.circular(10)),
           ),
-          child: Column(
+          child: ListView(
             children: [
               kIsWeb
                   ? selectionWidget(imagePicked)
                   : _images.isNotEmpty
-                      ? Stack(
+                      ? Column(
                           children: [
+                            const SizedBox(
+                              height: 24,
+                            ),
                             CustomCarousel(
                               images: _images.map((file) => file.path).toList(),
                               height: 350,
                               fromMemory: true,
                             ),
+                            const SizedBox(
+                              height: 24,
+                            ),
                             Container(
-                              height: 350,
-                              alignment: Alignment.centerRight,
-                              child: Positioned(
-                                right: 10,
-                                top: 10,
-                                child: Container(
-                                  margin: const EdgeInsets.only(right: 8),
-                                  decoration: BoxDecoration(
-                                      color: const Color.fromARGB(
-                                              204, 254, 115, 76)
-                                          .withOpacity(0.5),
-                                      borderRadius: BorderRadius.circular(12)),
-                                  child: IconButton(
-                                      icon: const Icon(
-                                        Icons.add,
-                                      ),
-                                      onPressed: () {
-                                        showImageSourceDialog();
-                                      }),
-                                ),
-                              ),
-                            )
+                              padding: const EdgeInsets.all(6),
+                              // margin: EdgeInsets.only(right: 8),
+                              decoration: BoxDecoration(
+                                  color: const Color.fromARGB(204, 254, 115, 76)
+                                      .withOpacity(0.5),
+                                  borderRadius: BorderRadius.circular(12)),
+                              child: IconButton(
+                                  icon: const Icon(
+                                    Icons.add,
+                                  ),
+                                  onPressed: () {
+                                    showImageSourceDialog();
+                                  }),
+                            ),
+                            const SizedBox(
+                              height: 24,
+                            ),
                           ],
                         )
+
+                      //  Stack(
+                      //     children: [
+                      //       CustomCarousel(
+                      //         images: _images.map((file) => file.path).toList(),
+                      //         height: 350,
+                      //         fromMemory: true,
+                      //       ),
+                      //       Container(
+                      //         height: 350,
+                      //         alignment: Alignment.centerRight,
+                      //         child: Positioned(
+                      //           right: 10,
+                      //           top: 10,
+                      //           child: Container(
+                      //             margin: const EdgeInsets.only(right: 8),
+                      //             decoration: BoxDecoration(
+                      //                 color: const Color.fromARGB(
+                      //                         204, 254, 115, 76)
+                      //                     .withOpacity(0.5),
+                      //                 borderRadius: BorderRadius.circular(12)),
+                      //             child: IconButton(
+                      //                 icon: const Icon(
+                      //                   Icons.add,
+                      //                 ),
+                      //                 onPressed: () {
+                      //                   showImageSourceDialog();
+                      //                 }),
+                      //           ),
+                      //         ),
+                      //       )
+                      //     ],
+                      //   )
                       : InkWell(
                           onTap: () {
                             showImageSourceDialog();

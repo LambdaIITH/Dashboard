@@ -120,8 +120,8 @@ class GameStartScreen extends StatelessWidget {
                       const EdgeInsets.symmetric(vertical: 12.0, horizontal: 18.0),
                 ),
                 onPressed: () {
-                  Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => OrientationGameScreen()));
+                  // Navigator.of(context).push(
+                  //     MaterialPageRoute(builder: (context) => OrientationGameScreen()));
                 },
                 child: Text(
                   'Start Game',
