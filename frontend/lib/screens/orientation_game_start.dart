@@ -1,3 +1,4 @@
+import 'package:dashbaord/screens/orientation_game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -92,7 +93,7 @@ class GameStartScreen extends StatelessWidget {
               ),
               Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.fromLTRB(12, 4, 10, 4),
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12.0),
                     margin: const EdgeInsets.fromLTRB(24, 10, 24, 10),
                     decoration: BoxDecoration(
                       color: const Color(0xFFD6C1F8),
@@ -116,11 +117,11 @@ class GameStartScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(15),
                   ),
                   padding:
-                      const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+                      const EdgeInsets.symmetric(vertical: 12.0, horizontal: 18.0),
                 ),
                 onPressed: () {
                   Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => const Placeholder()));
+                      MaterialPageRoute(builder: (context) => OrientationGameScreen()));
                 },
                 child: Text(
                   'Start Game',
@@ -131,6 +132,7 @@ class GameStartScreen extends StatelessWidget {
                   ),
                 ),
               ),
+              const SizedBox(height: 20,)
             ],
           ),
         ),
