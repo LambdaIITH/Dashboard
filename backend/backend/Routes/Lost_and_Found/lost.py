@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException, Request, status, UploadFile, File,
 from typing import Dict, Any, List
 from Routes.Auth.cookie import get_user_id
 from utils import *
-from queries.lost import *
+from queries.lost_and_found import *
 from models import LfItem, LfResponse
 from utils import S3Client
 from .funcs import *
@@ -22,7 +22,7 @@ async def add_item( request: Request,
         form_data_dict = json.loads(form_data)
         user_id = get_user_id(request)
         with conn.cursor() as cur:
-            cur.execute( insert_in_lost_table( form_data_dict, user_id ) )
+            cur.execute( insert_in_table(0, form_data_dict, user_id ) )
             item = LfItem.from_row(cur.fetchone())
         
         # update in elasticsearch
@@ -31,7 +31,7 @@ async def add_item( request: Request,
             image_paths = S3Client.uploadToCloud(images, item.id, "lost")
 
             with conn.cursor() as cur:
-                cur.execute(insert_lost_images(image_paths, item.id))
+                cur.execute(insert_images(0, image_paths, item.id))
         conn.commit()
         return {"message": "Data inserted successfully"}
 
@@ -67,13 +67,13 @@ async def get_all_lost_item_names() -> List[Dict[str, Any]]:
 def show_lost_items(id: int) -> LfResponse:
     try:   
         with conn.cursor() as cur: 
-            cur.execute(get_particular_lost_item(id))
+            cur.execute(get_particular_item(0, id))
             
             lost_item = cur.fetchall()
             if lost_item == []:
                 raise HTTPException(status_code=404, detail="Item not found")
             lost_item = lost_item[0]
-            cur.execute(get_all_image_uris(id))
+            cur.execute(get_all_image_uris(0, id))
             lost_images = cur.fetchall()
             image_urls = list(map(lambda x: x[0], lost_images))
             res = LfResponse.from_row(lost_item, image_urls)
@@ -126,7 +126,7 @@ def edit_selected_item(request: Request, item_id: int = Form(...),  form_data:st
         form_data_dict = json.loads(form_data)
 
         with conn.cursor() as cur:
-            cur.execute( update_in_lost_table( item_id, form_data_dict ) )
+            cur.execute( update_in_table(0, item_id, form_data_dict ) )
             row = cur.fetchone()
             item = LfItem.from_row(row)
             
@@ -144,12 +144,12 @@ def edit_selected_item(request: Request, item_id: int = Form(...),  form_data:st
 def search(query : str, max_results: int = 100) -> List[Dict[str, Any]] :
     try: 
         with conn.cursor() as cur: 
-            cur.execute( search_lost_items( query, max_results ) )
+            cur.execute( search_items(0, query, max_results ) )
             res = cur.fetchall()
             
             if len(res) == 0:
                 return []
-            cur.execute(get_some_image_uris([x[0] for x in res]))
+            cur.execute(get_some_image_uris(0, [x[0] for x in res]))
             images = cur.fetchall()
             
             image_dict = get_image_dict(images)
