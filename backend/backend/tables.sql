@@ -15,13 +15,13 @@ DROP TYPE IF EXISTS request_status CASCADE;
 CREATE TABLE IF NOT EXISTS courses
 (
     course_code VARCHAR(16) NOT NULL,
-    acad_period VARCHAR(32) NOT NULL,
+    sem VARCHAR(32) NOT NULL,
     course_name VARCHAR(256) NOT NULL,
     segment VARCHAR(3) NOT NULL,
-    slot VARCHAR(8) NOT NULL,
     credits INT NOT NULL,
     PRIMARY KEY(course_code, acad_period)
 );
+
 
 CREATE TABLE IF NOT EXISTS users
 (
@@ -29,8 +29,10 @@ CREATE TABLE IF NOT EXISTS users
     email VARCHAR(256) UNIQUE NOT NULL,
     name VARCHAR NOT NULL,
     cr BOOLEAN DEFAULT FALSE,
-    phone_number VARCHAR(15) UNIQUE
+    phone_number VARCHAR(15) UNIQUE,
+    time_table JSON DEFAULT '{"courses": {}, "slots": {}}'::json
 );
+
 
 CREATE TABLE IF NOT EXISTS custom_courses
 (

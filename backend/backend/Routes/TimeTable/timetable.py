@@ -15,7 +15,7 @@ def get_required_details_from_course(row: tuple):
     return (row[1], row[2], 0 , row[7], None) # course_code, acad_period, cr_id(none), slot, Custom(none here)
 
 
-@router.get("/{user_id}")
+@router.get("/")
 async def get_timetable(request: Request, acad_period: str) -> List[Takes]:
     user_id = get_user_id(request)
     try:

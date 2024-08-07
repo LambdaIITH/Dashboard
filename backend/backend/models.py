@@ -18,17 +18,32 @@ class Course(BaseModel):
                           credits=row[5], slot=row[4])
 
 
+class SlotDetails(BaseModel):
+    detail_key: str
+    detail_value: str
+
+class Slots(BaseModel):
+    slot_key: SlotDetails
+
+class Courses(BaseModel):
+    course_code: str
+    course_slot: str
+
+class TimeTable(BaseModel):
+    courses: Dict[str, Courses]
+    slots: Dict[str, Slots]
+
 class User(BaseModel):
     id: int = None
     email: str
     name: str
     cr: bool = False
     phone_number: Optional[str] = None
+    timetable: TimeTable 
 
     @classmethod
     def from_row(cls, row: tuple):
         return cls(id=row[0], email=row[1], name = row[2],  cr=row[3], phone=row[4])
-
 
 class Register(BaseModel):
     user_id: int
