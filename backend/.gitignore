@@ -1,7 +1,0 @@
-.env
-**/__pycache__
-.vscode
-test_users.sql
-/Routes/MessMenu/credentials.json
-credentials.json
-.venv
