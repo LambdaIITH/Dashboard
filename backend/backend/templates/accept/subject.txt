@@ -1,0 +1,1 @@
+[Cab Sharing] Your request to join {owner_name}'s cab has been accepted!
