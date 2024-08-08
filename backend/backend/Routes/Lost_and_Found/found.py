@@ -1,7 +1,7 @@
 import os, shutil
 import json
 from fastapi import APIRouter, HTTPException, Request, status, UploadFile, File, Form
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List
 from Routes.Auth.cookie import get_user_id
 from utils import *
 from queries.lost_and_found import *
@@ -10,8 +10,6 @@ from utils import S3Client
 from .funcs import get_image_dict, authorize_edit_delete
 
 router = APIRouter(prefix="/found", tags=["found"])
-
-
 
 # add found item 
 @router.post("/add_item")

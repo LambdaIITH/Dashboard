@@ -7,8 +7,9 @@ from utils import *
 from queries.lost_and_found import *
 from models import LfItem, LfResponse
 from utils import S3Client
-from .funcs import *
-router = APIRouter(prefix="/lost", tags=["lost"])
+from .funcs import get_image_dict, authorize_edit_delete
+
+router = APIRouter(prefix="/found", tags=["found"])
 
 # add lost item 
 @router.post("/add_item")
