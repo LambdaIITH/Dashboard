@@ -24,7 +24,7 @@ async def add_item( request: Request,
         form_data_dict = json.loads(form_data)
         user_id = get_user_id(request)
         with conn.cursor() as cur:
-            cur.execute( insert_in_table(1, form_data_dict, user_id ) )
+            cur.execute( insert_in_table(TableType.FOUND, form_data_dict, user_id ) )
             item = LfItem.from_row(cur.fetchone())
         
         # update in elasticsearch
@@ -33,7 +33,7 @@ async def add_item( request: Request,
             image_paths = S3Client.uploadToCloud(images, item.id, "found")
 
             with conn.cursor() as cur:
-                cur.execute(insert_images(1, image_paths, item.id))
+                cur.execute(insert_images(TableImagesType.FOUND, image_paths, item.id))
         conn.commit()
                 
         return {"message": "Data inserted successfully"}
@@ -71,13 +71,13 @@ def show_found_items(id: int) -> LfResponse:
     try:   
         with conn.cursor() as cur: 
             print('hello')
-            cur.execute(get_particular_item(1, id))
+            cur.execute(get_particular_item(TableType.FOUND, id))
             found_item = cur.fetchall()
             
             if found_item == []:
                 raise HTTPException(status_code=404, detail="Item not found")
             found_item = found_item[0]
-            cur.execute(get_all_image_uris(1, id))
+            cur.execute(get_all_image_uris(TableType.FOUND, id))
             found_images = cur.fetchall()
             image_urls = list(map(lambda x: x[0], found_images))
             res = LfResponse.from_row(found_item, image_urls)
@@ -125,7 +125,7 @@ def edit_selected_item( request: Request, item_id: int = Form(...),  form_data:s
         form_data_dict = json.loads(form_data)
 
         with conn.cursor() as cur:
-            cur.execute( update_in_table(1, item_id, form_data_dict ) )
+            cur.execute( update_in_table(TableType.FOUND, item_id, form_data_dict ) )
             row = cur.fetchone()
             item = LfItem.from_row(row)
         conn.commit()
@@ -139,11 +139,11 @@ def edit_selected_item( request: Request, item_id: int = Form(...),  form_data:s
 def search(query : str, max_results: int = 100) -> List[Dict[str, Any]]:
     try: 
         with conn.cursor() as cur: 
-            cur.execute( search_items(1, query, max_results ) )
+            cur.execute( search_items(TableType.FOUND, query, max_results ) )
             res = cur.fetchall()
             if len(res) == 0:
                 return []
-            cur.execute(get_some_image_uris(1, [x[0] for x in res]))
+            cur.execute(get_some_image_uris(TableImagesType.FOUND, [x[0] for x in res]))
             images = cur.fetchall()
             
             image_dict = get_image_dict(images)

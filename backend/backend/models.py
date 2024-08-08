@@ -1,6 +1,8 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import List, Dict, Optional, Tuple
+from queries.lost_and_found import lost_table, found_table, lost_images_table, found_images_table
+from enum import Enum
 
 
 class Course(BaseModel):
@@ -137,6 +139,15 @@ class Slot_Key(BaseModel):
     course_code: str
     acad_period: str
     user_id: Optional[int] = None
+
+
+class TableType(Enum):
+    LOST = lost_table
+    FOUND = found_table
+class TableImagesType(Enum):
+    LOST = lost_images_table
+    FOUND = found_images_table
+    
 # class Changes_tobe_Accepted(BaseModel):
 #     course_code: str
 #     course_name: str

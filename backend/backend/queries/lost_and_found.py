@@ -1,22 +1,14 @@
 from pypika import Query, Table, functions as fn, Order
 from typing import Dict, Any
-from enum import Enum
+from models import TableType, TableImagesType
 
 lost_table, lost_images_table = Table('lost'), Table('lost_images')
 found_table, found_images_table = Table('found'), Table('found_images')
 users = Table("users")
 
-class TableType(Enum):
-    LOST = lost_table
-    FOUND = found_table
-class TableImagesType(Enum):
-    LOST = lost_images_table
-    FOUND = found_images_table
+def insert_in_table(table_type: TableType, form_data: Dict[str, Any], user_id: int ): 
 
-
-def insert_in_table(TableType, form_data: Dict[str, Any], user_id: int ): 
-
-    query = Query.into(TableType.value).columns('item_name', 'item_description', 'user_id').insert(
+    query = Query.into(table_type.value).columns('item_name', 'item_description', 'user_id').insert(
         form_data['item_name'], form_data['item_description'], user_id
     )
     
@@ -26,17 +18,17 @@ def insert_in_table(TableType, form_data: Dict[str, Any], user_id: int ):
     return sql_query
 
 
-def insert_images(TableType, image_paths: list, post_id: int): 
+def insert_images(table_type: TableType, image_paths: list, post_id: int): 
 
-    query = Query.into(TableType.value).columns('image_url', 'item_id')
+    query = Query.into(table_type.value).columns('image_url', 'item_id')
 
     for image_path in image_paths:
         query = query.insert(image_path, post_id)
     
     return query.get_sql()
 
-def get_all_items(TableType):
-	if TableType.value == lost_table:
+def get_all_items(table_type: TableType):
+	if table_type.value == lost_table:
 		tableQuery = """
 			FROM
 				lost f
@@ -69,42 +61,42 @@ def get_all_items(TableType):
             
 	return query
 
-def update_in_table(TableType, item_id: int, form_data: Dict[str, Any]):
-    query = Query.update(TableType.value)
+def update_in_table(table_type: TableType, item_id: int, form_data: Dict[str, Any]):
+    query = Query.update(table_type.value)
 
     for key, value in form_data.items():
         if key == 'item_name' or key == 'item_description':
-            query = query.set(TableType.value[key], value)
+            query = query.set(table_type.value[key], value)
 
-    query = query.where(TableType.value['id'] == item_id).get_sql()
+    query = query.where(table_type.value['id'] == item_id).get_sql()
     query  += " RETURNING *"
     return query
 
-def get_particular_item(TableType, item_id: int):
-    query = (Query.from_(TableType.value)
+def get_particular_item(table_type: TableType, item_id: int):
+    query = (Query.from_(table_type.value)
              .join(users)
-             .on(users['id'] == TableType.value['user_id'])
+             .on(users['id'] == table_type.value['user_id'])
              .select('*')
-             .where(TableType.value['id'] == item_id))
+             .where(table_type.value['id'] == item_id))
     return str(query)
 
-def delete_an_item_images(TableImagesType, item_id:int):
-    query = Query.from_(TableImagesType.value).delete().where(TableImagesType.value['item_id'] == item_id)
+def delete_an_item_images(table_images_type: TableImagesType, item_id:int):
+    query = Query.from_(table_images_type.value).delete().where(table_images_type.value['item_id'] == item_id)
     return str(query)
 
-def get_all_image_uris(TableImagesType, item_id: int):
-    query = Query.from_(TableImagesType.value).select('image_url').where(TableImagesType.value['item_id'] == item_id)
+def get_all_image_uris(table_images_type: TableImagesType, item_id: int):
+    query = Query.from_(table_images_type.value).select('image_url').where(table_images_type.value['item_id'] == item_id)
     return str(query)
 
-def search_items(TableType, search_query: str, max_results: int= 10):
-    query = (Query.from_(TableType.value)
+def search_items(table_type: TableType, search_query: str, max_results: int= 10):
+    query = (Query.from_(table_type.value)
     .select('*')
-    .where(TableType.value['item_name'].ilike(f'%{search_query}%') | TableType.value['item_description'].ilike(f'%{search_query}%'))
-    .orderby(TableType.value['created_at'], order=Order.desc)
+    .where(table_type.value['item_name'].ilike(f'%{search_query}%') | table_type.value['item_description'].ilike(f'%{search_query}%'))
+    .orderby(table_type.value['created_at'], order=Order.desc)
     .limit(max_results)
     )
     return str(query)
 
-def get_some_image_uris(TableImagesType, item_ids : list):
-    query = Query.from_().select(TableImagesType.value['item_id'], TableImagesType.value['image_url']).where(TableImagesType.value['item_id'].isin(item_ids))
+def get_some_image_uris(table_images_type: TableImagesType, item_ids : list):
+    query = Query.from_().select(table_images_type.value['item_id'], table_images_type.value['image_url']).where(table_images_type.value['item_id'].isin(item_ids))
     return str(query)
