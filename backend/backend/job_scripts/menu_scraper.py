@@ -8,10 +8,26 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 # -------------------------------------------------------------------------------
 # What week is now? (1/2/3/4) (for deciding which menu to use)
+# d = datetime.date.today()
+# current_week = (
+#     d.isocalendar()[1] - datetime.date(d.year, d.month, 1).isocalendar()[1] 
+# )
+
+## Finding the current week using the number of mondays in the month
 d = datetime.date.today()
-current_week = (
-    d.isocalendar()[1] - datetime.date(d.year, d.month, 1).isocalendar()[1] + 1
-)
+start_date = datetime.date(d.year, d.month, 1)
+next_day = d + datetime.timedelta(days=1)
+num_mondays = 0
+while start_date != next_day:
+    if start_date.weekday() == 0:
+        num_mondays += 1
+    start_date += datetime.timedelta(days=1)
+
+current_week = (num_mondays // 7 + 1)%4
+
+if current_week == 0:
+    current_week = 1
+
 
 # -------------------------------------------------------------------------------
 # Get sheets
@@ -28,12 +44,9 @@ gc = gspread.authorize(creds)
 
 
 sh = gc.open_by_url(
-    "https://docs.google.com/spreadsheets/d/1XU44bhxu2_Z_HnImXZIM3Iqt6ZvukTbF3YGZZV19NLs"
+    "https://docs.google.com/spreadsheets/d/1T0KxKwujTUY-itYoFcVQ4S8EHhhRG3EuNLttHTv-yy0/edit?gid=0#gid=0"
 )
-# This is my personal copy of the mess menu, since my service account does not have access to the original google sheet. The previous commented thing is the original
-# sh = gc.open_by_url(
-#     "https://docs.google.com/spreadsheets/d/1-Moq3UU1lWa6y2vhiWEweWiEAYmU4QkpMcjBIf_FDXk/edit#gid=0"
-# )
+
 weekly = sh.worksheet("main menu")
 additionals = sh.worksheet("extras")
 
