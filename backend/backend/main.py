@@ -1,10 +1,10 @@
+import os
 from Routes.Auth.cookie import set_cookie
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 from Routes.TimeTable.timetable import router as timetable_router
-from Routes.TimeTable.cr import router as cr_router
 from Routes.TimeTable.custom import router as custom_router
 from Routes.TimeTable.changes import router as changes_router
 from Routes.MessMenu.mess_menu import router as mess_menu_router
@@ -21,12 +21,13 @@ load_dotenv()
 
 app = FastAPI()
 
+domains = os.getenv("ALLOWED_DOMAINS", "").split(",")
+
 # TODO: change for prod
 origins = [
-    "http://localhost:3000",
-    "http://localhost",
-    "*"
-]
+    "http://localhost:5500",
+    "http://localhost:8080",
+] + domains
 
 app.add_middleware(
     CORSMiddleware,
@@ -39,7 +40,6 @@ app.add_middleware(
 # include routers
 app.include_router(timetable_router)
 app.include_router(auth_router)
-app.include_router(cr_router)
 app.include_router(custom_router)
 app.include_router(changes_router)
 app.include_router(mess_menu_router)
@@ -70,7 +70,7 @@ async def cookie_verification_middleware(request: Request, call_next):
 
 @app.middleware("http")
 async def apply_middleware(request: Request, call_next):
-    excluded_routes = ["/auth/login", "/auth/logout", "/docs", "/openapi.json"]  # Add routes to exclude guard here
+    excluded_routes = ["/auth/login", "/auth/logout", "/docs", "/openapi.json", "/transport/", "/mess_menu/"]  # Add routes to exclude guard here
 
     if request.url.path not in excluded_routes:
         return await cookie_verification_middleware(request, call_next)
@@ -84,7 +84,6 @@ async def root():
 
 @app.options("/{path:path}")
 def options_handler(request: Request, path: str):
-    # Add CORS headers to OPTIONS response if needed
     return JSONResponse(status_code=200, headers={
         "Access-Control-Allow-Origin": "*", 
         "Access-Control-Allow-Methods": "*", 

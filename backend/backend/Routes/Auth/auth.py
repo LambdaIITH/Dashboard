@@ -1,6 +1,6 @@
 import os
 import re
-import requests
+import requests as req
 from dotenv import load_dotenv
 from google.oauth2 import id_token
 from google.auth.exceptions import GoogleAuthError
@@ -10,6 +10,7 @@ from utils import conn
 from queries import user as user_queries
 from pypika import Query
 from queries.user import users
+from google.auth.transport.requests import Request
 
 load_dotenv()
 
@@ -17,10 +18,9 @@ client_id = os.getenv("GOOGLE_CLIENT_ID")
 
 def verify_id_token(token):
     # return True, {"email": "ms22btech11010@iith.ac.in", "name": "Bhaskar"}
-    request = requests.Request()
-    
+    request_adapter = Request()
     try:
-        id_info = id_token.verify_oauth2_token(token, request, client_id)
+        id_info = id_token.verify_oauth2_token(token, request_adapter, client_id)
         return True, id_info
     except GoogleAuthError as e:
         return False, f"Token verification failed: {e}"
@@ -32,8 +32,9 @@ def handle_login(id_token):
 
     if not is_valid_iith_email(data["email"]):
         return False, "", {"error": "Please use an IITH email", "status": 401}
-
+   
     exists, user_id = is_user_exists(data["email"])
+    
     if not exists:
         user_id = insert_user(email=data["email"], name=data["name"])
 

@@ -1,4 +1,3 @@
-
 import jwt
 from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
@@ -7,18 +6,18 @@ from fastapi import Response, HTTPException, Request
 
 load_dotenv()
 secret = os.getenv("TOKEN_SECRET")
+domain = os.getenv("COOKIE_DOMAIN")
 
 def set_cookie(response: Response, key: str, value: str, days_expire=15):
-    print(value)
     expires = datetime.now(timezone.utc) + timedelta(days=days_expire)
     response.set_cookie(
         key=key,
         value=value,
         expires=expires,
         httponly=True,
-        secure=False,
+        secure=True,
         samesite='None',
-        domain='localhost',
+        domain=domain,
         path='/',
         max_age=days_expire * 24 * 60 * 60 
     )
