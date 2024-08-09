@@ -8,6 +8,20 @@ from oauth2client.service_account import ServiceAccountCredentials
 from functools import reduce
 from datetime import datetime
 
+log_file_path = os.path.join(os.path.dirname(__file__), "transport_scraper.log")
+
+# -------------------------------------------------------------------------------
+# Adding Logs with file open
+try:
+    with open(log_file_path, "a") as log_file:
+        log_file.write(f"Script executed at: {datetime.now()}\n")
+except Exception as e:
+    with open(log_file_path, "a") as log_file:
+        log_file.write(f"Error opening log file: {str(e)}\n")
+
+
+# -------------------------------------------------------------------------------
+
 scope = ["https://spreadsheets.google.com/feeds",
          'https://www.googleapis.com/auth/spreadsheets',
          "https://www.googleapis.com/auth/drive.file",

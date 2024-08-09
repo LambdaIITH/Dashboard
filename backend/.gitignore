@@ -3,5 +3,11 @@
 .vscode
 test_users.sql
 /Routes/MessMenu/credentials.json
+/Routes/MessMenu/mess.json
+/Routes/Transport/transport.json
 credentials.json
+*.json
 .venv
+backend/job_scripts/*.log
+backend/job_scripts/menu_scraper.log
+backend/job_scripts/transport_scraper.log

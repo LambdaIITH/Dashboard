@@ -6,6 +6,18 @@ import string
 import datetime
 from oauth2client.service_account import ServiceAccountCredentials
 
+
+log_file_path = os.path.join(os.path.dirname(__file__), "menu_scraper.log")
+
+# -------------------------------------------------------------------------------
+# Adding Logs with file open
+try:
+    with open(log_file_path, "a") as log_file:
+        log_file.write(f"Script executed at: {datetime.datetime.now()}\n")
+except Exception as e:
+    with open(log_file_path, "a") as log_file:
+        log_file.write(f"Error opening log file: {str(e)}\n")
+
 # -------------------------------------------------------------------------------
 # What week is now? (1/2/3/4) (for deciding which menu to use)
 # d = datetime.date.today()
@@ -83,7 +95,7 @@ daily_items = {meal: [] for meal in meals}
 
 
 def clean(text: str):
-    return text.strip().lower().capitalize()
+    return text.strip()
 
 
 # -------------------------------------------------------------------------------
