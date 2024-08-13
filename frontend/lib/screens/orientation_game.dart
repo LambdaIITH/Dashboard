@@ -39,7 +39,7 @@ class _OrientationGameScreenState extends State<OrientationGameScreen> {
   void showError({String? msg}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(msg ?? 'Something Went Wrong!'),
+        content: Center(child: Text(msg ?? 'Something Went Wrong!')),
         duration: const Duration(milliseconds: 1500),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
