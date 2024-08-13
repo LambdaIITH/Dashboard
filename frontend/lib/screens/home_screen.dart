@@ -17,6 +17,8 @@ import 'package:dashbaord/widgets/home_screen_bus_timings.dart';
 import 'package:dashbaord/widgets/home_screen_mess_menu.dart';
 import 'package:flutter/services.dart';
 import 'package:in_app_update/in_app_update.dart';
+import 'package:text_scroll/text_scroll.dart';
+// import 'package:marquee/marquee.dart';
 
 class HomeScreen extends StatefulWidget {
   final bool isGuest;
@@ -148,11 +150,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   int status = 0;
-  int totalOperation = 2;
+  int totalOperation = 3;
 
   void changeState() {
     setState(() {
       status++;
+      print(status);
       if (status >= totalOperation) {
         isLoading = false;
       }
@@ -172,6 +175,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     fetchMessMenu();
     fetchBus();
+    getEventText();
     analyticsService.logScreenView(screenName: "HomeScreen");
   }
 
@@ -186,6 +190,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     fetchMessMenu();
     fetchBus();
+    getEventText();
   }
 
   //TODO: delete this after orientation
@@ -202,17 +207,16 @@ class _HomeScreenState extends State<HomeScreen> {
     'lambda@iith.ac.in'
   ];
 
-bool isFreshersEmail(String email) {
-  if (headsANDmentors.contains(email)) return true;
+  bool isFreshersEmail(String email) {
+    if (headsANDmentors.contains(email)) return true;
 
-  final RegExp emailRegExp = RegExp(r'^[\w\.-]*24[\w\.-]*@iith\.ac\.in$');
+    final RegExp emailRegExp = RegExp(r'^[\w\.-]*24[\w\.-]*@iith\.ac\.in$');
 
-  DateTime now = DateTime.now();
-  bool isAugustFirst = now.month == 8 && now.day == 1 && now.year == 2024;
+    DateTime now = DateTime.now();
+    bool isAugustFirst = now.month == 8 && now.day == 1 && now.year == 2024;
 
-  return emailRegExp.hasMatch(email) && isAugustFirst;
-}
-
+    return emailRegExp.hasMatch(email) && isAugustFirst;
+  }
 
   checkForUpdates() async {
     await Future.delayed(const Duration(seconds: 10));
@@ -234,6 +238,16 @@ bool isFreshersEmail(String email) {
     } catch (e) {
       debugPrint("Error in checking for update: $e");
     }
+  }
+
+  String eventText = "";
+
+  getEventText() async {
+    String text = await ApiServices().getEventText();
+    setState(() {
+      eventText = text;
+      changeState();
+    });
   }
 
   @override
@@ -267,6 +281,17 @@ bool isFreshersEmail(String email) {
                           user: userModel,
                           isGuest: widget.isGuest),
                       const SizedBox(height: 28),
+                      TextScroll(
+                        eventText,
+                        velocity:
+                            const Velocity(pixelsPerSecond: Offset(50, 0)),
+                        delayBefore: const Duration(milliseconds: 900),
+                        pauseBetween: const Duration(milliseconds: 100),
+                        style: const TextStyle(color: Colors.purple),
+                        textAlign: TextAlign.center,
+                        selectable: true,
+                      ),
+                      const SizedBox(height: 20),
                       HomeScreenBusTimings(
                         busSchedule: busSchedule,
                       ),
@@ -323,7 +348,8 @@ bool isFreshersEmail(String email) {
                               ? showError
                               : () => Navigator.of(context).push(
                                     MaterialPageRoute(
-                                        builder: (ctx) => GameStartScreen()),
+                                        builder: (ctx) =>
+                                            const GameStartScreen()),
                                   ),
                         ),
                       const SizedBox(height: 20),

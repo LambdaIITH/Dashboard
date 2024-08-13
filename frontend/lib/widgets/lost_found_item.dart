@@ -25,7 +25,7 @@ class LostFoundItem extends StatelessWidget {
         ),
       ),
       child: Container(
-      constraints: BoxConstraints(
+      constraints: const BoxConstraints(
         maxHeight: 200,
       ),
         width: 160, // Fixed height

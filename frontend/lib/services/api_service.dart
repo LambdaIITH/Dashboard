@@ -717,4 +717,65 @@ class ApiServices {
   }
 
   // ====================Lost and found ends=====================================
+
+  Future<Map<String, dynamic>> gameStart() async {
+    try {
+      final response = await dio.get('/game/api/game/user/start');
+
+      if (response.statusCode == 200) {
+        return {
+          'game_state': (response.data['game_state'] as List)
+              .map((row) => (row as List).map((item) => item as int).toList())
+              .toList(),
+          'current_state': (response.data['current_state'] as List)
+              .map((row) => (row as List).map((item) => item as bool).toList())
+              .toList(),
+          'killed': response.data['killed'],
+          'won': response.data['won'],
+        };
+      } else {
+        throw Exception(
+            'Failed to start game. Status code: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      debugPrint("Game start failed: $e");
+      throw Exception('Failed to start game');
+    }
+  }
+
+  Future<Response<dynamic>> updateGameState(int i, int j) async {
+    try {
+      final response = await dio.patch(
+        '/game/api/game/user/update',
+        data: {
+          'i': i,
+          'j': j,
+        },
+      );
+      print(response);
+      return response;
+    } on DioException catch (e) {
+      debugPrint("Game update failed: $e");
+      throw Exception('Failed to update game');
+    }
+  }
+
+  Future<String> getEventText() async {
+    try {
+      final response = await dio.get('/time');
+
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        throw Exception('some random shit');
+      }
+    } on DioException {
+      throw Exception('Failed to start game');
+    }
+  }
 }
+
+
+//api.iith.dev/game/api/game/start
+
+// api/game/start

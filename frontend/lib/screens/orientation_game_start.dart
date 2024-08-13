@@ -1,10 +1,19 @@
 import 'package:dashbaord/screens/orientation_game.dart';
+import 'package:dashbaord/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class GameStartScreen extends StatelessWidget {
-  String svgData = '''<svg width="1037" height="128" viewBox="0 0 1037 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+class GameStartScreen extends StatefulWidget {
+  const GameStartScreen({super.key});
+
+  @override
+  State<GameStartScreen> createState() => _GameStartScreenState();
+}
+
+class _GameStartScreenState extends State<GameStartScreen> {
+  String svgData =
+      '''<svg width="1037" height="128" viewBox="0 0 1037 128" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M47.8457 0H986.223V108C986.223 119.046 977.269 128 966.223 128H67.8457C56.8 128 47.8457 119.046 47.8457 108V0Z" fill="#503D2B"/>
 <rect width="1037" height="38.1754" rx="19.0877" fill="#503D2B"/>
 <rect x="15.623" y="31.4385" width="1005.75" height="41.5439" rx="20.7719" fill="#503D2B"/>
@@ -13,8 +22,30 @@ class GameStartScreen extends StatelessWidget {
 
 ''';
 
-  GameStartScreen({super.key});
+  List<List<int>> grid = [];
+  List<List<bool>> state = [];
+  bool isWon = false;
+  bool isKilled = false;
 
+  bool isLoading = false;
+  bool buttonClicked = false;
+
+  startGame() async {
+    setState(() {
+      buttonClicked = true;
+      isLoading = true;
+    });
+    ApiServices apiServices = ApiServices();
+    final response = await apiServices.gameStart();
+
+    setState(() {
+      grid = response['game_state'];
+      state = response['current_state'];
+      isKilled = response['killed'];
+      isWon = response['won'];
+      isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -92,23 +123,24 @@ class GameStartScreen extends StatelessWidget {
                 ],
               ),
               Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12.0),
-                    margin: const EdgeInsets.fromLTRB(24, 10, 24, 10),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFD6C1F8),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      'Game starts during lambda orientation. Stay Tuned!',
-                      style: GoogleFonts.raleway(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xff000000),
-                      ),
-                      textAlign: TextAlign.left,
-                    ),
+                width: double.infinity,
+                padding:
+                    const EdgeInsets.symmetric(vertical: 8, horizontal: 12.0),
+                margin: const EdgeInsets.fromLTRB(24, 10, 24, 10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD6C1F8),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  'Game starts during lambda orientation. Stay Tuned!',
+                  style: GoogleFonts.raleway(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xff000000),
                   ),
+                  textAlign: TextAlign.left,
+                ),
+              ),
               const SizedBox(height: 16),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
@@ -116,13 +148,27 @@ class GameStartScreen extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 12.0, horizontal: 18.0),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 12.0, horizontal: 18.0),
                 ),
-                onPressed: () {
-                  // Navigator.of(context).push(
-                  //     MaterialPageRoute(builder: (context) => OrientationGameScreen()));
-                },
+                onPressed: buttonClicked
+                    ? null
+                    : () async {
+                        await startGame();
+
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (ctx) => OrientationGameScreen(
+                                      isKilled: isKilled,
+                                      isWon: isWon,
+                                      grid: grid,
+                                      state: state,
+                                    )));
+
+                        // Navigator.of(context).push(
+                        //     MaterialPageRoute(builder: (context) => OrientationGameScreen()));
+                      },
                 child: Text(
                   'Start Game',
                   style: GoogleFonts.inter(
@@ -132,7 +178,9 @@ class GameStartScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 20,)
+              const SizedBox(
+                height: 20,
+              )
             ],
           ),
         ),
