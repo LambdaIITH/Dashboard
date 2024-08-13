@@ -82,137 +82,157 @@ class _OrientationGameScreenState extends State<OrientationGameScreen> {
       DeviceOrientation.landscapeRight,
     ]);
 
-    final textColor =
-        Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
+    final textColor = Colors.black;
 
     return WillPopScope(
       onWillPop: _onWillPop,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            'Housie by Lambda',
-            style: GoogleFonts.inter(
+      child: Theme(
+        data: ThemeData.light().copyWith(
+          scaffoldBackgroundColor:
+              Colors.white, // Ensure the background is light
+          appBarTheme: AppBarTheme(
+            backgroundColor: Colors.white, // AppBar background color
+            iconTheme: IconThemeData(color: textColor), // Icon color
+            titleTextStyle: TextStyle(
+              color: textColor, // Title text color
               fontSize: 28,
               fontWeight: FontWeight.w700,
-              color: textColor,
             ),
           ),
-          leading: IconButton(
-            icon: const Icon(
-              Icons.arrow_back,
-              size: 30.0,
-            ),
-            onPressed: () async {
-              final shouldPop = await _onWillPop();
-              if (shouldPop) {
-                Navigator.pop(context);
-              }
-            },
+          snackBarTheme: SnackBarThemeData(
+            backgroundColor: Colors.grey[800], // SnackBar background color
+            contentTextStyle: TextStyle(color: Colors.white), // Text color
           ),
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 48),
-              child: Container(
-                padding: EdgeInsets.fromLTRB(12, 4, 12, 4),
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(6),
-                    color: isKilled
-                        ? Colors.red
-                        : isWon
-                            ? Colors.green
-                            : Colors.transparent),
-                child: Text(isKilled
-                    ? 'You Lost'
-                    : isWon
-                        ? 'You Won'
-                        : ''),
-              ),
-            )
-          ],
         ),
-        body: Row(
-          children: [
-            Expanded(
-              flex: 8,
-              child: Padding(
-                padding: const EdgeInsets.all(25.0),
-                child: GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 9, // 9 buttons per row
-                    childAspectRatio: 1,
-                    mainAxisSpacing: 8,
-                    crossAxisSpacing: 8,
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text(
+              'Housie by Lambda',
+              style: GoogleFonts.inter(
+                fontSize: 28,
+                fontWeight: FontWeight.w700,
+                color: textColor,
+              ),
+            ),
+            leading: IconButton(
+              icon: const Icon(
+                Icons.arrow_back,
+                size: 30.0,
+              ),
+              onPressed: () async {
+                final shouldPop = await _onWillPop();
+                if (shouldPop) {
+                  Navigator.pop(context);
+                }
+              },
+            ),
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(right: 48),
+                child: Container(
+                  padding: EdgeInsets.fromLTRB(12, 4, 12, 4),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(6),
+                      color: isKilled
+                          ? Colors.red
+                          : isWon
+                              ? Colors.green
+                              : Colors.transparent),
+                  child: Text(isKilled
+                      ? 'You Lost'
+                      : isWon
+                          ? 'You Won'
+                          : ''),
+                ),
+              )
+            ],
+          ),
+          body: Row(
+            children: [
+              Expanded(
+                flex: 8,
+                child: Padding(
+                  padding: const EdgeInsets.all(25.0),
+                  child: GridView.builder(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 9, // 9 buttons per row
+                      childAspectRatio: 1,
+                      mainAxisSpacing: 8,
+                      crossAxisSpacing: 8,
+                    ),
+                    itemCount: 27,
+                    itemBuilder: (context, index) {
+                      return _buildGridButton(index);
+                    },
                   ),
-                  itemCount: 27,
-                  itemBuilder: (context, index) {
-                    return _buildGridButton(index);
-                  },
                 ),
               ),
-            ),
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                      onPressed: selectedIndex != null
-                          ? () async {
-                              setState(() {
-                                isClicked = true;
-                              });
-                              int i = selectedIndex! ~/ 9;
-                              int j = selectedIndex! % 9;
-                              if (state[i][j]) {
-                                showError(msg: 'You already marked this cell.');
-                              }
-                              final response =
-                                  await ApiServices().updateGameState(i, j);
-                              if (response.statusCode != 200) {
-                                showError(msg: response.data);
-                              } else {
+              Expanded(
+                flex: 2,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        onPressed: selectedIndex != null
+                            ? () async {
                                 setState(() {
-                                  state[i][j] = true;
-                                  //TODO: test these once
-                                  isKilled = response.data['killed'];
-                                  isWon = response.data['won'];
+                                  isClicked = true;
+                                });
+                                int i = selectedIndex! ~/ 9;
+                                int j = selectedIndex! % 9;
+                                if (state[i][j]) {
+                                  showError(
+                                      msg: 'You already marked this cell.');
+                                }
+                                final response =
+                                    await ApiServices().updateGameState(i, j);
+                                if (response.statusCode != 200) {
+                                  showError(msg: response.data);
+                                } else {
+                                  setState(() {
+                                    state[i][j] = true;
+                                    //TODO: test these once
+                                    isKilled = response.data['killed'];
+                                    isWon = response.data['won'];
+                                  });
+                                }
+                                setState(() {
+                                  isClicked = false;
                                 });
                               }
-                              setState(() {
-                                isClicked = false;
-                              });
-                            }
-                          : null,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: isClicked
-                            ? Colors.grey
-                            : selectedIndex != null
-                                ? Colors.blue
-                                : Colors
-                                    .grey, // Change button color based on selection
-                        minimumSize: const Size(80, 80),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                            : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: isClicked
+                              ? Colors.grey
+                              : selectedIndex != null
+                                  ? Colors.blue
+                                  : Colors
+                                      .grey, // Change button color based on selection
+                          minimumSize: const Size(80, 80),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
+                        child: isClicked
+                            ? CircularProgressIndicator(
+                                color: Colors.blue,
+                              )
+                            : const Icon(
+                                Icons.check,
+                                color: Colors.white,
+                                size: 40,
+                              ),
                       ),
-                      child: isClicked
-                          ? CircularProgressIndicator(
-                              color: Colors.blue,
-                            )
-                          : const Icon(
-                              Icons.check,
-                              color: Colors.white,
-                              size: 40,
-                            ),
-                    ),
-                    const SizedBox(height: 5),
-                  ],
+                      const SizedBox(height: 5),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -242,7 +262,7 @@ class _OrientationGameScreenState extends State<OrientationGameScreen> {
 
     bool isSelected = selectedIndex == idx;
     String backendUrl = dotenv.env["BACKEND_URL"] ?? "";
-    String imgUrl = '$backendUrl/game/images/${widget.grid[row][col] + 1}.png';
+    String imgUrl = '$backendUrl/game/images/${widget.grid[row][col]}.png';
 
     // Handle the case where the grid cell is already marked
     if (state.isNotEmpty && state[row][col]) {
@@ -263,7 +283,7 @@ class _OrientationGameScreenState extends State<OrientationGameScreen> {
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: Image.network(
-                '$backendUrl/game/images/${widget.grid[row][col] + 1}.png',
+                '$backendUrl/game/images/${widget.grid[row][col]}.png',
                 fit: BoxFit.cover,
                 color: Colors.black.withOpacity(0.3),
                 colorBlendMode: BlendMode.darken,
@@ -288,8 +308,7 @@ class _OrientationGameScreenState extends State<OrientationGameScreen> {
 
     return GestureDetector(
       onTap: () {
-
-        if(isKilled || isWon ) return;
+        if (isKilled || isWon) return;
 
         setState(() {
           if (selectedIndex == idx) {
