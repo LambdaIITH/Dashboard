@@ -1,4 +1,3 @@
-import 'package:dashbaord/screens/orientation_game_start.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -280,20 +279,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                           userModel?.email ?? 'user@iith.ac.in',
                                     ),
                                   ),
-                                ),
-                      ),
-                      const SizedBox(height: 20),
-                      HomeCardNoOptions(
-                        isComingSoon: false,
-                        isImageShow: false,
-                        isLnF: true,
-                        title: 'Fresher\'s Game',
-                        child: 'assets/icons/calendar.svg',
-                        onTap: widget.isGuest
-                            ? showError
-                            : () => Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                      builder: (ctx) => GameStartScreen()),
                                 ),
                       ),
                       const SizedBox(height: 20),

@@ -94,6 +94,12 @@ class _MessMenuPageState extends State<MessMenuPage> {
     analyticsService.logScreenView(screenName: "Mess Menu Screen");
   }
 
+  bool isWeekend() {
+    DateTime today = DateTime.now();
+    return today.weekday == DateTime.saturday ||
+        today.weekday == DateTime.sunday;
+  }
+
   @override
   Widget build(BuildContext context) {
     final textColor =
@@ -145,26 +151,6 @@ class _MessMenuPageState extends State<MessMenuPage> {
                 focusColor: textColor,
               ),
             ),
-            // Padding(
-            //   padding: const EdgeInsets.fromLTRB(0, 3, 30, 0),
-            //   child: ToggleButtons(
-            //       direction: Axis.horizontal,
-            //       onPressed: (index) {
-            //         setState(() {
-            //           for (var i = 0; i < selectedOption.length; i++) {
-            //             selectedOption[i] = i == index;
-            //           }
-            //         });
-            //       },
-            //       borderRadius: const BorderRadius.all(Radius.circular(7.0)),
-            //       fillColor: const Color.fromARGB(255, 198, 198, 198),
-            //       constraints: const BoxConstraints(
-            //         minHeight: 38.0,
-            //         minWidth: 85.0,
-            //       ),
-            //       isSelected: selectedOption,
-            //       children: messToggleButtons),
-            // )
           ],
         ),
         Column(
@@ -176,7 +162,7 @@ class _MessMenuPageState extends State<MessMenuPage> {
               ShowMessMenu(
                 extras: extras?.breakfast ?? [],
                 whichMeal: 'Breakfast',
-                time: '7:30AM-10:30AM',
+                time: isWeekend() ? '8:00AM-10:30AM' : '7:30AM-10:00AM',
                 meals: meals.breakfast,
               ),
               ShowMessMenu(

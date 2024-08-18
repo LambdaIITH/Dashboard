@@ -14,6 +14,12 @@ class HomeScreenMessMenu extends StatelessWidget {
     this.messMenu,
   });
 
+  bool isWeekend() {
+    DateTime today = DateTime.now();
+    return today.weekday == DateTime.saturday ||
+        today.weekday == DateTime.sunday;
+  }
+
   @override
   Widget build(BuildContext context) {
     if (messMenu == null) {
@@ -38,7 +44,7 @@ class HomeScreenMessMenu extends StatelessWidget {
         (currentTime.hour == 10 && currentTime.minute <= 30)) {
       currentMeal = 'Breakfast';
       currentMealData = meals.breakfast;
-      mealTime = '7:30AM-10:30AM';
+      mealTime = isWeekend() ? '8:00AM-10:30AM' : '7:30AM-10:00AM';
       extras = additional?.breakfast ?? [];
     } else if (currentTime.hour < 14 ||
         (currentTime.hour == 14 && currentTime.minute <= 45)) {
