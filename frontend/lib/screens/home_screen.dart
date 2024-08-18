@@ -16,6 +16,7 @@ import 'package:dashbaord/widgets/home_screen_bus_timings.dart';
 import 'package:dashbaord/widgets/home_screen_mess_menu.dart';
 import 'package:flutter/services.dart';
 import 'package:in_app_update/in_app_update.dart';
+import 'package:text_scroll/text_scroll.dart';
 
 class HomeScreen extends StatefulWidget {
   final bool isGuest;
@@ -158,6 +159,15 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  String eventText = "";
+  getEventText() async {
+    String text = await ApiServices().getEventText();
+    setState(() {
+      eventText = text;
+      changeState();
+    });
+  }
+
   final analyticsService = FirebaseAnalyticsService();
 
   @override
@@ -239,6 +249,17 @@ class _HomeScreenState extends State<HomeScreen> {
                           image: image,
                           user: userModel,
                           isGuest: widget.isGuest),
+                      if(eventText.isNotEmpty) const SizedBox(height: 28),
+                      if(eventText.isNotEmpty) TextScroll(
+                        eventText,
+                        velocity:
+                            const Velocity(pixelsPerSecond: Offset(50, 0)),
+                        delayBefore: const Duration(milliseconds: 900),
+                        pauseBetween: const Duration(milliseconds: 100),
+                        style: const TextStyle(color: Colors.purple),
+                        textAlign: TextAlign.center,
+                        selectable: true,
+                      ),
                       const SizedBox(height: 28),
                       HomeScreenBusTimings(
                         busSchedule: busSchedule,

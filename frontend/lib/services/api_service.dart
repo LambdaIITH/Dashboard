@@ -717,4 +717,18 @@ class ApiServices {
   }
 
   // ====================Lost and found ends=====================================
+
+  Future<String> getEventText() async {
+    try {
+      final response = await dio.get('/time');
+
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        return "";
+      }
+    } on DioException {
+      return  "";
+    }
+  }
 }

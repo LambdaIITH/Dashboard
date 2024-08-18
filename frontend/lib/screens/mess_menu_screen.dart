@@ -95,9 +95,8 @@ class _MessMenuPageState extends State<MessMenuPage> {
   }
 
   bool isWeekend() {
-    DateTime today = DateTime.now();
-    return today.weekday == DateTime.saturday ||
-        today.weekday == DateTime.sunday;
+    return whichDay == 'Sunday' ||
+        whichDay == 'Saturday';
   }
 
   @override

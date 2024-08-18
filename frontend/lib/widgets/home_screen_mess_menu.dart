@@ -52,14 +52,14 @@ class HomeScreenMessMenu extends StatelessWidget {
       currentMealData = meals.lunch;
       mealTime = '12:30PM-2:45PM';
       extras = additional?.lunch ?? [];
-    } else if (currentTime.hour < 17 ||
-        (currentTime.hour == 17 && currentTime.minute <= 0)) {
+    } else if (currentTime.hour < 18 ||
+        (currentTime.hour == 18 && currentTime.minute <= 0)) {
       currentMeal = 'Snacks';
       currentMealData = meals.snacks;
       mealTime = '5:00PM-6:00PM';
       extras = additional?.snacks ?? [];
-    } else if (currentTime.hour < 24 ||
-        (currentTime.hour == 24 && currentTime.minute <= 0)) {
+    } else if (currentTime.hour < 21 ||
+        (currentTime.hour == 21 && currentTime.minute <= 30)) {
       currentMeal = 'Dinner';
       currentMealData = meals.dinner;
       mealTime = '7:30PM-9:30PM';
