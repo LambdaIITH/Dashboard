@@ -28,7 +28,6 @@ except Exception as e:
 ## Finding the current week using the number of mondays in the month
 
 d = datetime.date.today()
-d = d + datetime.timedelta(days=1)
 start_date = datetime.date(d.year, d.month, 1)
 next_day = d + datetime.timedelta(days=1)
 num_mondays = 0
