@@ -26,7 +26,9 @@ except Exception as e:
 # )
 
 ## Finding the current week using the number of mondays in the month
+
 d = datetime.date.today()
+d = d + datetime.timedelta(days=1)
 start_date = datetime.date(d.year, d.month, 1)
 next_day = d + datetime.timedelta(days=1)
 num_mondays = 0
@@ -34,11 +36,10 @@ while start_date != next_day:
     if start_date.weekday() == 0:
         num_mondays += 1
     start_date += datetime.timedelta(days=1)
-
-current_week = (num_mondays // 7 + 1)%4
-
-if current_week == 0:
-    current_week = 1
+if num_mondays == 0:
+    num_mondays = 1
+current_week = (num_mondays)%4
+is_even_week = (current_week + 1) % 2 # should be 1 for even week and 0 for odd week
 
 
 # -------------------------------------------------------------------------------
@@ -173,8 +174,7 @@ def parse_regular():
     #  Snacks given in Sunday only (handled)
 
     # if odd week, use top menu, else use bottom menu
-    is_even_week = (current_week + 1) % 2
-
+    
     daily_item_cell = weekly.findall("Daily")[is_even_week]
     daily_items_list = weekly.row_values(daily_item_cell.row)
     # -------------------------------------------------------------------------------
