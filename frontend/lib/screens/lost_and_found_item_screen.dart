@@ -27,6 +27,7 @@ class LostAndFoundItemScreen extends StatelessWidget {
     final data = await ApiServices().getLostAndFoundItem(
       id: id,
       lostOrFound: lostOrFound,
+      context: context
     );
     debugPrint(data.toString());
     if (data['status'] == 200) {
@@ -237,6 +238,7 @@ class LostAndFoundItemScreen extends StatelessWidget {
       final response = await ApiServices().deleteLostAndFoundItem(
         id: id,
         lostOrFound: lostOrFound,
+        context: context
       );
 
       if (response['status'] == 200) {

@@ -100,6 +100,7 @@ class _LostAndFoundEditItemScreenState
       itemDescription: _itemDescriptionController.text,
       lostOrFound: _lostOrFound!,
       images: _images,
+      context: context
     );
 
     // TODO: check status!!!!

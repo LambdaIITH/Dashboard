@@ -62,6 +62,7 @@ dependencies:
   url_launcher: ^6.3.0
   image_picker_for_web: ^3.0.4
   image_cropper: ^7.1.0
+  text_scroll: ^0.2.0
 
 dev_dependencies:
   flutter_test:

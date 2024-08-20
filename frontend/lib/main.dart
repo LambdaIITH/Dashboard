@@ -31,6 +31,8 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
+GlobalKey<NavigatorState> navigatorKey = GlobalKey();
+
 class _MyAppState extends State<MyApp> {
   bool isLoading = true;
   bool isLoggedIn = false;
@@ -103,6 +105,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: navigatorKey,
       title: 'Dashboard',
       debugShowCheckedModeBanner: false,
       theme: lightTheme,

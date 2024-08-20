@@ -44,14 +44,14 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
     final Map<String, dynamic> data;
     if (_search.isEmpty) {
       if (onlyLost) {
-        data = await ApiServices().getLostItems();
+        data = await ApiServices().getLostItems(context);
       } else if (onlyFound) {
-        data = await ApiServices().getFoundItems();
+        data = await ApiServices().getFoundItems(context);
       } else {
-        data = await ApiServices().getLostAndFoundItems();
+        data = await ApiServices().getLostAndFoundItems(context);
       }
     } else {
-      data = await ApiServices().searchLostAndFoundItems(_search);
+      data = await ApiServices().searchLostAndFoundItems(_search, context);
     }
     List<Widget> finalItems = [];
     if (data['status'] == 200) {

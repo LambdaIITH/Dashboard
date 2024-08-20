@@ -1,3 +1,5 @@
+import 'package:dashbaord/screens/profile_screen.dart';
+import 'package:dashbaord/utils/custom_page_route.dart';
 import 'package:flutter/material.dart';
 import 'package:dashbaord/models/booking_model.dart';
 import 'package:dashbaord/models/travellers.dart';
@@ -167,13 +169,13 @@ class _CabAddScreenState extends State<CabAddScreen> {
             TextButton(
               child: const Text('OK'),
               onPressed: () {
-                //TODO:
+                //TODO: add on theme change
 
-                // Navigator.pushReplacement(
-                //     context,
-                //     CustomPageRoute(
-                //         child: ProfileScreen(
-                //             user: widget.user, image: widget.image)));
+                Navigator.pushReplacement(
+                    context,
+                    CustomPageRoute(
+                        child: ProfileScreen(
+                            user: widget.user, image: widget.image, onThemeChanged: (int value) {  },)));
               },
             ),
           ],
@@ -207,7 +209,8 @@ class _CabAddScreenState extends State<CabAddScreen> {
       requests: [],
     );
     try {
-      final res = await apiServices.createBooking(bookingModel);
+      // ignore: use_build_context_synchronously
+      final res = await apiServices.createBooking(bookingModel, context);
       if (!mounted) return;
       if (res["error"] == null) {
         Navigator.pushReplacement(

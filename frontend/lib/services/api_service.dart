@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 
+import 'package:dashbaord/screens/login_screen.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -51,9 +52,14 @@ class ApiServices {
   //======================================================================
   final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ["email"]);
 
-  Future<void> googleLogout() async {
+  Future<void> googleLogout(BuildContext context) async {
     await _googleSignIn.signOut();
     await FirebaseAuth.instance.signOut();
+    Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+            builder: (ctx) => LoginScreen(onThemeChanged: (int x) {})),
+        (route) => false);
   }
 
   void showError(BuildContext context) {
@@ -68,8 +74,9 @@ class ApiServices {
   }
 
   Future<void> logout(BuildContext context) async {
-    await googleLogout();
+    await googleLogout(context);
     showError(context);
+    serverLogout();
   }
 
   Future<void> serverLogout() async {
@@ -209,12 +216,19 @@ class ApiServices {
     }
   }
 
-  Future<Map<String, dynamic>> createBooking(BookingModel booking) async {
+  Future<Map<String, dynamic>> createBooking(
+      BookingModel booking, BuildContext context) async {
     try {
       final response = await dio.post(
         '/cabshare/bookings',
         data: booking.toJson(),
       );
+
+      if (response.statusCode == 401) {
+        await logout(context);
+        return {'error': 'Unauthorized user', 'status': 401};
+      }
+
       return {
         'booking': response.data,
         'status': response.statusCode,
@@ -236,12 +250,16 @@ class ApiServices {
   }
 
   Future<Map<String, dynamic>> updateBooking(
-      int bookingId, BookingModel booking) async {
+      int bookingId, BookingModel booking, BuildContext context) async {
     try {
       final response = await dio.patch(
         '/cabshare/bookings/$bookingId',
         data: booking.toJson(),
       );
+      if (response.statusCode == 401) {
+        await logout(context);
+        return {'error': 'Unauthorized user', 'status': 401};
+      }
       return {'booking': response.data, 'status': response.statusCode};
     } on DioException catch (e) {
       if (e.response != null) {
@@ -297,12 +315,18 @@ class ApiServices {
   }
 
   Future<Map<String, dynamic>> requestToJoinBooking(
-      int bookingId, String comments) async {
+      int bookingId, String comments, BuildContext context) async {
     try {
       final response = await dio.post(
         '/cabshare/bookings/$bookingId/request',
         data: {'comments': comments},
       );
+
+      if (response.statusCode == 401) {
+        await logout(context);
+        return {'error': 'Unauthorized user', 'status': 401};
+      }
+
       return {'status': response.statusCode};
     } on DioException catch (e) {
       if (e.response != null) {
@@ -319,10 +343,17 @@ class ApiServices {
     }
   }
 
-  Future<Map<String, dynamic>> deleteRequest(int bookingId) async {
+  Future<Map<String, dynamic>> deleteRequest(
+      int bookingId, BuildContext context) async {
     try {
       final response =
           await dio.delete('/cabshare/bookings/$bookingId/request');
+
+      if (response.statusCode == 401) {
+        await logout(context);
+        return {'error': 'Unauthorized user', 'status': 401};
+      }
+
       return {'status': response.statusCode};
     } on DioException catch (e) {
       if (e.response != null) {
@@ -340,12 +371,16 @@ class ApiServices {
   }
 
   Future<Map<String, dynamic>> acceptRequest(
-      int bookingId, String requesterEmail) async {
+      int bookingId, String requesterEmail, BuildContext context) async {
     try {
       final response = await dio.post(
         '/cabshare/bookings/$bookingId/accept',
         data: {'requester_email': requesterEmail},
       );
+      if (response.statusCode == 401) {
+        await logout(context);
+        return {'error': 'Unauthorized user', 'status': 401};
+      }
       return {'status': response.statusCode};
     } on DioException catch (e) {
       if (e.response != null) {
@@ -363,12 +398,16 @@ class ApiServices {
   }
 
   Future<Map<String, dynamic>> rejectRequest(
-      int bookingId, String requesterEmail) async {
+      int bookingId, String requesterEmail, BuildContext context) async {
     try {
       final response = await dio.post(
         '/cabshare/bookings/$bookingId/reject',
         data: {'requester_email': requesterEmail},
       );
+      if (response.statusCode == 401) {
+        await logout(context);
+        return {'error': 'Unauthorized user', 'status': 401};
+      }
       return {'status': response.statusCode};
     } on DioException catch (e) {
       if (e.response != null) {
@@ -385,9 +424,14 @@ class ApiServices {
     }
   }
 
-  Future<Map<String, dynamic>> deleteBooking(int bookingId) async {
+  Future<Map<String, dynamic>> deleteBooking(
+      int bookingId, BuildContext context) async {
     try {
       final response = await dio.delete('/cabshare/bookings/$bookingId');
+      if (response.statusCode == 401) {
+        await logout(context);
+        return {'error': 'Unauthorized user', 'status': 401};
+      }
       return {'status': response.statusCode};
     } on DioException catch (e) {
       if (e.response != null) {
@@ -404,9 +448,14 @@ class ApiServices {
     }
   }
 
-  Future<Map<String, dynamic>> exitBooking(int bookingId) async {
+  Future<Map<String, dynamic>> exitBooking(
+      int bookingId, BuildContext context) async {
     try {
       final response = await dio.delete('/cabshare/bookings/$bookingId/self');
+      if (response.statusCode == 401) {
+        await logout(context);
+        return {'error': 'Unauthorized user', 'status': 401};
+      }
       return {'status': response.statusCode};
     } on DioException catch (e) {
       if (e.response != null) {
@@ -448,10 +497,17 @@ class ApiServices {
 
   // ====================PROFILE PAGE ENDS===================================
   // ====================Lost and found starts=====================================
-  Future<Map<String, dynamic>> getLostAndFoundItems() async {
+  Future<Map<String, dynamic>> getLostAndFoundItems(
+      BuildContext context) async {
     try {
       final response = await dio.get('/lost/all');
       final response2 = await dio.get('/found/all');
+
+      if (response.statusCode == 401 || response2.statusCode == 401) {
+        await logout(context);
+        return {'error': 'Unauthorized user', 'status': 401};
+      }
+
       final items = (response.data as List).map(
         (e) {
           e['lostOrFound'] = LostOrFound.lost;
@@ -481,9 +537,13 @@ class ApiServices {
     }
   }
 
-  Future<Map<String, dynamic>> getLostItems() async {
+  Future<Map<String, dynamic>> getLostItems(BuildContext context) async {
     try {
       final response = await dio.get('/lost/all');
+      if (response.statusCode == 401) {
+        await logout(context);
+        return {'error': 'Unauthorized user', 'status': 401};
+      }
       final items = (response.data as List).map(
         (e) {
           e['lostOrFound'] = LostOrFound.lost;
@@ -505,9 +565,13 @@ class ApiServices {
     }
   }
 
-  Future<Map<String, dynamic>> getFoundItems() async {
+  Future<Map<String, dynamic>> getFoundItems(BuildContext context) async {
     try {
       final response = await dio.get('/found/all');
+      if (response.statusCode == 401) {
+        await logout(context);
+        return {'error': 'Unauthorized user', 'status': 401};
+      }
       final items = (response.data as List).map(
         (e) {
           e['lostOrFound'] = LostOrFound.found;
@@ -591,16 +655,21 @@ class ApiServices {
     }
   }
 
-  Future<Map<String, dynamic>> getLostAndFoundItem({
-    required String id,
-    required LostOrFound lostOrFound,
-  }) async {
+  Future<Map<String, dynamic>> getLostAndFoundItem(
+      {required String id,
+      required LostOrFound lostOrFound,
+      required BuildContext context}) async {
     try {
       final url =
           "/${lostOrFound == LostOrFound.lost ? "lost" : "found"}/item/$id";
 
       // TODO
       final response = await dio.get(url);
+
+      if (response.statusCode == 401) {
+        await logout(context);
+        return {'error': 'Unauthorized user', 'status': 401};
+      }
       response.data['lostOrFound'] = lostOrFound == LostOrFound.found
           ? LostOrFound.found
           : LostOrFound.lost;
@@ -620,16 +689,20 @@ class ApiServices {
     }
   }
 
-  Future<Map<String, dynamic>> deleteLostAndFoundItem({
-    required String id,
-    required LostOrFound lostOrFound,
-  }) async {
+  Future<Map<String, dynamic>> deleteLostAndFoundItem(
+      {required String id,
+      required LostOrFound lostOrFound,
+      required BuildContext context}) async {
     try {
       final url =
           "/${lostOrFound == LostOrFound.lost ? "lost" : "found"}/delete_item";
 
       final formData = FormData.fromMap({"item_id": id});
       final response = await dio.delete(url, data: formData);
+      if (response.statusCode == 401) {
+        await logout(context);
+        return {'error': 'Unauthorized user', 'status': 401};
+      }
       return {'status': response.statusCode};
     } on DioException catch (e) {
       if (e.response != null) {
@@ -646,13 +719,13 @@ class ApiServices {
     }
   }
 
-  Future<Map<String, dynamic>> editLostAndFounditem({
-    required String itemName,
-    required String id,
-    required String itemDescription,
-    required LostOrFound lostOrFound,
-    required List<String> images,
-  }) async {
+  Future<Map<String, dynamic>> editLostAndFounditem(
+      {required String itemName,
+      required String id,
+      required String itemDescription,
+      required LostOrFound lostOrFound,
+      required List<String> images,
+      required BuildContext context}) async {
     try {
       final url =
           "/${lostOrFound == LostOrFound.lost ? "lost" : "found"}/edit_item";
@@ -664,6 +737,12 @@ class ApiServices {
         "itemDescription": itemDescription,
         "images": images,
       });
+
+      if (response.statusCode == 401) {
+        await logout(context);
+        return {'error': 'Unauthorized user', 'status': 401};
+      }
+
       return {'status': response.statusCode};
     } on DioException catch (e) {
       if (e.response != null) {
@@ -680,10 +759,17 @@ class ApiServices {
     }
   }
 
-  Future<Map<String, dynamic>> searchLostAndFoundItems(String search) async {
+  Future<Map<String, dynamic>> searchLostAndFoundItems(
+      String search, BuildContext context) async {
     try {
       final response = await dio.get('/lost/search?query=$search');
       final response2 = await dio.get('/found/search?query=$search');
+
+      if (response.statusCode == 401 || response2.statusCode == 401) {
+        await logout(context);
+        return {'error': 'Unauthorized user', 'status': 401};
+      }
+
       final items = (response.data as List).map(
         (e) {
           e['lostOrFound'] = LostOrFound.lost;
@@ -728,7 +814,7 @@ class ApiServices {
         return "";
       }
     } on DioException {
-      return  "";
+      return "";
     }
   }
 }

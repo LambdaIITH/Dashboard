@@ -69,7 +69,7 @@ class _CabCardState extends State<CabCard> {
   void joinCab(BuildContext context) async {
     try {
       final res = await apiServices.requestToJoinBooking(
-          bookingId, commentController.text.trim());
+          bookingId, commentController.text.trim(), context);
       if (res["status"] == 200) {
         showMessage("Successfully sent the cab join request");
       } else {
@@ -81,7 +81,7 @@ class _CabCardState extends State<CabCard> {
   }
 
   void deleteCab() async {
-    final res = await apiServices.deleteBooking(bookingId);
+    final res = await apiServices.deleteBooking(bookingId, context);
     if (res['status'] == 200) {
       showMessage("Cab has been successfully deleted");
     } else {
@@ -90,7 +90,7 @@ class _CabCardState extends State<CabCard> {
   }
 
   void exitCab() async {
-    final res = await apiServices.exitBooking(bookingId);
+    final res = await apiServices.exitBooking(bookingId, context);
     if (res['status'] == 200) {
       showMessage("Successfully exited from the cab");
     } else {
@@ -99,7 +99,7 @@ class _CabCardState extends State<CabCard> {
   }
 
   void cancelRequest() async {
-    final res = await apiServices.deleteRequest(bookingId);
+    final res = await apiServices.deleteRequest(bookingId, context);
     if (res['status'] == 200) {
       showMessage("Request has been successfully canceled");
     } else {
@@ -302,7 +302,7 @@ class _CabCardState extends State<CabCard> {
                   child: InkWell(
                     onTap: () async {
                       final res =
-                          await apiServices.rejectRequest(bookingId, email);
+                          await apiServices.rejectRequest(bookingId, email, context);
                       Navigator.pop(context);
                       if (res['status'] == 200) {
                         showMessage("Successfully request rejected");
@@ -335,7 +335,7 @@ class _CabCardState extends State<CabCard> {
                   child: InkWell(
                     onTap: () async {
                       final res =
-                          await apiServices.acceptRequest(bookingId, email);
+                          await apiServices.acceptRequest(bookingId, email, context);
                       Navigator.pop(context);
                       if (res['status'] == 200) {
                         showMessage("Successfully request accepted");
