@@ -94,7 +94,10 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         changeState();
       });
-      saveUserData('User', 'user@iith.ac.in');
+      var u = await SharedService().getUserDetails();
+      if(u['name'] == null) {
+        saveUserData('User', 'user@iith.ac.in');
+      }
       return;
     }
     setState(() {

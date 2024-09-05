@@ -84,12 +84,12 @@ class HomeScreenAppBar extends StatelessWidget {
             : InkWell(
                 borderRadius: BorderRadius.circular(100),
                 onTap: () {
-                  if (user == null) {
-                    return;
-                  }
+                  // if (user == null) {
+                  //   return;
+                  // }
                   Navigator.of(context).push(CustomPageRoute(
                     child: ProfileScreen(
-                      user: user!,
+                      user: user ?? UserModel(email: "xx11btech110xx@iith.ac.in", name: "User"),
                       image: image,
                       onThemeChanged: onThemeChanged,
                     ),
