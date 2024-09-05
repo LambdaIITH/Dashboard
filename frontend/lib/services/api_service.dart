@@ -106,10 +106,10 @@ class ApiServices {
       debugPrint("Making request to: ${dio.options.baseUrl}/mess_menu");
       final response = await dio.get('/mess_menu/');
 
-      if (response.statusCode == 401) {
-        await logout(context);
-        return null;
-      }
+      // if (response.statusCode == 401) {
+      //   await logout(context);
+      //   return null;
+      // }
 
       final data = response.data;
       return MessMenuModel.fromJson(data);
@@ -124,10 +124,10 @@ class ApiServices {
       debugPrint("Making request to: ${dio.options.baseUrl}/transport");
       final response = await dio.get('/transport/');
 
-      if (response.statusCode == 401) {
-        await logout(context);
-        return null;
-      }
+      // if (response.statusCode == 401) {
+      //   await logout(context);
+      //   return null;
+      // }
 
       final data = response.data;
       return BusSchedule.fromJson(data);
@@ -142,7 +142,7 @@ class ApiServices {
       debugPrint("Making request to: ${dio.options.baseUrl}/user");
       final response = await dio.get('/user/');
 
-      if (response.statusCode == 401) {
+      if (response.statusCode != 200) {
         await logout(context);
         return null;
       }
@@ -154,10 +154,16 @@ class ApiServices {
           cr: data['cr'],
           phone: data['phone_number'],
           id: data['id']);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        await logout(context);
+        return null;
+      }
+      debugPrint("Failed to fetch user (DioError): $e");
     } catch (e) {
-      debugPrint("Failed to fetch bus schedule: $e");
-      return null;
+      debugPrint("Failed to fetch user: $e");
     }
+    return null;
   }
 
   Future<UserModel?> updatePhoneNumber(
@@ -167,10 +173,6 @@ class ApiServices {
       final response =
           await dio.patch('/user/update', data: {"phone_number": phone});
 
-      if (response.statusCode == 401) {
-        await logout(context);
-        return null;
-      }
       final data = response.data;
       return UserModel(
           email: data['email'],
@@ -178,6 +180,11 @@ class ApiServices {
           cr: data['cr'],
           phone: data['phone_number'],
           id: data['id']);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        await logout(context);
+        return null;
+      }
     } catch (e) {
       debugPrint("Failed to fetch bus schedule: $e");
       return null;
@@ -203,13 +210,14 @@ class ApiServices {
       final response = await dio.get('/cabshare/bookings',
           queryParameters: queryParams.isEmpty ? null : queryParams);
 
-      if (response.statusCode == 401) {
+      final data = response.data as List;
+      return data.map((booking) => BookingModel.fromJson(booking)).toList();
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
         await logout(context);
         return [];
       }
-
-      final data = response.data as List;
-      return data.map((booking) => BookingModel.fromJson(booking)).toList();
+      return [];
     } catch (e) {
       debugPrint("Failed to fetch bookings: $e");
       return [];
@@ -224,17 +232,17 @@ class ApiServices {
         data: booking.toJson(),
       );
 
-      if (response.statusCode == 401) {
-        await logout(context);
-        return {'error': 'Unauthorized user', 'status': 401};
-      }
-
       return {
         'booking': response.data,
         'status': response.statusCode,
         'error': null
       };
     } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        await logout(context);
+        return {'error': 'Unauthorized user', 'status': 401};
+      }
+
       if (e.response != null) {
         return {
           'error': e.response?.data['detail'],
@@ -256,12 +264,14 @@ class ApiServices {
         '/cabshare/bookings/$bookingId',
         data: booking.toJson(),
       );
-      if (response.statusCode == 401) {
+
+      return {'booking': response.data, 'status': response.statusCode};
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
         await logout(context);
         return {'error': 'Unauthorized user', 'status': 401};
       }
-      return {'booking': response.data, 'status': response.statusCode};
-    } on DioException catch (e) {
+
       if (e.response != null) {
         return {
           'error': e.response?.data['detail'],
@@ -282,13 +292,14 @@ class ApiServices {
           "Making request to: ${dio.options.baseUrl}/cabshare/me/bookings");
       final response = await dio.get('/cabshare/me/bookings');
 
-      if (response.statusCode == 401) {
+      final data = response.data["future_bookings"] as List;
+      return data.map((booking) => BookingModel.fromJson(booking)).toList();
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
         await logout(context);
         return [];
       }
-
-      final data = response.data["future_bookings"] as List;
-      return data.map((booking) => BookingModel.fromJson(booking)).toList();
+      return [];
     } catch (e) {
       debugPrint("Failed to fetch user bookings: $e");
       return [];
@@ -301,13 +312,14 @@ class ApiServices {
           "Making request to: ${dio.options.baseUrl}/cabshare/me/requests");
       final response = await dio.get('/cabshare/me/requests');
 
-      if (response.statusCode == 401) {
+      final data = response.data as List;
+      return data.map((booking) => BookingModel.fromJson(booking)).toList();
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
         await logout(context);
         return [];
       }
-
-      final data = response.data as List;
-      return data.map((booking) => BookingModel.fromJson(booking)).toList();
+      return [];
     } catch (e) {
       debugPrint("Failed to fetch user requests: $e");
       return [];
@@ -322,13 +334,12 @@ class ApiServices {
         data: {'comments': comments},
       );
 
-      if (response.statusCode == 401) {
+      return {'status': response.statusCode};
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
         await logout(context);
         return {'error': 'Unauthorized user', 'status': 401};
       }
-
-      return {'status': response.statusCode};
-    } on DioException catch (e) {
       if (e.response != null) {
         return {
           'error': e.response?.data['detail'],
@@ -349,13 +360,12 @@ class ApiServices {
       final response =
           await dio.delete('/cabshare/bookings/$bookingId/request');
 
-      if (response.statusCode == 401) {
+      return {'status': response.statusCode};
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
         await logout(context);
         return {'error': 'Unauthorized user', 'status': 401};
       }
-
-      return {'status': response.statusCode};
-    } on DioException catch (e) {
       if (e.response != null) {
         return {
           'error': e.response?.data['detail'],
@@ -377,12 +387,13 @@ class ApiServices {
         '/cabshare/bookings/$bookingId/accept',
         data: {'requester_email': requesterEmail},
       );
-      if (response.statusCode == 401) {
+
+      return {'status': response.statusCode};
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
         await logout(context);
         return {'error': 'Unauthorized user', 'status': 401};
       }
-      return {'status': response.statusCode};
-    } on DioException catch (e) {
       if (e.response != null) {
         return {
           'error': e.response?.data['detail'],
@@ -404,12 +415,13 @@ class ApiServices {
         '/cabshare/bookings/$bookingId/reject',
         data: {'requester_email': requesterEmail},
       );
-      if (response.statusCode == 401) {
+
+      return {'status': response.statusCode};
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
         await logout(context);
         return {'error': 'Unauthorized user', 'status': 401};
       }
-      return {'status': response.statusCode};
-    } on DioException catch (e) {
       if (e.response != null) {
         return {
           'error': e.response?.data['detail'],
@@ -428,12 +440,13 @@ class ApiServices {
       int bookingId, BuildContext context) async {
     try {
       final response = await dio.delete('/cabshare/bookings/$bookingId');
-      if (response.statusCode == 401) {
+
+      return {'status': response.statusCode};
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
         await logout(context);
         return {'error': 'Unauthorized user', 'status': 401};
       }
-      return {'status': response.statusCode};
-    } on DioException catch (e) {
       if (e.response != null) {
         return {
           'error': e.response?.data['detail'],
@@ -452,12 +465,12 @@ class ApiServices {
       int bookingId, BuildContext context) async {
     try {
       final response = await dio.delete('/cabshare/bookings/$bookingId/self');
-      if (response.statusCode == 401) {
+      return {'status': response.statusCode};
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
         await logout(context);
         return {'error': 'Unauthorized user', 'status': 401};
       }
-      return {'status': response.statusCode};
-    } on DioException catch (e) {
       if (e.response != null) {
         return {
           'error': e.response?.data['detail'],
@@ -503,11 +516,6 @@ class ApiServices {
       final response = await dio.get('/lost/all');
       final response2 = await dio.get('/found/all');
 
-      if (response.statusCode == 401 || response2.statusCode == 401) {
-        await logout(context);
-        return {'error': 'Unauthorized user', 'status': 401};
-      }
-
       final items = (response.data as List).map(
         (e) {
           e['lostOrFound'] = LostOrFound.lost;
@@ -524,6 +532,10 @@ class ApiServices {
       );
       return {'status': response.statusCode, 'items': items};
     } on DioException catch (e) {
+      if (e.response?.statusCode == 401 || e.response?.statusCode == 401) {
+        await logout(context);
+        return {'error': 'Unauthorized user', 'status': 401};
+      }
       if (e.response != null) {
         return {
           'error': e.response?.data['detail'],
@@ -540,10 +552,7 @@ class ApiServices {
   Future<Map<String, dynamic>> getLostItems(BuildContext context) async {
     try {
       final response = await dio.get('/lost/all');
-      if (response.statusCode == 401) {
-        await logout(context);
-        return {'error': 'Unauthorized user', 'status': 401};
-      }
+
       final items = (response.data as List).map(
         (e) {
           e['lostOrFound'] = LostOrFound.lost;
@@ -552,6 +561,10 @@ class ApiServices {
       ).toList();
       return {'status': response.statusCode, 'items': items};
     } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        await logout(context);
+        return {'error': 'Unauthorized user', 'status': 401};
+      }
       if (e.response != null) {
         return {
           'error': e.response?.data['detail'],
@@ -568,10 +581,7 @@ class ApiServices {
   Future<Map<String, dynamic>> getFoundItems(BuildContext context) async {
     try {
       final response = await dio.get('/found/all');
-      if (response.statusCode == 401) {
-        await logout(context);
-        return {'error': 'Unauthorized user', 'status': 401};
-      }
+
       final items = (response.data as List).map(
         (e) {
           e['lostOrFound'] = LostOrFound.found;
@@ -580,6 +590,10 @@ class ApiServices {
       ).toList();
       return {'status': response.statusCode, 'items': items};
     } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        await logout(context);
+        return {'error': 'Unauthorized user', 'status': 401};
+      }
       if (e.response != null) {
         return {
           'error': e.response?.data['detail'],
@@ -666,15 +680,15 @@ class ApiServices {
       // TODO
       final response = await dio.get(url);
 
-      if (response.statusCode == 401) {
-        await logout(context);
-        return {'error': 'Unauthorized user', 'status': 401};
-      }
       response.data['lostOrFound'] = lostOrFound == LostOrFound.found
           ? LostOrFound.found
           : LostOrFound.lost;
       return {'status': response.statusCode, 'item': response.data};
     } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        await logout(context);
+        return {'error': 'Unauthorized user', 'status': 401};
+      }
       if (e.response != null) {
         return {
           'error': e.response?.data['detail'],
@@ -699,12 +713,13 @@ class ApiServices {
 
       final formData = FormData.fromMap({"item_id": id});
       final response = await dio.delete(url, data: formData);
-      if (response.statusCode == 401) {
+
+      return {'status': response.statusCode};
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
         await logout(context);
         return {'error': 'Unauthorized user', 'status': 401};
       }
-      return {'status': response.statusCode};
-    } on DioException catch (e) {
       if (e.response != null) {
         return {
           'error': e.response?.data['detail'],
@@ -738,13 +753,12 @@ class ApiServices {
         "images": images,
       });
 
-      if (response.statusCode == 401) {
+      return {'status': response.statusCode};
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
         await logout(context);
         return {'error': 'Unauthorized user', 'status': 401};
       }
-
-      return {'status': response.statusCode};
-    } on DioException catch (e) {
       if (e.response != null) {
         return {
           'error': e.response?.data['detail'],
@@ -765,11 +779,6 @@ class ApiServices {
       final response = await dio.get('/lost/search?query=$search');
       final response2 = await dio.get('/found/search?query=$search');
 
-      if (response.statusCode == 401 || response2.statusCode == 401) {
-        await logout(context);
-        return {'error': 'Unauthorized user', 'status': 401};
-      }
-
       final items = (response.data as List).map(
         (e) {
           e['lostOrFound'] = LostOrFound.lost;
@@ -788,6 +797,10 @@ class ApiServices {
       debugPrint(items.toString());
       return {'status': response.statusCode, 'items': items};
     } on DioException catch (e) {
+      if (e.response?.statusCode == 401 || e.response?.statusCode == 401) {
+        await logout(context);
+        return {'error': 'Unauthorized user', 'status': 401};
+      }
       if (e.response != null) {
         return {
           'error': e.response?.data['detail'],
@@ -807,7 +820,6 @@ class ApiServices {
   Future<String> getEventText() async {
     try {
       final response = await dio.get('/time');
-
       if (response.statusCode == 200) {
         return response.data;
       } else {
