@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -15,6 +17,7 @@ import 'package:dashbaord/widgets/home_screen_appbar.dart';
 import 'package:dashbaord/widgets/home_screen_bus_timings.dart';
 import 'package:dashbaord/widgets/home_screen_mess_menu.dart';
 import 'package:flutter/services.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:in_app_update/in_app_update.dart';
 import 'package:text_scroll/text_scroll.dart';
 
@@ -66,6 +69,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
     //save mess menu
     await SharedService().saveMessMenu(response);
+    updateAndroidWidget(response);
+  }
+
+  void updateAndroidWidget(MessMenuModel messMenu) {
+    HomeWidget.saveWidgetData(
+        "widget_mess_menu", jsonEncode(messMenu.toJson()));
+    HomeWidget.updateWidget(
+      androidName: "MessMenuWidget",
+    );
   }
 
   Future<void> fetchBus() async {
@@ -95,7 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
         changeState();
       });
       var u = await SharedService().getUserDetails();
-      if(u['name'] == null) {
+      if (u['name'] == null) {
         saveUserData('User', 'user@iith.ac.in');
       }
       return;
@@ -201,7 +213,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   checkForUpdates() async {
-    await Future.delayed(const Duration(seconds: 10));
+    await Future.delayed(const Duration(seconds: 3));
     try {
       var updateInfo = await InAppUpdate.checkForUpdate();
       if (updateInfo.updateAvailability == UpdateAvailability.updateAvailable) {
@@ -252,17 +264,18 @@ class _HomeScreenState extends State<HomeScreen> {
                           image: image,
                           user: userModel,
                           isGuest: widget.isGuest),
-                      if(eventText.isNotEmpty) const SizedBox(height: 28),
-                      if(eventText.isNotEmpty) TextScroll(
-                        eventText,
-                        velocity:
-                            const Velocity(pixelsPerSecond: Offset(50, 0)),
-                        delayBefore: const Duration(milliseconds: 900),
-                        pauseBetween: const Duration(milliseconds: 100),
-                        style: const TextStyle(color: Colors.purple),
-                        textAlign: TextAlign.center,
-                        selectable: true,
-                      ),
+                      if (eventText.isNotEmpty) const SizedBox(height: 28),
+                      if (eventText.isNotEmpty)
+                        TextScroll(
+                          eventText,
+                          velocity:
+                              const Velocity(pixelsPerSecond: Offset(50, 0)),
+                          delayBefore: const Duration(milliseconds: 900),
+                          pauseBetween: const Duration(milliseconds: 100),
+                          style: const TextStyle(color: Colors.purple),
+                          textAlign: TextAlign.center,
+                          selectable: true,
+                        ),
                       const SizedBox(height: 28),
                       HomeScreenBusTimings(
                         busSchedule: busSchedule,
