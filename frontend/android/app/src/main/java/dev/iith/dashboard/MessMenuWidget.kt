@@ -47,7 +47,7 @@ class MessMenuWidget : AppWidgetProvider() {
                             res.append("${i + 1}. ${temp[i]}, ")
                         }
 
-                        res.append("\n\ncdExtras: ")
+                        res.append("\n\nExtras: ")
 
                         val ext = extras?.second
                         if (ext != null) {
@@ -59,16 +59,16 @@ class MessMenuWidget : AppWidgetProvider() {
                         // Set the result to the TextView
                         views.setTextViewText(R.id.textView6, res.toString().trim()) // Using trim() to remove any trailing newlines
                     } else {
-                        views.setTextViewText(R.id.textView3, "No meals available")
-                        views.setTextViewText(R.id.textView6, "")
+                        views.setTextViewText(R.id.textView6, "No meals available")
+                        views.setTextViewText(R.id.textView3, "Mess Menu")
                     }
                 } else {
-                    views.setTextViewText(R.id.textView3, "Failed to load menu")
-                    views.setTextViewText(R.id.textView6, "")
+                    views.setTextViewText(R.id.textView6, "No meals available")
+                    views.setTextViewText(R.id.textView3, "Mess Menu")
                 }
             } else {
-                views.setTextViewText(R.id.textView3, "No data available")
-                views.setTextViewText(R.id.textView6, "")
+                views.setTextViewText(R.id.textView6, "No data available")
+                views.setTextViewText(R.id.textView3, "Mess Menu")
             }
 
             appWidgetManager.updateAppWidget(appWidgetId, views)

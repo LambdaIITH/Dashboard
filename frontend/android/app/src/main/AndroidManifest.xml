@@ -1,40 +1,38 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml
+    version="1.0"
+    encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="dev.iith.dashboard" >
-
+    package="dev.iith.dashboard">
     <uses-permission
         android:name="com.google.android.gms.permission.AD_ID"
-        tools:node="remove" />
-    <uses-permission android:name="android.permission.INTERNET" />
-
+        tools:node="remove"/>
+    <uses-permission
+        android:name="android.permission.INTERNET"/>
     <application
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon"
-        android:label="Dashboard" >
+        android:label="Dashboard">
         <receiver
             android:name=".MessMenuWidget"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action
+                    android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
             </intent-filter>
-
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/mess_menu_widget_info" />
+                android:resource="@xml/mess_menu_widget_info"/>
         </receiver>
-
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:exported="true"
             android:hardwareAccelerated="true"
             android:launchMode="singleTop"
-            android:screenOrientation="portrait"
             android:theme="@style/LaunchTheme"
-            android:windowSoftInputMode="adjustResize" >
-
+            android:windowSoftInputMode="adjustResize">
             <!--
            Specifies an Android theme to apply to this Activity as soon as
                  the Android process has started. This theme is visible to the user
@@ -43,43 +41,43 @@
             -->
             <meta-data
                 android:name="io.flutter.embedding.android.NormalTheme"
-                android:resource="@style/NormalTheme" />
-
+                android:resource="@style/NormalTheme"/>
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-
             <meta-data
                 android:name="flutter_deeplinking_enabled"
-                android:value="true" />
-
-            <intent-filter android:autoVerify="true" >
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
+                android:value="true"/>
+            <intent-filter
+                android:autoVerify="true">
+                <action
+                    android:name="android.intent.action.VIEW"/>
+                <category
+                    android:name="android.intent.category.DEFAULT"/>
+                <category
+                    android:name="android.intent.category.BROWSABLE"/>
                 <data
                     android:host="cabsharing.iith.dev"
-                    android:scheme="https" />
+                    android:scheme="https"/>
                 <data
                     android:host="cabsharing.iith.dev"
-                    android:scheme="http" />
+                    android:scheme="http"/>
             </intent-filter>
-            <intent-filter android:autoVerify="true" >
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
+            <intent-filter
+                android:autoVerify="true">
+                <action
+                    android:name="android.intent.action.VIEW"/>
+                <category
+                    android:name="android.intent.category.DEFAULT"/>
+                <category
+                    android:name="android.intent.category.BROWSABLE"/>
                 <data
                     android:host="dashboard.iith.dev"
-                    android:scheme="https" />
+                    android:scheme="https"/>
                 <data
                     android:host="dashboard.iith.dev"
-                    android:scheme="http" />
+                    android:scheme="http"/>
             </intent-filter>
         </activity>
         <!--
@@ -88,7 +86,6 @@
         -->
         <meta-data
             android:name="flutterEmbedding"
-            android:value="2" />
+            android:value="2"/>
     </application>
-
 </manifest>
