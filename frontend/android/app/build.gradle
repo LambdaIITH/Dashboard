@@ -70,7 +70,18 @@ android {
     buildTypes {
         release {
             signingConfig signingConfigs.release
+            // Enable shrinking, obfuscation, and optimization for release builds
+            minifyEnabled true
+            // Use ProGuard rules from the specified files
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            // Optionally, set debuggable to true for testing (set back to false before release)
+            // debuggable true
         }
+        debug {
+            // Disable minification for debug builds
+            minifyEnabled false
+        }
+        
     }
     buildFeatures {
         viewBinding true
