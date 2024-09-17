@@ -1,5 +1,6 @@
 import os
-from Routes.Auth.cookie import set_cookie
+from Routes.Auth.cookie import get_user_id, set_cookie
+from Routes.User.user import get_user
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -17,6 +18,8 @@ from Routes.User.controller import router as user_router
 from Routes.Auth.tokens import verify_token
 from fastapi.responses import JSONResponse
 from Routes.Transport.transport_schedule import router as transport_router
+import httpx
+
 load_dotenv()
 
 app = FastAPI()
@@ -99,3 +102,35 @@ def get_protected_data():
 def get_session_info(response: Response):
     response = JSONResponse(content={"message": "Session Exists"}, status_code=200)
     return response
+
+@app.get("/main-gate/status")
+async def get_main_gate_status(user_id: int = Depends(get_user_id)):
+    user_details = get_user(user_id=user_id)
+    if not user_details:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    roll = user_details['email'].split("@")[0].capitalize()
+    
+    auth_token = os.getenv("AUTH_PASSWORD")
+    
+    if not auth_token:
+        raise HTTPException(status_code=500, detail="Auth token not found")
+    
+    async with httpx.AsyncClient() as client:
+        main_gate_api = os.getenv("MAIN_GATE_API")
+    
+        if not main_gate_api:
+            raise HTTPException(status_code=500, detail="Main Gate API not found")
+        
+        response = await client.get(f"{main_gate_api}?roll={roll}", headers={"Auth": auth_token})
+        
+        if response.status_code != 200:
+            raise HTTPException(status_code=500, detail="Error fetching status from Main Gate API")
+
+        response_data = response.json()
+        
+        if response_data.get("message") is not None:
+            return response_data, 201
+        else:
+            return response_data, 200
+
