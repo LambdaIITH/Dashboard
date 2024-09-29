@@ -25,6 +25,7 @@ class User(BaseModel):
     cr: bool = False
     phone_number: Optional[str] = None
 
+    # this User BaseClass does not contain TimeTable Field, but original table does(so does the tuple here)
     @classmethod
     def from_row(cls, row: tuple):
         return cls(id=row[0], email=row[1], name = row[2],  cr=row[3], phone=row[4])
@@ -57,11 +58,11 @@ class Timetable(BaseModel):
         
     """
     courses: Dict[str, str]  = Field(default_factory=dict)
-    custom_slots: List[Dict[str, Dict[str, str]]]
+    custom_slots: Dict[str, Dict[str, str]] = Field(default_factory=dict)
     
     @classmethod
     def from_row(cls, timetable):
-        return Timetable(courses=timetable.courses, custom_slots=timetable.custom_slots)
+        return Timetable(courses=timetable['courses'], custom_slots=timetable['custom_slots'])
     
 
 class LfItem(BaseModel):

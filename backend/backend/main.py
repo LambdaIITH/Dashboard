@@ -6,8 +6,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 from Routes.TimeTable.timetable import router as timetable_router
-from Routes.TimeTable.custom import router as custom_router
-from Routes.TimeTable.changes import router as changes_router
 from Routes.MessMenu.mess_menu import router as mess_menu_router
 from Routes.Auth.controller import router as auth_router
 from Routes.Lost_and_Found.found import router as found_router
@@ -18,7 +16,6 @@ from Routes.User.controller import router as user_router
 from Routes.Auth.tokens import verify_token
 from fastapi.responses import JSONResponse
 from Routes.Transport.transport_schedule import router as transport_router
-import httpx
 
 load_dotenv()
 
@@ -43,8 +40,6 @@ app.add_middleware(
 # include routers
 app.include_router(timetable_router)
 app.include_router(auth_router)
-app.include_router(custom_router)
-app.include_router(changes_router)
 app.include_router(mess_menu_router)
 app.include_router(found_router)
 app.include_router(lost_router)

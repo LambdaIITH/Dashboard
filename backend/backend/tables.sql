@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS shared_timetable
     expiry TIMESTAMP,
     PRIMARY KEY(code),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
-) 
+) ;
 
 CREATE TABLE IF NOT EXISTS custom_courses
 (
