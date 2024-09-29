@@ -29,8 +29,19 @@ CREATE TABLE IF NOT EXISTS users
     email VARCHAR(256) UNIQUE NOT NULL,
     name VARCHAR NOT NULL,
     cr BOOLEAN DEFAULT FALSE,
-    phone_number VARCHAR(15) UNIQUE
+    phone_number VARCHAR(15) UNIQUE,
+    timetable JSON DEFAULT '{"courses": {}, "custom_slots": {}}'
 );
+
+CREATE TABLE IF NOT EXISTS shared_timetable
+(
+    code VARCHAR(8) NOT NULL,
+    user_id BIGINT NOT NULL,
+    timetable JSON,
+    expiry TIMESTAMP,
+    PRIMARY KEY(code),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
+) 
 
 CREATE TABLE IF NOT EXISTS custom_courses
 (
