@@ -1,54 +1,30 @@
 from pypika import Table, Query, Field, Column
 from models import Timetable
 from typing import List
+from datetime import datetime as DateTime
+users, shared_timetable = Table('users'), Table('shared_timetable')
 
-users, courses, register = Table("users"), Table("courses"), Table("register")
+def get_timetable(user_id: int) -> str:
+    """Get the timetable of the user with the given user_id"""
+    query = Query.from_(users).select('timetable').where(users.id == user_id)
+    return str(query)
 
+def post_timetable(user_id: int, timetable: Timetable) -> str:
+    """Update the timetable of the user with the given user_id"""
+    query = Query.update(users).set('timetable', timetable).where(users.id == user_id)
+    return str(query)
 
-def get_registered_course_details(user_id: int, acad_period: str):
-    query = (
-        Query.from_(register)
-        .join(courses)
-        .on(
-            (register.course_code == courses.course_code)
-            & (register.acad_period == courses.acad_period)
-        )
-        .select("*")
-        .where((register.user_id == user_id) & (register.acad_period == acad_period))
-    )
+def get_shared_timetable(code: str) -> str:
+    """Get the timetable with the given code"""
+    query = Query.from_(shared_timetable).select('*').where(shared_timetable.code == code)
+    return str(query)
 
-    return query.get_sql()
+def post_shared_timetable(code: str, user_id: int, timetable: Timetable, expiry: DateTime) -> str:
+    """Post the timetable to the shared_timetable table"""
+    query = Query.into(shared_timetable).columns('code', 'user_id', 'timetable', 'expiry').insert(user_id, code, timetable, expiry)
+    return str(query)
 
-
-def get_allRegisteredCourses(user_id: int, acad_period: str):
-    query = (
-        Query.from_(register)
-        .select(register.course_code)
-        .where((register.user_id == user_id) & (register.acad_period == acad_period))
-    )
-
-    return query.get_sql()
-
-
-def post_timeTable(timetable: Timetable):
-    query = Query.into(register).columns(
-        register.user_id, register.course_code, register.acad_period
-    )
-
-    for course_code in timetable.course_codes:
-        query = query.insert(timetable.user_id, course_code, timetable.acad_period)
-
-    return query.get_sql()
-
-
-def delete_timeTable(timetable: Timetable):  # deletes some courses which are in this timeTable Object
-    query = Query.from_(register).where(
-        (register.user_id == timetable.user_id)
-        & (register.acad_period == timetable.acad_period)
-        & (register.course_code.isin(timetable.course_codes))
-    )
-
-    query = query.delete()
-
-    return query.get_sql()
-
+def delete_shared_timetable(code: str) -> str:
+    """Delete the timetable with the given code"""
+    query = Query.from_(shared_timetable).delete().where(shared_timetable.code == code)
+    return str(query)

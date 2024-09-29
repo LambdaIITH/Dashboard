@@ -30,73 +30,39 @@ class User(BaseModel):
         return cls(id=row[0], email=row[1], name = row[2],  cr=row[3], phone=row[4])
 
 
-class Register(BaseModel):
-    user_id: int
-    course_code: str
-    acad_period: str
-    
-    @classmethod
-    def from_row(cls, row: tuple):
-        return Register(user_id = row[0], course_code = row[1], acad_period=row[2])
-
-class Slot_Change(BaseModel):
-    course_code: str
-    acad_period:str
-    user_id: Optional[int] = None
-    slot: Optional[str] = None
-    custom_slot : Optional[Dict] = None
-    
-    @classmethod
-    def from_row(cls, row: tuple):
-        return Slot_Change(course_code = row[0], acad_period = row[1], user_id = row[2],  slot = row[3], custom_slot = row[4])
- 
-class cr_Slot_Change(BaseModel):
-    course_code: str
-    acad_period:str
-    user_id: Optional[int] = None
-    cr_name: Optional[str] = None
-    slot: Optional[str] = None
-    custom_slot : Optional[Dict] = None
-    
-    @classmethod
-    def from_row(cls, row: tuple):
-        return cr_Slot_Change(course_code = row[0], acad_period = row[1], user_id = row[2], cr_name = None, slot = row[3], custom_slot = row[4])
-    
-    def from_row_with_name(cls, row:tuple, cr_name: str):
-        """
-            will be used for responses
-        """
-        return cr_Slot_Change(course_code = row[0], acad_period = row[1], user_id = None, cr_name = cr_name, slot = row[3], custom_slot = row[4])
-    
-        
 
 class Timetable(BaseModel):
-    user_id: Optional[int] = None
-    acad_period: str
-    course_codes: List[str]
+    """TimeTable Model:
+        courses: Mapping of course_code to slots
+        custom_slots: List of custom slots
+        
+        custom_slot is a mapping of slot to a mapping of day to timings
+        
+        Example:
+        {
+            "courses": {
+                "CS101": "A1",
+                "CS102": "B1"
+            },
+            "custom_slots": [
+                {
+                    "slot": {
+                        "day": "Monday",
+                        "timings": "10:00-11:00"
+                    }
+                }
+            ]
+        }
+        
+        
+    """
+    courses: Dict[str, str]  = Field(default_factory=dict)
+    custom_slots: List[Dict[str, Dict[str, str]]]
     
-class Changes_Accepted(BaseModel):
-    user_id: Optional[int] = None
-    course_code: str
-    acad_period: str
-    cr_id: int
-
     @classmethod
-    def from_row(cls, row: Tuple[int, str, str, int]):
-        return Changes_Accepted(user_id=row[0], course_code=row[1], acad_period=row[2], cr_id=row[3])
-
-class Takes(BaseModel):
-    course_code: str
-    course_name: str
-    acad_period: str
-    segment: str
-    slot: Optional[str] = None
-    timings: Optional[Dict] = None
-
-    @classmethod
-    def from_row_type1(cls, row: tuple):
-        return Takes(course_code=row[0],acad_period= row[1] ,course_name= "", segment="", slot=row[3], timings=row[4])
-
+    def from_row(cls, timetable):
+        return Timetable(courses=timetable.courses, custom_slots=timetable.custom_slots)
+    
 
 class LfItem(BaseModel):
     id: int 
