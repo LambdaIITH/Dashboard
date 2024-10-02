@@ -1,4 +1,4 @@
-package routes
+package auth
 
 import (
 	"fmt"
@@ -6,21 +6,11 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/joho/godotenv"
 )
 
-var secret []byte
+var secret []byte = []byte(os.Getenv("TOKEN_SECRET"))
 
-func init() {
-	// load .env vars
-	err := godotenv.Load()
-	if err != nil {
-		fmt.Println("Error loading .env file")
-	}
-	secret = []byte(os.Getenv("TOKEN_SECRET"))
-}
-
-func generateToken(userID string) (string, error) {
+func GenerateToken(userID string) (string, error) {
 	duration := 15 * 25 * time.Hour // Expires in 15 days
 	expTime := time.Now().Add(duration).Unix()
 
@@ -35,7 +25,7 @@ func generateToken(userID string) (string, error) {
 
 }
 
-func verifyToken(tokenString string) (bool, interface{}) {
+func VerifyToken(tokenString string) (bool, interface{}) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])

@@ -1,4 +1,4 @@
-package routes
+package auth
 
 import (
 	"context"
@@ -10,12 +10,7 @@ import (
 	"google.golang.org/api/idtoken"
 )
 
-var clientID string // get from env to validate tokenid
-
-func init() {
-	// Load environment variables
-	clientID = os.Getenv("GOOGLE_CLIENT_ID")
-}
+var clientID string = os.Getenv("GOOGLE_CLIENT_ID") // get from env to validate tokenid
 
 // User data structure
 type UserResponse struct {
@@ -24,7 +19,7 @@ type UserResponse struct {
 }
 
 // Verify ID Token
-func verifyIDToken(token string) (bool, map[string]interface{}) {
+func VerifyIDToken(token string) (bool, map[string]interface{}) {
 	ctx := context.Background()
 
 	// Validate the ID token
@@ -44,27 +39,27 @@ func verifyIDToken(token string) (bool, map[string]interface{}) {
 }
 
 // Handle login
-func handleLogin(idToken string) (bool, string, map[string]interface{}) {
+func HandleLogin(idToken string) (bool, string, map[string]interface{}) {
 	// Step 1: Verify the ID token
-	ok, data := verifyIDToken(idToken)
+	ok, data := VerifyIDToken(idToken)
 	if !ok {
 		return false, "", map[string]interface{}{"error": "Invalid ID token"}
 	}
 
 	// Step 2: Check if the email is valid (must be an IITH email)
-	if !isValidIITHEmail(data["email"].(string)) {
+	if !IsValidIITHEmail(data["email"].(string)) {
 		return false, "", map[string]interface{}{"error": "Please use an IITH email"}
 	}
 
 	// Step 3: Check if the user already exists
-	exists, userID := isUserExists(data["email"].(string))
+	exists, userID := IsUserExists(data["email"].(string))
 	if !exists {
 		// Step 4: Insert new user if they don't exist
-		userID = insertUser(data["email"].(string), data["name"].(string))
+		userID = InsertUser(data["email"].(string), data["name"].(string))
 	}
 
 	// Step 5: Generate JWT token for the user
-	token, err := generateToken(fmt.Sprint(userID))
+	token, err := GenerateToken(fmt.Sprint(userID))
 	if err != nil {
 		log.Printf("Token generation failed: %v", err)
 		return false, "", map[string]interface{}{"error": "Token generation failed"}
@@ -78,24 +73,22 @@ func handleLogin(idToken string) (bool, string, map[string]interface{}) {
 }
 
 // Validate IITH Email
-func isValidIITHEmail(email string) bool {
+func IsValidIITHEmail(email string) bool {
 	pattern := `^[a-zA-Z0-9._%+-]+@(?:[a-zA-Z0-9-]+\.)?iith\.ac\.in$`
 	return regexp.MustCompile(pattern).MatchString(email)
 }
 
-
-
 // TODO: write insetUser and isUserExists GOPI or SUSI
 
 // Insert User
-func insertUser(email string, name string) int64 {
+func InsertUser(email string, name string) int64 {
 	// some one write code
 	var userID int64 = 0
 	return userID
 }
 
 // Check if user exists
-func isUserExists(email string) (bool, int64) {
+func IsUserExists(email string) (bool, int64) {
 	// some one write code
 	var userID int64 = 0
 	return true, userID

@@ -1,4 +1,4 @@
-package routes
+package auth
 
 import (
 	"net/http"
@@ -21,30 +21,30 @@ func SetupAuthRoutes(r *gin.Engine) {
 
 	auth_handler := r.Group("/auth")
 	{
-		auth_handler.POST("/login", loginHandler)
-		auth_handler.GET("/logout", logoutHandler)
+		auth_handler.POST("/login", LoginHandler)
+		auth_handler.GET("/logout", LogoutHandler)
 	}
 
 }
 
-func logoutHandler(c *gin.Context) {
-	setCookie(c.Writer, "session", "lambda-iith", 0)
+func LogoutHandler(c *gin.Context) {
+	SetCookie(c.Writer, "session", "lambda-iith", 0)
 	resp := make(map[string]string)
 	resp["message"] = "Logged out"
 	c.JSON(http.StatusOK, resp)
 }
 
-func loginHandler(c *gin.Context) {
+func LoginHandler(c *gin.Context) {
 	var loginRequest LoginRequest
 	if err := c.BindJSON(&loginRequest); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 		return
 	}
 
-	status, token, msg := handleLogin(loginRequest.IDToken)
+	status, token, msg := HandleLogin(loginRequest.IDToken)
 
 	if status {
-		setCookie(c.Writer, "session", token, 15) // Set cookie with 15 days expiry
+		SetCookie(c.Writer, "session", token, 15) // Set cookie with 15 days expiry
 		c.JSON(http.StatusOK, gin.H{"message": msg})
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": msg})
