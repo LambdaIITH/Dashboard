@@ -189,6 +189,7 @@ class ApiServices {
       debugPrint("Failed to fetch bus schedule: $e");
       return null;
     }
+    return null;
   }
 
   // ====================CAB SHARING STARTS===================================
@@ -827,6 +828,22 @@ class ApiServices {
       }
     } on DioException {
       return "";
+    }
+  }
+
+  Future<int> getMainGateStatus() async {
+    try {
+      final response = await dio.get('/main-gate/status');
+      if (response.statusCode == 200) {
+        if(response.data['inside']){
+          return 1;
+        }else{
+          return 0;
+        }
+      }
+      return -1;
+    } on DioException {
+      return -1;
     }
   }
 }

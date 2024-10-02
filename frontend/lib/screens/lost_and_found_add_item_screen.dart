@@ -31,6 +31,7 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
   final List<PickedFile> _images = [];
   final List<Uint8List> _imagesWeb = [];
   bool imagePicked = false;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -137,7 +138,7 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
   void createListing() async {
     if (_images.isEmpty && !imagePicked) {
       showMessage(
-        msg: "Please add atleast 1 images",
+        msg: "Please add at least 1 image",
         context: context,
       );
       return;
@@ -165,17 +166,26 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
       return;
     }
 
+    setState(() {
+      isLoading = true;
+    });
+
     final response = await ApiServices().addLostAndFoundItem(
-        itemName: _itemNameController.text,
-        itemDescription: _itemDescriptionController.text,
-        lostOrFound: _lostOrFound!,
-        images: _images,
-        imagesWeb: _imagesWeb);
+      itemName: _itemNameController.text,
+      itemDescription: _itemDescriptionController.text,
+      lostOrFound: _lostOrFound!,
+      images: _images,
+      imagesWeb: _imagesWeb,
+    );
+
+    setState(() {
+      isLoading = false;
+    });
 
     if (response['status'] == 200) {
       showMessage(
         context: context,
-        msg: "Successfully item added!",
+        msg: "Item successfully added!",
       );
       Navigator.pushAndRemoveUntil(
         context,
@@ -305,29 +315,24 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
                               height: 350,
                               fromMemory: true,
                             ),
-                            Container(
-                              height: 350,
-                              alignment: Alignment.centerRight,
-                              child: Positioned(
-                                right: 10,
-                                top: 10,
-                                child: Container(
-                                  margin: const EdgeInsets.only(right: 8),
-                                  decoration: BoxDecoration(
-                                      color: const Color.fromARGB(
-                                              204, 254, 115, 76)
-                                          .withOpacity(0.5),
-                                      borderRadius: BorderRadius.circular(12)),
-                                  child: IconButton(
-                                      icon: const Icon(
-                                        Icons.add,
-                                      ),
-                                      onPressed: () {
-                                        showImageSourceDialog();
-                                      }),
+                            Positioned(
+                              right: 10,
+                              top: 10,
+                              child: Container(
+                                margin: const EdgeInsets.only(right: 8),
+                                decoration: BoxDecoration(
+                                  color: const Color.fromARGB(204, 254, 115, 76)
+                                      .withOpacity(0.5),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: IconButton(
+                                  icon: const Icon(Icons.add),
+                                  onPressed: () {
+                                    showImageSourceDialog();
+                                  },
                                 ),
                               ),
-                            )
+                            ),
                           ],
                         )
                       : InkWell(
@@ -477,7 +482,7 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
                 alignment: Alignment.bottomCenter,
                 margin: const EdgeInsets.only(bottom: 16),
                 child: TextButton(
-                  onPressed: !updateButtonStatus()
+                  onPressed: !updateButtonStatus() || isLoading
                       ? null
                       : () {
                           createListing();
@@ -485,7 +490,7 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10.0),
-                      color: !updateButtonStatus()
+                      color: !updateButtonStatus() || isLoading
                           ? Colors.grey
                           : const Color.fromRGBO(254, 114, 76, 0.70),
                       boxShadow: const [
@@ -501,17 +506,20 @@ class _LostAndFoundAddItemScreenState extends State<LostAndFoundAddItemScreen> {
                     width: double.infinity,
                     height: 60,
                     alignment: Alignment.center,
-                    child: Text(
-                      'Add Item',
-                      style: GoogleFonts.inter(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context).textTheme.bodyLarge?.color,
-                      ),
-                    ),
+                    child: isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : Text(
+                            'Add Item',
+                            style: GoogleFonts.inter(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color:
+                                  Theme.of(context).textTheme.bodyLarge?.color,
+                            ),
+                          ),
                   ),
                 ),
-              ),
+              )
             ],
           ),
         ),

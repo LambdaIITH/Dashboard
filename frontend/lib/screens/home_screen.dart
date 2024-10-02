@@ -50,6 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
   UserModel? userModel;
   bool isLoading = true;
   String image = '';
+  int mainGateStatus = -1;
 
   void fetchMessMenu() async {
     final response = await ApiServices().getMessMenu(context);
@@ -189,6 +190,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     checkForUpdates();
+    getMainGateStatus();
     if (!widget.isGuest) {
       totalOperation = totalOperation + 2;
       fetchUser();
@@ -210,6 +212,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     fetchMessMenu();
     fetchBus();
+    getMainGateStatus();
   }
 
   checkForUpdates() async {
@@ -232,6 +235,13 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (e) {
       debugPrint("Error in checking for update: $e");
     }
+  }
+
+  Future<void> getMainGateStatus() async {
+    int status = await ApiServices().getMainGateStatus();
+    setState(() {
+      mainGateStatus = status;
+    });
   }
 
   @override
@@ -260,6 +270,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       const SizedBox(height: 24),
                       HomeScreenAppBar(
+                          status: mainGateStatus,
                           onThemeChanged: widget.onThemeChanged,
                           image: image,
                           user: userModel,

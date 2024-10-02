@@ -122,20 +122,65 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         floatingActionButton: FloatingActionButton(
-            backgroundColor: const Color.fromARGB(204, 254, 115, 76),
-            child: const Icon(
-              Icons.add,
-              size: 30.0,
-            ),
-            onPressed: () {
-              Navigator.push(
-                  context,
-                  CustomPageRoute(
-                      startPos: const Offset(0, 1),
-                      child: LostAndFoundAddItemScreen(
-                        currentUserEmail: widget.currentUserEmail,
-                      )));
-            }),
+          backgroundColor: const Color.fromARGB(204, 254, 115, 76),
+          child: const Icon(
+            Icons.add,
+            size: 30.0,
+          ),
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Text('Alert'),
+                  content: const Text(
+                    'Please delete the item once everything is sorted. If not, it will be removed automatically after 28 days.',
+                  ),
+                  actions: [
+                    SizedBox(
+                      width: 100,
+                      height: 40,
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.of(context)
+                              .pop();
+                        },
+                        child: const Text('Cancel', 
+                        style: TextStyle(color: Colors.red),),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 100,
+                      height: 40,
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          Navigator.push(
+                            context,
+                            CustomPageRoute(
+                              startPos: const Offset(0, 1),
+                              child: LostAndFoundAddItemScreen(
+                                currentUserEmail: widget.currentUserEmail,
+                              ),
+                            ),
+                          );
+                        },
+                        style: TextButton.styleFrom(
+                          backgroundColor:
+                              Colors.green, 
+                        ),
+                        child: const Text(
+                          'Agree',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        ),
         appBar: AppBar(
           title: BoldText(
             text: 'Lost and Found',
