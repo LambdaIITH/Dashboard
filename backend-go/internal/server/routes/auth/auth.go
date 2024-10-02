@@ -2,112 +2,101 @@ package routes
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
-	"net/http"
+	"log"
 	"os"
 	"regexp"
 
-	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	"google.golang.org/api/idtoken"
 )
 
-var (
-	clientID string
-	db       *sql.DB
-)
+var clientID string // get from env to validate tokenid
 
-// User represents a user in the system
-type User struct {
-	ID    int    `json:"id"`
-	Email string `json:"email"`
-	Name  string `json:"name"`
-}
-
-// Init initializes environment variables and database connection
-func Init() {
+func init() {
 	// Load environment variables
-	err := godotenv.Load()
-	if err != nil {
-		panic("Error loading .env file")
-	}
-
 	clientID = os.Getenv("GOOGLE_CLIENT_ID")
-	// Initialize your database connection here
-	// db, err = sql.Open("your_driver", "your_data_source_name")
 }
 
-// verifyIDToken verifies the Google ID token and returns user information
+// User data structure
+type UserResponse struct {
+	ID    int64  `json:"id"`
+	Email string `json:"email"`
+}
+
+// Verify ID Token
 func verifyIDToken(token string) (bool, map[string]interface{}) {
-	idTokenInfo, err := idtoken.Validate(context.Background(), token, clientID)
+	ctx := context.Background()
+
+	// Validate the ID token
+	payload, err := idtoken.Validate(ctx, token, clientID)
 	if err != nil {
-		fmt.Printf("Token verification failed: %v\n", err)
-		return false, nil
+		return false, map[string]interface{}{"error": fmt.Sprintf("Token validation failed: %v", err)}
 	}
-	return true, idTokenInfo.Claims
+
+	// Convert payload to a map[string]interface{}
+	payloadMap := make(map[string]interface{})
+	payloadMap["email"] = payload.Claims["email"]
+	payloadMap["name"] = payload.Claims["name"]
+	// Add other fields you may need from payload.Claims as necessary
+
+	// Return true and the ID information as a map
+	return true, payloadMap
 }
 
-// handleLogin handles the login process using Google ID token
-func handleLogin(c *gin.Context) {
-	var loginRequest struct {
-		IDToken string `json:"id_token"`
-	}
-	if err := c.ShouldBindJSON(&loginRequest); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
-		return
-	}
-
-	ok, data := verifyIDToken(loginRequest.IDToken)
+// Handle login
+func handleLogin(idToken string) (bool, string, map[string]interface{}) {
+	// Step 1: Verify the ID token
+	ok, data := verifyIDToken(idToken)
 	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid ID token"})
-		return
+		return false, "", map[string]interface{}{"error": "Invalid ID token"}
 	}
 
+	// Step 2: Check if the email is valid (must be an IITH email)
 	if !isValidIITHEmail(data["email"].(string)) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Please use an IITH email"})
-		return
+		return false, "", map[string]interface{}{"error": "Please use an IITH email"}
 	}
 
+	// Step 3: Check if the user already exists
 	exists, userID := isUserExists(data["email"].(string))
 	if !exists {
+		// Step 4: Insert new user if they don't exist
 		userID = insertUser(data["email"].(string), data["name"].(string))
 	}
 
-	token,err := generateToken(userID)
-	c.JSON(http.StatusOK, gin.H{"token": token, "id": userID, "email": data["email"]})
+	// Step 5: Generate JWT token for the user
+	token, err := generateToken(fmt.Sprint(userID))
+	if err != nil {
+		log.Printf("Token generation failed: %v", err)
+		return false, "", map[string]interface{}{"error": "Token generation failed"}
+	}
+
+	// Return successful login response
+	return true, token, map[string]interface{}{
+		"id":    userID,
+		"email": data["email"].(string),
+	}
 }
 
-// isValidIITHEmail checks if the email belongs to IITH
+// Validate IITH Email
 func isValidIITHEmail(email string) bool {
 	pattern := `^[a-zA-Z0-9._%+-]+@(?:[a-zA-Z0-9-]+\.)?iith\.ac\.in$`
-	match, _ := regexp.MatchString(pattern, email)
-	return match
+	return regexp.MustCompile(pattern).MatchString(email)
 }
 
-// insertUser inserts a new user into the database
-func insertUser(email string, name string) int {
-	var userID int
-	query := "INSERT INTO users (email, name) VALUES ($1, $2) RETURNING id"
-	err := db.QueryRow(query, email, name).Scan(&userID)
-	if err != nil {
-		panic(err) // Handle your error properly
-	}
+
+
+// TODO: write insetUser and isUserExists GOPI or SUSI
+
+// Insert User
+func insertUser(email string, name string) int64 {
+	// some one write code
+	var userID int64 = 0
 	return userID
 }
 
-// isUserExists checks if a user exists in the database
-func isUserExists(email string) (bool, int) {
-	var userID int
-	query := "SELECT id FROM users WHERE email = $1"
-	err := db.QueryRow(query, email).Scan(&userID)
-
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return false, 0
-		}
-		panic(err) // Handle your error properly
-	}
+// Check if user exists
+func isUserExists(email string) (bool, int64) {
+	// some one write code
+	var userID int64 = 0
 	return true, userID
 }
-
