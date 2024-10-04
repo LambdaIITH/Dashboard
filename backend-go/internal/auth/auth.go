@@ -7,8 +7,13 @@ import (
 	"os"
 	"regexp"
 
+
 	"google.golang.org/api/idtoken"
+
+	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 )
+
 
 var clientID string = os.Getenv("GOOGLE_CLIENT_ID") // get from env to validate tokenid
 
@@ -52,11 +57,24 @@ func HandleLogin(idToken string) (bool, string, map[string]interface{}) {
 	}
 
 	// Step 3: Check if the user already exists
-	exists, userID := IsUserExists(data["email"].(string))
+	exists, userID, err := IsUserExists(data["email"].(string))
+	if err != nil {
+		// Handle the error if checking for existing user fails
+		log.Fatalf("Error checking if user exists: %v", err)
+		return false, "", map[string]interface{}{"error": "Error checking if user exists"}
+	}
+
 	if !exists {
 		// Step 4: Insert new user if they don't exist
-		userID = InsertUser(data["email"].(string), data["name"].(string))
+		userID, err = InsertUser(data["email"].(string), data["name"].(string))
+		if err != nil {
+			// Handle the error if inserting the user fails
+			log.Fatalf("Error inserting user: %v", err)
+			return false, "", map[string]interface{}{"error": "Error adding user"}
+		}
 	}
+
+	// Now you can use userID for further steps
 
 	// Step 5: Generate JWT token for the user
 	token, err := GenerateToken(fmt.Sprint(userID))
@@ -78,18 +96,59 @@ func IsValidIITHEmail(email string) bool {
 	return regexp.MustCompile(pattern).MatchString(email)
 }
 
-// TODO: write insetUser and isUserExists GOPI or SUSI
+// Inseting user into database
 
-// Insert User
-func InsertUser(email string, name string) int64 {
-	// some one write code
-	var userID int64 = 0
-	return userID
+var db *sqlx.DB
+
+// InsertUser inserts a user and returns their ID, or an error if something goes wrong
+func InsertUser(email string, name string) (int, error) {
+	// Start a transaction
+	tx, err := db.Beginx()
+	if err != nil {
+		return 0, fmt.Errorf("failed to start transaction: %v", err)
+	}
+
+	// Defer the transaction rollback or commit
+	defer func(tx *sqlx.Tx) {
+		if p := recover(); p != nil {
+			tx.Rollback() // If panic occurs, rollback transaction
+			panic(p)      // Re-throw panic after rollback
+		} else if err != nil {
+			tx.Rollback() // Rollback transaction if there was an error
+		} else {
+			tx.Commit() // Commit transaction if all went well
+		}
+	}(tx)
+
+	// Insert user query
+	insertQuery := `INSERT INTO users (email, name) VALUES ($1, $2)`
+	_, err = tx.Exec(insertQuery, email, name)
+	if err != nil {
+		return 0, fmt.Errorf("failed to insert user: %v", err)
+	}
+
+	// Retrieve the user ID
+	selectQuery := `SELECT id FROM users WHERE email = $1`
+	var userID int
+	err = tx.Get(&userID, selectQuery, email)
+	if err != nil {
+		return 0, fmt.Errorf("failed to retrieve user ID: %v", err)
+	}
+
+	return userID, nil
 }
 
-// Check if user exists
-func IsUserExists(email string) (bool, int64) {
-	// some one write code
-	var userID int64 = 0
-	return true, userID
+func IsUserExists(email string) (bool, int, error) {
+	var userID int
+	query := `SELECT id FROM users WHERE email = $1`
+
+	err := db.Get(&userID, query, email)
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			return false, 0, nil
+		}
+		return false, 0, fmt.Errorf("failed to check if user exists: %v", err)
+	}
+
+	return true, userID, nil
 }
