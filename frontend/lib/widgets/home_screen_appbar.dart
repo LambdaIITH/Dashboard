@@ -12,10 +12,13 @@ class HomeScreenAppBar extends StatelessWidget {
       required this.onThemeChanged,
       required this.user,
       required this.image,
-      required this.isGuest});
+      required this.isGuest,
+      required this.status});
+      
   final UserModel? user;
   final String image;
   final bool isGuest;
+  final int status;
   final ValueChanged<int> onThemeChanged;
 
   String getGreeting() {
@@ -76,7 +79,6 @@ class HomeScreenAppBar extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                      // color: Colors.orange,
                       borderRadius: BorderRadius.circular(500)),
                   child: const Icon(Icons.logout_rounded),
                 ),
@@ -84,9 +86,6 @@ class HomeScreenAppBar extends StatelessWidget {
             : InkWell(
                 borderRadius: BorderRadius.circular(100),
                 onTap: () {
-                  // if (user == null) {
-                  //   return;
-                  // }
                   Navigator.of(context).push(CustomPageRoute(
                     child: ProfileScreen(
                       user: user ?? UserModel(email: "xx11btech110xx@iith.ac.in", name: "User"),
@@ -95,9 +94,30 @@ class HomeScreenAppBar extends StatelessWidget {
                     ),
                   ));
                 },
-                child: ClipOval(
-                  child: CircleAvatar(
-                      radius: 24, child: CachedNetworkImage(imageUrl: image)),
+                child: Stack(
+                  children: [
+                    ClipOval(
+                      child: CircleAvatar(
+                          radius: 24, child: CachedNetworkImage(imageUrl: image)),
+                    ),
+                    if (status != -1)
+                      Positioned(
+                        top: 0,
+                        right: 0,
+                        child: Container(
+                          width: 14,
+                          height: 14,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: status == 1 ? Colors.green : Colors.red,
+                            border: Border.all(
+                              color: Colors.white, // Adds a white border to the dot
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               )
       ],
