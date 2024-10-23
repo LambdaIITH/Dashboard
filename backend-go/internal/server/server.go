@@ -1,14 +1,14 @@
 package server
 
 import (
+	"Dashboard/internal/auth"
+	"Dashboard/internal/database"
+	"Dashboard/internal/server/routes" // Import the routes
 	"fmt"
 	"net/http"
-	"os"
-	"strconv"
 	"time"
+
 	"github.com/gin-gonic/gin"
-	"Dashboard/internal/server/routes"  // Import the routes
-	"Dashboard/internal/database"
 )
 
 type Server struct {
@@ -17,22 +17,28 @@ type Server struct {
 	db database.Service
 }
 
-
 func (s *Server) RegisterRoutes() http.Handler {
 	r := gin.Default()
 
 	// Register routes from different files
-	routes.SetupLostRouter(r)
 	r.GET("/health", routes.HealthHandler)
+
+	auth.SetupAuthRoutes(r)
+
+	protected := r.Group("/protected")
+
+	protected.Use(auth.AuthMiddleware())
+
+	routes.SetupLostRouter(protected)
 
 	return r
 }
 
-
 func NewServer() *http.Server {
-	port, _ := strconv.Atoi(os.Getenv("PORT"))
+	// port, _ := strconv.Atoi(os.Getenv("PORT"))
+	// port, _ := strconv.Atoi(os.Getenv("8000"))
 	NewServer := &Server{
-		port: port,
+		port: 8000,
 
 		db: database.New(),
 	}
@@ -45,7 +51,6 @@ func NewServer() *http.Server {
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,
 	}
-
 
 	return server
 }

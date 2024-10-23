@@ -4,9 +4,13 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"regexp"
+	"strings"
 
+	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v4"
 	"google.golang.org/api/idtoken"
 )
 
@@ -23,7 +27,7 @@ func VerifyIDToken(token string) (bool, map[string]interface{}) {
 	ctx := context.Background()
 
 	// Validate the ID token
-	payload, err := idtoken.Validate(ctx, token, clientID)
+	payload, err := idtoken.Validate(ctx, token, clientID) 
 	if err != nil {
 		return false, map[string]interface{}{"error": fmt.Sprintf("Token validation failed: %v", err)}
 	}
@@ -92,4 +96,39 @@ func IsUserExists(email string) (bool, int64) {
 	// some one write code
 	var userID int64 = 0
 	return true, userID
+}
+
+func AuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is missing"})
+			c.Abort()
+			return
+		}
+
+		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+		if tokenString == authHeader { // No "Bearer" prefix
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token format"})
+			c.Abort()
+			return
+		}
+
+		isValid, claims := VerifyToken(tokenString)
+		if !isValid {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": claims.(string)}) // Claims will be the error message
+			c.Abort()
+			return
+		}
+
+		// Extract user ID from the claims (assuming it's stored under the "sub" key)
+		claimsMap := claims.(jwt.MapClaims)
+		userID := claimsMap["sub"].(string)
+
+		// Store the userID in the context so that handlers can access it
+		c.Set("user_id", userID)
+
+		// Proceed to the next handler
+		c.Next()
+	}
 }

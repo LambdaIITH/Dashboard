@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -49,4 +50,5 @@ func LoginHandler(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": msg})
 	}
+	fmt.Println(loginRequest.IDToken)
 }
