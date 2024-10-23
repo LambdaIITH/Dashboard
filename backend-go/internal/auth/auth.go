@@ -4,16 +4,18 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"regexp"
-
+	"strings"
 
 	"google.golang.org/api/idtoken"
 
+	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
-
 
 var clientID string = os.Getenv("GOOGLE_CLIENT_ID") // get from env to validate tokenid
 
@@ -151,4 +153,39 @@ func IsUserExists(email string) (bool, int, error) {
 	}
 
 	return true, userID, nil
+}
+
+func AuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is missing"})
+			c.Abort()
+			return
+		}
+
+		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+		if tokenString == authHeader { // No "Bearer" prefix
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token format"})
+			c.Abort()
+			return
+		}
+
+		isValid, claims := VerifyToken(tokenString)
+		if !isValid {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": claims.(string)}) // Claims will be the error message
+			c.Abort()
+			return
+		}
+
+		// Extract user ID from the claims (assuming it's stored under the "sub" key)
+		claimsMap := claims.(jwt.MapClaims)
+		userID := claimsMap["sub"].(string)
+
+		// Store the userID in the context so that handlers can access it
+		c.Set("user_id", userID)
+
+		// Proceed to the next handler
+		c.Next()
+	}
 }
