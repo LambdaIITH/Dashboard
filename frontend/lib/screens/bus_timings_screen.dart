@@ -395,7 +395,7 @@ class _BusSchedulePageState extends State<BusSchedulePage> {
                               child: BusTimingList(
                                   from: 'Maingate',
                                   destination: 'Hostel',
-                                  timings: widget.busSchedule.fromIITH), //TODO
+                                  timings: widget.busSchedule.toIITH),
                             )),
                             const SizedBox(
                               width: 4.0,
@@ -407,7 +407,7 @@ class _BusSchedulePageState extends State<BusSchedulePage> {
                               child: BusTimingList(
                                   from: 'Hostel',
                                   destination: 'Maingate',
-                                  timings: widget.busSchedule.toIITH), //TODO
+                                  timings: widget.busSchedule.fromIITH), //TODO
                             ))
                           ],
                         ),
