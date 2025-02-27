@@ -10,7 +10,7 @@ import (
 )
 
 func User(c *gin.Context) {
-	userId, err := helpers.GetUserID(c.Request)
+	userId, err := helpers.GetUserID(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 	}
@@ -21,7 +21,7 @@ func User(c *gin.Context) {
 }
 
 func UpdateUser(c *gin.Context) {
-	userId, err := helpers.GetUserID(c.Request)
+	userId, err := helpers.GetUserID(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 	}
@@ -37,7 +37,7 @@ func UpdateUser(c *gin.Context) {
 }
 
 func UpdateUserFCMToken(c *gin.Context) {
-	userId, err := helpers.GetUserID(c.Request)
+	userId, err := helpers.GetUserID(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 	}

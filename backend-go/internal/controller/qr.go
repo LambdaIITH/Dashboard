@@ -38,7 +38,7 @@ type ScanQRModel struct {
 }
 
 func ProcessTransaction(c *gin.Context) {
-	userId, err := helpers.GetUserID(c.Request)
+	userId, err := helpers.GetUserID(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -172,7 +172,7 @@ func ScanQRCode(c *gin.Context) {
 }
 
 func GetRecentTransaction(c *gin.Context) {
-	userId, err := helpers.GetUserID(c.Request)
+	userId, err := helpers.GetUserID(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

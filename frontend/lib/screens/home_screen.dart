@@ -29,6 +29,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:in_app_update/in_app_update.dart';
 import 'package:text_scroll/text_scroll.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 class HomeScreen extends StatefulWidget {
   final bool isGuest;
@@ -307,6 +308,7 @@ class _HomeScreenState extends State<HomeScreen> {
     fetchTimetable();
     setUpFirebaseMessaging();
     analyticsService.logScreenView(screenName: "HomeScreen");
+    // Initialize the controller properly
   }
 
   Future<void> _refresh() async {
@@ -585,8 +587,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       Brightness.dark
                                   ? Colors.grey[900] // Dark mode background
                                   : Colors.grey[200], // Light mode background
-                              borderRadius:
-                                  BorderRadius.circular(12), 
+                              borderRadius: BorderRadius.circular(12),
                             ),
                             padding: EdgeInsets.fromLTRB(12.0, 8.0, 1.0, 8.0),
                             child: Column(
@@ -781,17 +782,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                                     25,
                                         isComingSoon: false,
                                         reduceImageSize: true,
-                                        title: 'Map',
+                                        title: 'IITH Community',
                                         child: 'assets/icons/bus-svg.svg',
                                         onTap: () {
                                           // widget.isGuest
                                           //     ? showError()
-                                          context.push('/city_bus');
+                                          context.push("/community");
                                         },
                                       ),
                                     ),
                                   ],
-
                                 ),
                               ],
                             ),

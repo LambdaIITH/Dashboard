@@ -1120,44 +1120,41 @@ class ApiServices {
   }
 
   Future<Map<String, dynamic>> uploadPhoto(capturedImage) async {
-    if (capturedImage != null) {
-      try {
-        /// Form data for the POST request
-        ///
-        FormData formData = FormData.fromMap({
-          'form_data': jsonEncode({
-            "face_name": "Sample Face Name 2",
-            "face_description": "This is a sample face description"
-          }),
-          'images': await MultipartFile.fromFile(capturedImage!.path,
-              filename: 'face.jpg')
-        });
-
-        final response = await dio.post(
-          '/face/add_face',
-          data: formData,
-          options: Options(headers: {'Content-Type': 'multipart/form-data'}),
-        );
-
-        if (response.statusCode == 200) {
-          debugPrint("Upload Successful: \${response.data}");
-          // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Upload Successful')));
-          return {'status': response.statusCode, 'data': response.data};
-        } else {
-          debugPrint('Error: \${response.statusCode}');
-          return {
-            'error': 'Failed to send request \${response.statusMessage}',
-            'status': response.statusCode
-          };
-        }
-      } on DioException catch (e) {
-        debugPrint('Request failed: \$e');
-        return {
-          'error': e.response?.data['detail'],
-          'status': e.response?.statusCode
-        };
-      }
+    if (!capturedImage.existsSync()) {
+      return {'error': 'Invalid image file'};
     }
-    return {'error': 'No image to upload'};
+
+    try {
+      // Create MultipartFile list
+      List<MultipartFile> multiPartList = [
+        await MultipartFile.fromFile(
+          capturedImage!.path,
+          filename: "IITH_DASHBOARD_BY_LAMBDA-${capturedImage.path.split('/').last}-${DateTime.now().toIso8601String()}",
+        )
+      ];
+
+      FormData formData = FormData();
+      for (var file in multiPartList) {
+        formData.files.add(MapEntry("images", file));
+      }
+
+      debugPrint('FormData: ${formData.fields}');
+      debugPrint('FormData files: ${formData.files}');
+
+      final response = await dio.post(
+        '/face/add_face',
+        data: formData,
+        options: Options(headers: {'Content-Type': 'multipart/form-data'}),
+      );
+
+      if (response.statusCode == 200) {
+        return {'status': response.statusCode, 'data': response.data};
+      } else {
+        return {'error': 'Failed to upload: ${response.statusMessage}', 'status': response.statusCode};
+      }
+    } catch (e) {
+      debugPrint("Upload failed: $e");
+      return {'error': 'Request failed: $e'};
+    }
   }
 }

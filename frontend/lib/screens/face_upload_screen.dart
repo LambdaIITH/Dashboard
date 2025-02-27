@@ -54,8 +54,18 @@ class _FaceUploadScreenState extends State<FaceUploadScreen> {
 
   Future<void> _capturePhoto() async {
     if (_cameraController != null && _cameraController!.value.isInitialized) {
-      XFile image = await _cameraController!.takePicture();
-      await _detectFaces(image);
+      try {
+        XFile image = await _cameraController!.takePicture();
+        await _detectFaces(image);
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Camera error: $e")),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Camera not initialized!")),
+      );
     }
   }
 
@@ -77,8 +87,8 @@ class _FaceUploadScreenState extends State<FaceUploadScreen> {
 
   Future<void> _uploadPhoto() async {
     if (_capturedImage != null && _isFaceDetected) {
-      print("UPLOADING");
-      ApiServices().uploadPhoto(_capturedImage);
+      File imageFile = File(_capturedImage!.path);
+      ApiServices().uploadPhoto(imageFile);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("No face detected! Cannot upload.")),

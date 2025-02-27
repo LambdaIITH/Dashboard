@@ -8,6 +8,7 @@ import 'package:dashbaord/screens/bus_timings_screen.dart';
 import 'package:dashbaord/screens/cab_add_screen.dart';
 import 'package:dashbaord/screens/cab_add_success.dart';
 import 'package:dashbaord/screens/cab_sharing_screen.dart';
+import 'package:dashbaord/screens/community_screen.dart';
 import 'package:dashbaord/screens/face_upload_screen.dart';
 import 'package:dashbaord/screens/home_screen.dart';
 import 'package:dashbaord/screens/igh_room_booking.dart';
@@ -460,6 +461,25 @@ class AppRouter {
             isGuest: false,
             onThemeChanged: onThemeChanged,
             code: code,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/community',
+        pageBuilder: (context, state) {
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: const CommunityScreen(),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(1, 0),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
+              );
+            },
           );
         },
       ),
