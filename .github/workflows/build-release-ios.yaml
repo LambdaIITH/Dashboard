@@ -48,7 +48,8 @@ jobs:
         run: |
           cd frontend/ios
           echo "platform :ios, '12.0'" >> Podfile
-          pod install --repo-update
+          pod repo update
+          pod install
       
       - name: Log CocoaPods Installation
         run: echo "CocoaPods installed successfully."
