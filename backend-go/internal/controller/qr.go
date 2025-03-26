@@ -15,28 +15,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type TransactionRequest struct {
-	TransactionId string `json:"transactionId"`
-	Amount        string `json:"amount"`
-	Start         string `json:"start"`
-	Destination   string `json:"destination"`
-}
-
-type TransactionResponse struct {
-	TransactionId string `json:"transactionId"`
-	PaymentTime   string `json:"paymentTime"`
-	TravelDate    string `json:"travelDate"`
-	BusTiming     string `json:"busTiming"`
-	IsUsed        bool   `json:"isUsed"`
-	Start         string `json:"start"`
-	Destination   string `json:"destination"`
-	Amount        string `json:"amount"`
-}
-
-type ScanQRModel struct {
-	IsScanned bool `json:"isScanned"`
-}
-
 func ProcessTransaction(c *gin.Context) {
 	userId, err := helpers.GetUserID(c)
 	if err != nil {
@@ -44,7 +22,7 @@ func ProcessTransaction(c *gin.Context) {
 		return
 	}
 
-	var request TransactionRequest
+	var request schema.TransactionRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -55,7 +33,7 @@ func ProcessTransaction(c *gin.Context) {
 	travelDate := now.Format("02/01/06")
 	busTiming := "14:30"
 
-	response := TransactionResponse{
+	response := schema.TransactionResponse{
 		TransactionId: request.TransactionId,
 		PaymentTime:   paymentTime,
 		TravelDate:    travelDate,
@@ -68,8 +46,8 @@ func ProcessTransaction(c *gin.Context) {
 
 	transactionData := map[string]interface{}{
 		"transaction_id": response.TransactionId,
-		"payment_time":   time.Now(),
-		"travel_date":    time.Now(),
+		"payment_time":   now,
+		"travel_date":    now,
 		"bus_timing":     response.BusTiming,
 		"isUsed":         false,
 		"start":          response.Start,
@@ -104,7 +82,7 @@ func ProcessTransaction(c *gin.Context) {
 		fmt.Println("Failed to log transaction to google sheets")
 	}
 
-	result := queries.LogTransactionToDb(c, transactionData)
+	result := queries.LogTransactionToDb(c, transactionData, userId)
 	if !result {
 		query := `
 			SELECT payment_time, travel_date, bus_timing, isUsed
@@ -132,7 +110,7 @@ func ProcessTransaction(c *gin.Context) {
 			return
 		}
 
-		response = TransactionResponse{
+		response = schema.TransactionResponse{
 			TransactionId: request.TransactionId,
 			PaymentTime:   dbResponse.PaymentTime.Format("15:04 02/01/06"),
 			TravelDate:    dbResponse.TravelDate.Format("02/01/06"),
@@ -151,13 +129,13 @@ func ProcessTransaction(c *gin.Context) {
 }
 
 func ScanQRCode(c *gin.Context) {
-	var request TransactionRequest
+	var request schema.TransactionRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	response := ScanQRModel{
+	response := schema.ScanQRModel{
 		IsScanned: true,
 	}
 
@@ -184,7 +162,7 @@ func GetRecentTransaction(c *gin.Context) {
 		return
 	}
 
-	response := TransactionResponse{
+	response := schema.TransactionResponse{
 		TransactionId: transactions["TransactionId"].(string),
 		PaymentTime:   transactions["PaymentTime"].(string),
 		TravelDate:    transactions["TravelDate"].(string),

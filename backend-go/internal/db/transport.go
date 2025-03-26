@@ -11,16 +11,16 @@ import (
 	"github.com/LambdaIITH/Dashboard/backend/config"
 )
 
-func LogTransactionToDb(ctx context.Context, transactionData map[string]interface{}) bool {
+func LogTransactionToDb(ctx context.Context, transactionData map[string]interface{}, userId int) bool {
 	// Query to insert the transaction data in the database
 	query := `
-		INSERT INTO transactions (transaction_id, payment_time, travel_date, bus_timing, isUsed) 
-		VALUES ($1, $2, $3, $4, $5);
+		INSERT INTO transactions (transaction_id, payment_time, user_id, travel_date, bus_timing, isUsed, start, destination, amount) 
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
 	`
 
 	// Execute the query
 	// no need to scan the resutl
-	_, err := config.DB.Exec(ctx, query, transactionData["transactionId"], transactionData["paymentTime"], transactionData["travelDate"], transactionData["busTiming"], transactionData["isUsed"])
+	_, err := config.DB.Exec(ctx, query, transactionData["transactionId"], transactionData["paymentTime"], userId, transactionData["travelDate"], transactionData["busTiming"], transactionData["isUsed"], transactionData["start"], transactionData["destination"], transactionData["amount"])
 	if err != nil {
 		return false
 	}
@@ -48,7 +48,7 @@ func ScanQR(ctx context.Context, transactionData map[string]interface{}) bool {
 
 func GetLastTransaction(ctx context.Context, userId int) map[string]interface{} {
 	query := `
-    SELECT transaction_id, payment_time, travel_date, bus_timing, isused, start, destination, amount
+    SELECT transaction_id, payment_time, travel_date, bus_timing, isUsed, start, destination, amount
     FROM transactions
     WHERE user_id = $1 AND payment_time >= NOW() - INTERVAL '2 hours'
     ORDER BY payment_time DESC
