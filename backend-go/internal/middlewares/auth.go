@@ -12,8 +12,6 @@ import (
 
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Next()
-		return
 		token, err := c.Cookie("session")
 
 		if err != nil || token == "" {
