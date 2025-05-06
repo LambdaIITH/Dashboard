@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 import '../widgets/bus_timing_list_widget.dart';
 
 class CityBusScreen extends StatefulWidget {
-  CityBusScreen({super.key});
+  const CityBusScreen({super.key});
 
   @override
   State<CityBusScreen> createState() => _CityBusScreenState();
@@ -542,7 +542,7 @@ class _CityBusScreenState extends State<CityBusScreen>
                     SizedBox(height: 10),
                     Text(
                       // '${transactionDetails?['travelDate']}',
-                      '${DateFormat('dd MMM yyyy, hh:mm a').format(DateTime.parse(transactionDetails?['paymentTime'] ?? ''))}',
+                      DateFormat('dd MMM yyyy, hh:mm a').format(DateTime.parse(transactionDetails?['paymentTime'] ?? '')),
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 22,
@@ -644,10 +644,10 @@ class FullScheduleWidget extends StatelessWidget {
   final Map<String, int> fromIITH;
 
   const FullScheduleWidget({
-    Key? key,
+    super.key,
     required this.toIITH,
     required this.fromIITH,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

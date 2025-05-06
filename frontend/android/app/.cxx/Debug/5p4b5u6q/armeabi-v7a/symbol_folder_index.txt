@@ -1,0 +1,1 @@
+/home/ganesh/Projects/Dashboard/frontend/build/app/intermediates/cxx/Debug/5p4b5u6q/obj/armeabi-v7a

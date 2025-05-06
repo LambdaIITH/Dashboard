@@ -21,9 +21,10 @@ import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
-
 import '../models/transport_qr_model.dart';
 import 'dio_non_web_config.dart' if (dart.library.html) 'dio_web_config.dart';
+import '../models/merch_item_model.dart';
+import '../models/merch_order_model.dart';
 
 class ApiServices {
   static final ApiServices _instance = ApiServices._internal();
@@ -94,11 +95,9 @@ class ApiServices {
   Future<Map<String, dynamic>> login(String idToken) async {
     try {
       debugPrint("Making request to: ${dio.options.baseUrl}/auth/login");
-      final response =
-          await dio.post('/auth/login', data: {'id_token': idToken});
+      final response = await dio.post('/auth/login', data: {'id_token': idToken});
       final data = response.data;
-      final userModel =
-          UserModel(id: data['id'], email: data['email'], name: '');
+      final userModel = UserModel(id: data['id'], email: data['email'], name: '');
       return {'user': userModel, 'status': response.statusCode};
     } on DioException catch (e) {
       if (e.response != null && e.response?.statusCode == 401) {
@@ -145,8 +144,8 @@ class ApiServices {
 
   Future<bool> updateWeekNumber(BuildContext context, int value) async {
     try {
-      final response = await dio.post('/mess_menu/',
-          data: {"number": value, "password": "someSecret"});
+      final response =
+          await dio.post('/mess_menu/', data: {"number": value, "password": "someSecret"});
 
       return response.statusCode == 200;
     } catch (e) {
@@ -202,12 +201,10 @@ class ApiServices {
     return null;
   }
 
-  Future<UserModel?> updatePhoneNumber(
-      BuildContext context, String phone) async {
+  Future<UserModel?> updatePhoneNumber(BuildContext context, String phone) async {
     try {
       debugPrint("Making request to: ${dio.options.baseUrl}/user");
-      final response =
-          await dio.patch('/user/update', data: {"phone_number": phone});
+      final response = await dio.patch('/user/update', data: {"phone_number": phone});
 
       final data = response.data;
       return UserModel(
@@ -228,11 +225,10 @@ class ApiServices {
     return null;
   }
 
-  Future<bool> updateFCMToken(
-      BuildContext context, String token, String deviceType) async {
+  Future<bool> updateFCMToken(BuildContext context, String token, String deviceType) async {
     try {
-      final response = await dio.patch("/user/fcm/update",
-          data: {"token": token, "device_type": deviceType});
+      final response =
+          await dio.patch("/user/fcm/update", data: {"token": token, "device_type": deviceType});
       return response.statusCode == 200;
     } catch (e) {
       debugPrint(e.toString());
@@ -266,41 +262,28 @@ class ApiServices {
 
   Future<Map<String, dynamic>> postTimetable(Timetable timetable) async {
     try {
-      final response =
-          await dio.post('/schedule/courses', data: timetable.toJson());
+      final response = await dio.post('/schedule/courses', data: timetable.toJson());
       return {'status': response.statusCode, 'data': response.data};
     } on DioException catch (e) {
       debugPrint("Post edit timetable failed: $e");
-      return {
-        'error': 'Post edit timetable failed',
-        'status': e.response?.statusCode
-      };
+      return {'error': 'Post edit timetable failed', 'status': e.response?.statusCode};
     }
   }
 
   Future<Map<String, dynamic>> shareTimetable([Timetable? timetable]) async {
     try {
-      final response =
-          await dio.post('/schedule/share', data: timetable?.toJson());
+      final response = await dio.post('/schedule/share', data: timetable?.toJson());
       return {'status': response.statusCode, 'code': response.data['code']};
     } on DioException catch (e) {
-      return {
-        'error': 'Share timetable failed',
-        'status': e.response?.statusCode
-      };
+      return {'error': 'Share timetable failed', 'status': e.response?.statusCode};
     }
   }
 
-  Future<List<dynamic>> getSharedTimetable(
-      BuildContext context, String code) async {
+  Future<List<dynamic>> getSharedTimetable(BuildContext context, String code) async {
     try {
       final response = await dio.get('/schedule/share/$code');
       if (response.statusCode == 200) {
-        return [
-          Timetable.fromJson(response.data),
-          response.statusCode,
-          "Saved Timetable"
-        ];
+        return [Timetable.fromJson(response.data), response.statusCode, "Saved Timetable"];
       } else if (response.statusCode == 404) {
         return [null, response.statusCode, "Timetable expired"];
       } else {
@@ -331,8 +314,7 @@ class ApiServices {
           return null;
         }
       } else {
-        throw Exception(
-            'Failed to load all courses. Status code: ${response.statusCode}');
+        throw Exception('Failed to load all courses. Status code: ${response.statusCode}');
       }
     } on DioException catch (e) {
       debugPrint("API EXCEPTION $e");
@@ -351,10 +333,7 @@ class ApiServices {
   // ====================CAB SHARING STARTS===================================
 
   Future<List<BookingModel>> getBookings(BuildContext context,
-      {String? fromLoc,
-      String? toLoc,
-      String? startTime,
-      String? endTime}) async {
+      {String? fromLoc, String? toLoc, String? startTime, String? endTime}) async {
     try {
       final queryParams = <String, dynamic>{};
       if (fromLoc != null) queryParams['from_loc'] = fromLoc;
@@ -381,19 +360,14 @@ class ApiServices {
     }
   }
 
-  Future<Map<String, dynamic>> createBooking(
-      BookingModel booking, BuildContext context) async {
+  Future<Map<String, dynamic>> createBooking(BookingModel booking, BuildContext context) async {
     try {
       final response = await dio.post(
         '/cabshare/bookings',
         data: booking.toJson(),
       );
 
-      return {
-        'booking': response.data,
-        'status': response.statusCode,
-        'error': null
-      };
+      return {'booking': response.data, 'status': response.statusCode, 'error': null};
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
         await logout(context);
@@ -401,16 +375,10 @@ class ApiServices {
       }
 
       if (e.response != null) {
-        return {
-          'error': e.response?.data['detail'],
-          'status': e.response?.statusCode
-        };
+        return {'error': e.response?.data['detail'], 'status': e.response?.statusCode};
       }
       debugPrint("Create booking failed: $e");
-      return {
-        'error': 'Create booking failed',
-        'status': e.response?.statusCode
-      };
+      return {'error': 'Create booking failed', 'status': e.response?.statusCode};
     }
   }
 
@@ -430,23 +398,16 @@ class ApiServices {
       }
 
       if (e.response != null) {
-        return {
-          'error': e.response?.data['detail'],
-          'status': e.response?.statusCode
-        };
+        return {'error': e.response?.data['detail'], 'status': e.response?.statusCode};
       }
       debugPrint("Update booking failed: $e");
-      return {
-        'error': 'Update booking failed',
-        'status': e.response?.statusCode
-      };
+      return {'error': 'Update booking failed', 'status': e.response?.statusCode};
     }
   }
 
   Future<List<BookingModel>> getUserBookings(BuildContext context) async {
     try {
-      debugPrint(
-          "Making request to: ${dio.options.baseUrl}/cabshare/me/bookings");
+      debugPrint("Making request to: ${dio.options.baseUrl}/cabshare/me/bookings");
       final response = await dio.get('/cabshare/me/bookings');
 
       final data = response.data["future_bookings"] as List;
@@ -465,8 +426,7 @@ class ApiServices {
 
   Future<List<BookingModel>> getUserRequests(BuildContext context) async {
     try {
-      debugPrint(
-          "Making request to: ${dio.options.baseUrl}/cabshare/me/requests");
+      debugPrint("Making request to: ${dio.options.baseUrl}/cabshare/me/requests");
       final response = await dio.get('/cabshare/me/requests');
 
       final data = response.data as List;
@@ -498,24 +458,16 @@ class ApiServices {
         return {'error': 'Unauthorized user', 'status': 401};
       }
       if (e.response != null) {
-        return {
-          'error': e.response?.data['detail'],
-          'status': e.response?.statusCode
-        };
+        return {'error': e.response?.data['detail'], 'status': e.response?.statusCode};
       }
       debugPrint("Request to join booking failed: $e");
-      return {
-        'error': 'Request to join booking failed',
-        'status': e.response?.statusCode
-      };
+      return {'error': 'Request to join booking failed', 'status': e.response?.statusCode};
     }
   }
 
-  Future<Map<String, dynamic>> deleteRequest(
-      int bookingId, BuildContext context) async {
+  Future<Map<String, dynamic>> deleteRequest(int bookingId, BuildContext context) async {
     try {
-      final response =
-          await dio.delete('/cabshare/bookings/$bookingId/request');
+      final response = await dio.delete('/cabshare/bookings/$bookingId/request');
 
       return {'status': response.statusCode};
     } on DioException catch (e) {
@@ -524,16 +476,10 @@ class ApiServices {
         return {'error': 'Unauthorized user', 'status': 401};
       }
       if (e.response != null) {
-        return {
-          'error': e.response?.data['detail'],
-          'status': e.response?.statusCode
-        };
+        return {'error': e.response?.data['detail'], 'status': e.response?.statusCode};
       }
       debugPrint("Delete request failed: $e");
-      return {
-        'error': 'Delete request failed',
-        'status': e.response?.statusCode
-      };
+      return {'error': 'Delete request failed', 'status': e.response?.statusCode};
     }
   }
 
@@ -552,16 +498,10 @@ class ApiServices {
         return {'error': 'Unauthorized user', 'status': 401};
       }
       if (e.response != null) {
-        return {
-          'error': e.response?.data['detail'],
-          'status': e.response?.statusCode
-        };
+        return {'error': e.response?.data['detail'], 'status': e.response?.statusCode};
       }
       debugPrint("Accept request failed: $e");
-      return {
-        'error': 'Accept request failed',
-        'status': e.response?.statusCode
-      };
+      return {'error': 'Accept request failed', 'status': e.response?.statusCode};
     }
   }
 
@@ -580,21 +520,14 @@ class ApiServices {
         return {'error': 'Unauthorized user', 'status': 401};
       }
       if (e.response != null) {
-        return {
-          'error': e.response?.data['detail'],
-          'status': e.response?.statusCode
-        };
+        return {'error': e.response?.data['detail'], 'status': e.response?.statusCode};
       }
       debugPrint("Reject request failed: $e");
-      return {
-        'error': 'Reject request failed',
-        'status': e.response?.statusCode
-      };
+      return {'error': 'Reject request failed', 'status': e.response?.statusCode};
     }
   }
 
-  Future<Map<String, dynamic>> deleteBooking(
-      int bookingId, BuildContext context) async {
+  Future<Map<String, dynamic>> deleteBooking(int bookingId, BuildContext context) async {
     try {
       final response = await dio.delete('/cabshare/bookings/$bookingId');
 
@@ -605,21 +538,14 @@ class ApiServices {
         return {'error': 'Unauthorized user', 'status': 401};
       }
       if (e.response != null) {
-        return {
-          'error': e.response?.data['detail'],
-          'status': e.response?.statusCode
-        };
+        return {'error': e.response?.data['detail'], 'status': e.response?.statusCode};
       }
       debugPrint("Delete booking failed: $e");
-      return {
-        'error': 'Delete booking failed',
-        'status': e.response?.statusCode
-      };
+      return {'error': 'Delete booking failed', 'status': e.response?.statusCode};
     }
   }
 
-  Future<Map<String, dynamic>> exitBooking(
-      int bookingId, BuildContext context) async {
+  Future<Map<String, dynamic>> exitBooking(int bookingId, BuildContext context) async {
     try {
       final response = await dio.delete('/cabshare/bookings/$bookingId/self');
       return {'status': response.statusCode};
@@ -629,10 +555,7 @@ class ApiServices {
         return {'error': 'Unauthorized user', 'status': 401};
       }
       if (e.response != null) {
-        return {
-          'error': e.response?.data['detail'],
-          'status': e.response?.statusCode
-        };
+        return {'error': e.response?.data['detail'], 'status': e.response?.statusCode};
       }
       debugPrint("Exit booking failed: $e");
       return {'error': 'Exit booking failed', 'status': e.response?.statusCode};
@@ -642,8 +565,7 @@ class ApiServices {
   // ====================CAB SHARING ENDS===================================
 
   // ====================PROFILE PAGE STARTS===================================
-  Future<Map<String, dynamic>> postFeedback(
-      int bookingId, String feedback) async {
+  Future<Map<String, dynamic>> postFeedback(int bookingId, String feedback) async {
     try {
       final response = await dio.post(
         '/feedback',
@@ -652,23 +574,16 @@ class ApiServices {
       return {'status': response.statusCode};
     } on DioException catch (e) {
       if (e.response != null) {
-        return {
-          'error': e.response?.data['detail'],
-          'status': e.response?.statusCode
-        };
+        return {'error': e.response?.data['detail'], 'status': e.response?.statusCode};
       }
       debugPrint("Posting Feedback failed: $e");
-      return {
-        'error': 'Posting Feedback failed',
-        'status': e.response?.statusCode
-      };
+      return {'error': 'Posting Feedback failed', 'status': e.response?.statusCode};
     }
   }
 
   // ====================PROFILE PAGE ENDS===================================
   // ====================Lost and found starts=====================================
-  Future<Map<String, dynamic>> getLostAndFoundItems(
-      BuildContext context) async {
+  Future<Map<String, dynamic>> getLostAndFoundItems(BuildContext context) async {
     try {
       final response = await dio.get('/lost/all');
       final response2 = await dio.get('/found/all');
@@ -694,15 +609,9 @@ class ApiServices {
         return {'error': 'Unauthorized user', 'status': 401};
       }
       if (e.response != null) {
-        return {
-          'error': e.response?.data['detail'],
-          'status': e.response?.statusCode
-        };
+        return {'error': e.response?.data['detail'], 'status': e.response?.statusCode};
       }
-      return {
-        'error': 'get Lost and Found items failed',
-        'status': e.response?.statusCode
-      };
+      return {'error': 'get Lost and Found items failed', 'status': e.response?.statusCode};
     }
   }
 
@@ -723,15 +632,9 @@ class ApiServices {
         return {'error': 'Unauthorized user', 'status': 401};
       }
       if (e.response != null) {
-        return {
-          'error': e.response?.data['detail'],
-          'status': e.response?.statusCode
-        };
+        return {'error': e.response?.data['detail'], 'status': e.response?.statusCode};
       }
-      return {
-        'error': 'get Lost items failed',
-        'status': e.response?.statusCode
-      };
+      return {'error': 'get Lost items failed', 'status': e.response?.statusCode};
     }
   }
 
@@ -752,15 +655,9 @@ class ApiServices {
         return {'error': 'Unauthorized user', 'status': 401};
       }
       if (e.response != null) {
-        return {
-          'error': e.response?.data['detail'],
-          'status': e.response?.statusCode
-        };
+        return {'error': e.response?.data['detail'], 'status': e.response?.statusCode};
       }
-      return {
-        'error': 'get Found items failed',
-        'status': e.response?.statusCode
-      };
+      return {'error': 'get Found items failed', 'status': e.response?.statusCode};
     }
   }
 
@@ -772,8 +669,7 @@ class ApiServices {
     required List<PickedFile> images,
   }) async {
     try {
-      final url =
-          "/${lostOrFound == LostOrFound.lost ? "lost" : "found"}/add_item";
+      final url = "/${lostOrFound == LostOrFound.lost ? "lost" : "found"}/add_item";
 
       List<MultipartFile> multiPartList = [];
 
@@ -813,33 +709,23 @@ class ApiServices {
     } on DioException catch (e) {
       if (e.response != null) {
         debugPrint(e.response.toString());
-        return {
-          'error': e.response?.data?['detail'],
-          'status': e.response?.statusCode
-        };
+        return {'error': e.response?.data?['detail'], 'status': e.response?.statusCode};
       }
       debugPrint("add lf items failed: $e");
-      return {
-        'error': 'add Lost and Found items failed',
-        'status': e.response?.statusCode
-      };
+      return {'error': 'add Lost and Found items failed', 'status': e.response?.statusCode};
     }
   }
 
   Future<Map<String, dynamic>> getLostAndFoundItem(
-      {required String id,
-      required LostOrFound lostOrFound,
-      required BuildContext context}) async {
+      {required String id, required LostOrFound lostOrFound, required BuildContext context}) async {
     try {
-      final url =
-          "/${lostOrFound == LostOrFound.lost ? "lost" : "found"}/item/$id";
+      final url = "/${lostOrFound == LostOrFound.lost ? "lost" : "found"}/item/$id";
 
       // TODO
       final response = await dio.get(url);
 
-      response.data['lostOrFound'] = lostOrFound == LostOrFound.found
-          ? LostOrFound.found
-          : LostOrFound.lost;
+      response.data['lostOrFound'] =
+          lostOrFound == LostOrFound.found ? LostOrFound.found : LostOrFound.lost;
       return {'status': response.statusCode, 'item': response.data};
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
@@ -847,26 +733,17 @@ class ApiServices {
         return {'error': 'Unauthorized user', 'status': 401};
       }
       if (e.response != null) {
-        return {
-          'error': e.response?.data['detail'],
-          'status': e.response?.statusCode
-        };
+        return {'error': e.response?.data['detail'], 'status': e.response?.statusCode};
       }
       debugPrint("get lf items failed: $e");
-      return {
-        'error': 'get Lost and Found items failed',
-        'status': e.response?.statusCode
-      };
+      return {'error': 'get Lost and Found items failed', 'status': e.response?.statusCode};
     }
   }
 
   Future<Map<String, dynamic>> deleteLostAndFoundItem(
-      {required String id,
-      required LostOrFound lostOrFound,
-      required BuildContext context}) async {
+      {required String id, required LostOrFound lostOrFound, required BuildContext context}) async {
     try {
-      final url =
-          "/${lostOrFound == LostOrFound.lost ? "lost" : "found"}/delete_item";
+      final url = "/${lostOrFound == LostOrFound.lost ? "lost" : "found"}/delete_item";
 
       final formData = FormData.fromMap({"item_id": id});
       final response = await dio.delete(url, data: formData);
@@ -878,16 +755,10 @@ class ApiServices {
         return {'error': 'Unauthorized user', 'status': 401};
       }
       if (e.response != null) {
-        return {
-          'error': e.response?.data['detail'],
-          'status': e.response?.statusCode
-        };
+        return {'error': e.response?.data['detail'], 'status': e.response?.statusCode};
       }
       debugPrint("get lf items failed: $e");
-      return {
-        'error': 'get Lost and Found items failed',
-        'status': e.response?.statusCode
-      };
+      return {'error': 'get Lost and Found items failed', 'status': e.response?.statusCode};
     }
   }
 
@@ -899,8 +770,7 @@ class ApiServices {
       required List<String> images,
       required BuildContext context}) async {
     try {
-      final url =
-          "/${lostOrFound == LostOrFound.lost ? "lost" : "found"}/edit_item";
+      final url = "/${lostOrFound == LostOrFound.lost ? "lost" : "found"}/edit_item";
 
       // TODO
       final response = await dio.put(url, data: {
@@ -917,21 +787,14 @@ class ApiServices {
         return {'error': 'Unauthorized user', 'status': 401};
       }
       if (e.response != null) {
-        return {
-          'error': e.response?.data['detail'],
-          'status': e.response?.statusCode
-        };
+        return {'error': e.response?.data['detail'], 'status': e.response?.statusCode};
       }
       debugPrint("edit lf items failed: $e");
-      return {
-        'error': 'edit Lost and Found items failed',
-        'status': e.response?.statusCode
-      };
+      return {'error': 'edit Lost and Found items failed', 'status': e.response?.statusCode};
     }
   }
 
-  Future<Map<String, dynamic>> searchLostAndFoundItems(
-      String search, BuildContext context) async {
+  Future<Map<String, dynamic>> searchLostAndFoundItems(String search, BuildContext context) async {
     try {
       final response = await dio.get('/lost/search?query=$search');
       final response2 = await dio.get('/found/search?query=$search');
@@ -959,16 +822,10 @@ class ApiServices {
         return {'error': 'Unauthorized user', 'status': 401};
       }
       if (e.response != null) {
-        return {
-          'error': e.response?.data['detail'],
-          'status': e.response?.statusCode
-        };
+        return {'error': e.response?.data['detail'], 'status': e.response?.statusCode};
       }
       debugPrint("get lf items failed: $e");
-      return {
-        'error': 'get Lost and Found items failed',
-        'status': e.response?.statusCode
-      };
+      return {'error': 'get Lost and Found items failed', 'status': e.response?.statusCode};
     }
   }
 
@@ -1004,18 +861,12 @@ class ApiServices {
     }
   }
 
-  Future<Map<String, dynamic>> submitTransactionID(
-      String transactionId, amount, from, to) async {
+  Future<Map<String, dynamic>> submitTransactionID(String transactionId, amount, from, to) async {
     try {
       // Sending the POST request
       final response = await dio.post(
         '/transport/qr',
-        data: {
-          'transactionId': transactionId,
-          'amount': amount,
-          'start': from,
-          'destination': to
-        },
+        data: {'transactionId': transactionId, 'amount': amount, 'start': from, 'destination': to},
       );
 
       // Handling the response
@@ -1041,10 +892,7 @@ class ApiServices {
       }
     } on DioException catch (e) {
       debugPrint('Request failed: $e');
-      return {
-        'error': e.response?.data['detail'],
-        'status': e.response?.statusCode
-      };
+      return {'error': e.response?.data['detail'], 'status': e.response?.statusCode};
     }
   }
 
@@ -1062,13 +910,11 @@ class ApiServices {
     }
   }
 
-  Future<List<AnnouncementModel>?> getAnnouncements(
-      num limit, num offset) async {
+  Future<List<AnnouncementModel>?> getAnnouncements(num limit, num offset) async {
     try {
       debugPrint("Making request to: ${dio.options.baseUrl}/announcements");
 
-      final response = await dio
-          .get('${dio.options.baseUrl}/announcements', queryParameters: {
+      final response = await dio.get('${dio.options.baseUrl}/announcements', queryParameters: {
         'limit': limit,
         'offset': offset,
       });
@@ -1081,8 +927,32 @@ class ApiServices {
     return null;
   }
 
-  Future<Map<String, dynamic>?> getRecentTransaction(
-      BuildContext context) async {
+  Future<List<String>?> getAnnouncementsTags() async {
+    try {
+      debugPrint("Making request to: ${dio.options.baseUrl}/announcements/tandc");
+
+      final response = await dio.get('${dio.options.baseUrl}/announcements/tandc');
+      final data = json.decode(response.data)["tags"].cast<String>();
+      return data;
+    } catch (e) {
+      debugPrint("Failed to fetch announcements filters: $e");
+    }
+    return null;
+  }
+  Future<List<String>?> getAnnouncementsCategories() async {
+    try {
+      debugPrint("Making request to: ${dio.options.baseUrl}/announcements/tandc");
+
+      final response = await dio.get('${dio.options.baseUrl}/announcements/tandc');
+      final data = json.decode(response.data)["category"].cast<String>();
+      return data;
+    } catch (e) {
+      debugPrint("Failed to fetch announcements filters: $e");
+    }
+    return null;
+  }
+
+  Future<Map<String, dynamic>?> getRecentTransaction(BuildContext context) async {
     try {
       final url = '/transport/qr/recent';
       debugPrint("Making request to: $url");
@@ -1104,8 +974,7 @@ class ApiServices {
     }
   }
 
-  Future<bool> bookIghRoom(
-      BuildContext context, Map<String, dynamic> bookingDetails) async {
+  Future<bool> bookIghRoom(BuildContext context, Map<String, dynamic> bookingDetails) async {
     try {
       final response = await dio.post(
         '${dotenv.env["ADMIN_BACKEND_URL"]}/igh/book_room',
@@ -1129,7 +998,8 @@ class ApiServices {
       List<MultipartFile> multiPartList = [
         await MultipartFile.fromFile(
           capturedImage!.path,
-          filename: "IITH_DASHBOARD_BY_LAMBDA-${capturedImage.path.split('/').last}-${DateTime.now().toIso8601String()}",
+          filename:
+              "IITH_DASHBOARD_BY_LAMBDA-${capturedImage.path.split('/').last}-${DateTime.now().toIso8601String()}",
         )
       ];
 
@@ -1150,11 +1020,65 @@ class ApiServices {
       if (response.statusCode == 200) {
         return {'status': response.statusCode, 'data': response.data};
       } else {
-        return {'error': 'Failed to upload: ${response.statusMessage}', 'status': response.statusCode};
+        return {
+          'error': 'Failed to upload: ${response.statusMessage}',
+          'status': response.statusCode
+        };
       }
     } catch (e) {
       debugPrint("Upload failed: $e");
       return {'error': 'Request failed: $e'};
+    }
+  }
+
+  Future<List<MerchItem>> getMerchItems() async {
+    try {
+      final response = await dio.get('/merch/items');
+      return (response.data as List).map((item) => MerchItem.fromJson(item)).toList();
+    } catch (e) {
+      debugPrint("Failed to fetch merchandise items: $e");
+      return [];
+    }
+  }
+
+  Future<MerchItem?> getMerchItem(int itemId) async {
+    try {
+      final response = await dio.get('/merch/items/$itemId');
+      return MerchItem.fromJson(response.data);
+    } catch (e) {
+      debugPrint("Failed to fetch merchandise item: $e");
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> createMerchOrder(
+    int merchId, 
+    String? size, 
+    String displayName, 
+    String transactionId,
+    bool isOversized) async {
+    try {
+      final response = await dio.post('/merch/order', data: {
+        'merch_id': merchId,
+        'size': size,
+        'display_name': displayName,
+        'transaction_id': transactionId,
+        'is_oversized': isOversized,
+      });
+      return response.data;
+    } catch (e) {
+      debugPrint("Failed to create merchandise order: $e");
+      return null;
+    }
+  }
+
+  Future<List<MerchOrder>> getMerchOrders() async {
+    try {
+      final response = await dio.get('/merch/orders');
+      return (response.data as List).map((order) => MerchOrder.fromJson(order)).toList();
+    } catch (e) {
+      debugPrint("Failed to fetch user's merchandise orders: $e");
+      return [];
     }
   }
 }

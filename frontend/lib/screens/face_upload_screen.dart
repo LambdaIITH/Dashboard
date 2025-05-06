@@ -4,13 +4,12 @@ import 'package:dashbaord/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
-import 'package:http/http.dart' as http;
-import 'package:async/async.dart';
-import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class FaceUploadScreen extends StatefulWidget {
+  const FaceUploadScreen({super.key});
+
   @override
   _FaceUploadScreenState createState() => _FaceUploadScreenState();
 }

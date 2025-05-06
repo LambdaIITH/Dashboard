@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class AddEventBottomSheet extends StatefulWidget {
-  const AddEventBottomSheet({Key? key}) : super(key: key);
+  const AddEventBottomSheet({super.key});
 
   @override
   _AddEventBottomSheetState createState() => _AddEventBottomSheetState();

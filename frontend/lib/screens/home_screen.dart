@@ -29,7 +29,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:in_app_update/in_app_update.dart';
 import 'package:text_scroll/text_scroll.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 
 class HomeScreen extends StatefulWidget {
   final bool isGuest;

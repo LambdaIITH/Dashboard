@@ -65,7 +65,6 @@ class EventNotificationService {
           event.hour,
           event.minute,
         );
-
         await flutterLocalNotificationsPlugin.zonedSchedule(
           event.id,
           event.title,
@@ -73,9 +72,7 @@ class EventNotificationService {
           scheduledDate,
           platformChannelSpecifics,
           androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-          uiLocalNotificationDateInterpretation:
-              UILocalNotificationDateInterpretation.wallClockTime,
-          matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,  
+          matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime, uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
         );
       }
     }

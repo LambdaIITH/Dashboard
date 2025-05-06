@@ -1,0 +1,2 @@
+/home/ganesh/Projects/Dashboard/frontend/android/app/.cxx/RelWithDebInfo/1p2j3t5q/x86_64/CMakeFiles/edit_cache.dir
+/home/ganesh/Projects/Dashboard/frontend/android/app/.cxx/RelWithDebInfo/1p2j3t5q/x86_64/CMakeFiles/rebuild_cache.dir

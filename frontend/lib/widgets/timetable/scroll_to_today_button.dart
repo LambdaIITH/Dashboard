@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class TodayButton extends StatelessWidget {
   final VoidCallback onPressed;
 
-  const TodayButton({Key? key, required this.onPressed}) : super(key: key);
+  const TodayButton({super.key, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {

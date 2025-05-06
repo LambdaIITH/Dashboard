@@ -1,6 +1,6 @@
 plugins {
     id "com.android.application"
-    id 'com.google.gms.google-services' // FlutterFire Configuration
+    id 'com.google.gms.google-services'
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
 }
@@ -37,6 +37,7 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+        coreLibraryDesugaringEnabled true
     }
 
     kotlinOptions {
@@ -97,7 +98,7 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.9'
     implementation 'androidx.work:work-runtime:2.8.1'
     implementation 'androidx.work:work-runtime-ktx:2.8.1'
-    // Other dependencies
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
 }
 
 configurations.all {

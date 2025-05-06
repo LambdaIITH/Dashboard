@@ -1,6 +1,5 @@
 import 'package:dashbaord/main.dart';
 import 'package:dashbaord/models/time_table_model.dart';
-import 'package:dashbaord/services/api_service.dart';
 import 'package:dashbaord/services/event_notification_service.dart';
 import 'package:dashbaord/services/shared_service.dart';
 import 'package:flutter/material.dart';
@@ -11,10 +10,10 @@ class NotificationSettingsBottomSheet extends StatefulWidget {
   final Function(int?) onReminderOffsetChange;
 
   const NotificationSettingsBottomSheet({
-    Key? key,
+    super.key,
     required this.onNotificationsToggle,
     required this.onReminderOffsetChange,
-  }) : super(key: key);
+  });
 
   @override
   State<NotificationSettingsBottomSheet> createState() =>
