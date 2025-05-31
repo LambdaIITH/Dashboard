@@ -12,9 +12,11 @@ if not firebase_admin._apps:
 def send_personalized_fcm_notification(token, title, body, image_url=None, redirect_url=None, notification_type=None, extra_data=None):
     """Sends an FCM notification to a specific device with data payload support."""
     data_payload = {
-        "redirectUrl": redirect_url or "",  
-        "open": notification_type or "home",
-        "timestamp": str(int(time.time()))
+        "data":{
+            "redirectURL": redirect_url or "",  
+            "open": notification_type or "home",
+            "timestamp": str(int(time.time()))
+        }
     }
 
     if extra_data:
