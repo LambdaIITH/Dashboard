@@ -1,0 +1,141 @@
+name: Build and Release iOS
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/build-release-ios.yaml'
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Log Checkout
+        run: echo "Repository checked out successfully."
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.27.3'
+          cache: true
+      
+      - name: Log Flutter Setup
+        run: echo "Flutter setup completed."
+
+      - name: Create .env File
+        run: |
+          echo "BACKEND_URL=${{ secrets.BACKEND_URL || 'https://api.iith.dev' }}" >> frontend/.env
+        shell: bash
+      
+      - name: Log .env Creation
+        run: echo ".env file created successfully."
+
+      - name: Install Dependencies
+        run: |
+          cd frontend
+          flutter pub get
+      
+      - name: Log Dependency Installation
+        run: echo "Flutter dependencies installed successfully."
+
+      - name: Install CocoaPods
+        run: |
+          cd frontend/ios
+          echo "platform :ios, '15.6'" >> Podfile
+          pod install --repo-update
+      
+      - name: Log CocoaPods Installation
+        run: echo "CocoaPods installed successfully."
+
+      - name: Set Up Code Signing
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          PROVISIONING_PROFILE: ${{ secrets.PROVISIONING_PROFILE }}
+        run: |
+          echo "Setting up code signing..."
+          set -e
+          echo "Decoding Apple certificate..."
+          echo "${APPLE_CERTIFICATE}" | base64 --decode > certificate.p12 || { echo 'Failed to decode Apple certificate'; exit 1; }
+          security create-keychain -p "" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "" build.keychain
+          security import certificate.p12 -k build.keychain -P "${APPLE_CERTIFICATE_PASSWORD}" -T /usr/bin/codesign || { echo 'Failed to import certificate'; exit 1; }
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "" build.keychain
+          echo "Decoding provisioning profile..."
+          echo "${PROVISIONING_PROFILE}" | base64 --decode > provisioning.mobileprovision || { echo 'Failed to decode provisioning profile'; exit 1; }
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          mv provisioning.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+          echo "Code signing setup completed."
+      
+      - name: Log Code Signing Setup
+        run: echo "Code signing setup successfully."
+
+      - name: Build iOS App
+        run: |
+          cd frontend
+          flutter build ipa --release || { echo 'iOS build failed'; exit 1; }
+          echo "iOS app build completed."
+      
+      - name: Log Build Completion
+        run: echo "iOS app built successfully."
+
+      - name: Upload IPA to Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-ipa
+          path: frontend/build/ios/ipa/*.ipa
+      
+      - name: Log Artifact Upload
+        run: echo "IPA uploaded to artifacts."
+
+  release:
+    needs: build
+    runs-on: macos-latest
+
+    steps:
+      - name: Download IPA
+        uses: actions/download-artifact@v4
+        with:
+          name: release-ipa
+          path: build/
+      
+      - name: Log Artifact Download
+        run: echo "IPA artifact downloaded successfully."
+
+      - name: Authenticate with App Store Connect
+        run: |
+          echo "Authenticating with App Store Connect..."
+          xcrun altool --validate-app -f build/*.ipa -t ios --apiKey ${{ secrets.APP_STORE_API_KEY_ID }} --apiIssuer ${{ secrets.APP_STORE_API_ISSUER_ID }} || { echo 'App validation failed'; exit 1; }
+          echo "Authentication successful."
+      
+      - name: Log Authentication
+        run: echo "App Store authentication successful."
+
+      - name: Upload to App Store Connect
+        run: |
+          echo "Uploading IPA to App Store Connect..."
+          xcrun altool --upload-app -f build/*.ipa -t ios --apiKey ${{ secrets.APP_STORE_API_KEY_ID }} --apiIssuer ${{ secrets.APP_STORE_API_ISSUER_ID }} || { echo 'Upload failed'; exit 1; }
+          echo "Upload completed."
+      
+      - name: Log Upload Completion
+        run: echo "IPA uploaded to App Store Connect successfully."
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v1.${{ github.run_number }}
+          name: Release v1.${{ github.run_number }}
+          body: "New iOS release uploaded to App Store Connect."
+          files: build/*.ipa
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Log GitHub Release
+        run: echo "GitHub release created successfully."
