@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"sort"
 	"strconv"
+	"time"
 
 	"github.com/LambdaIITH/Dashboard/backend/config"
 	lost "github.com/LambdaIITH/Dashboard/backend/internal/db"
@@ -130,6 +132,121 @@ func GetAllItemsHandler(c *gin.Context) {
 		response = append(response, itemData)
 	}
 
+	c.JSON(http.StatusOK, response)
+}
+
+/*
+GetCombinedAllItemsHandler fetches all the lost and found items and returns them as a JSON response ordered by creation time.
+*/
+func GetCombinedAllItemsHandler(c *gin.Context) {
+
+	maxLimit := 100
+	if limitStr := c.Query("max_limit"); limitStr != "" {
+		if limit, err := strconv.Atoi(limitStr); err == nil {
+			maxLimit = limit
+		}
+	}
+
+	//Step 1: Fetching lost items AND found items
+	lostItems, err := lost.GetAllLostItems(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch items"})
+		fmt.Println(err)
+		return
+	}
+	if len(lostItems) > maxLimit {
+		lostItems = lostItems[:maxLimit]
+	}
+
+	foundItems, err := lost.GetAllFoundItems(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch items"})
+		return
+	}
+
+	if len(foundItems) > maxLimit {
+		foundItems = foundItems[:maxLimit]
+	}
+
+	//Step 2: Fetching images for all lost items AND found items
+	lostRows, err := config.DB.Query(c, "SELECT item_id, image_url FROM lost_images")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch images"})
+		return
+	}
+	defer lostRows.Close()
+
+	foundRows, err := config.DB.Query(c, "SELECT item_id, image_url FROM found_images")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch images"})
+		return
+	}
+	defer foundRows.Close()
+
+	//Step 3: Organize the image urls by item ID
+	imageDict := make(map[int][]string)
+	for lostRows.Next() {
+		var img schema.ImageURI
+		if err := lostRows.Scan(&img.ItemID, &img.ImageURL); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to scan images"})
+			return
+		}
+		imageDict[img.ItemID] = append(imageDict[img.ItemID], img.ImageURL)
+	}
+
+	for foundRows.Next() {
+		var img schema.ImageURI
+		if err := foundRows.Scan(&img.ItemID, &img.ImageURL); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to scan images"})
+			return
+		}
+		imageDict[img.ItemID] = append(imageDict[img.ItemID], img.ImageURL)
+	}
+
+	response := make([]map[string]any, 0, len(lostItems)+len(foundItems))
+
+	for _, item := range lostItems {
+		images := imageDict[item.ID]
+		if images == nil {
+			images = []string{}
+		}
+
+		itemData := map[string]any{
+			"id":         item.ID,
+			"name":       item.ItemName,
+			"images":     images,
+			"created_at": item.CreatedAt.Format(time.RFC3339),
+			"type":       "lost",
+		}
+		response = append(response, itemData)
+	}
+	for _, item := range foundItems {
+		images := imageDict[item.ID]
+		if images == nil {
+			images = []string{}
+		}
+
+		itemData := map[string]any{
+			"id":         item.ID,
+			"name":       item.ItemName,
+			"images":     images,
+			"created_at": item.CreatedAt.Format(time.RFC3339),
+			"type":       "found",
+		}
+		response = append(response, itemData)
+	}
+
+	sort.Slice(response, func(i, j int) bool {
+		t1, _ := time.Parse(time.RFC3339, response[i]["created_at"].(string))
+		t2, _ := time.Parse(time.RFC3339, response[j]["created_at"].(string))
+		return t1.After(t2) //newest first
+	})
+
+	if len(response) > maxLimit {
+		response = response[:maxLimit]
+	}
+
+	// Step 4: Return the response
 	c.JSON(http.StatusOK, response)
 }
 
