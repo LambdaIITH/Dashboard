@@ -834,6 +834,25 @@ class _HomeScreenState extends State<HomeScreen> {
                                         },
                                       ),
                                     ),
+                                    SizedBox(
+                                      width: MediaQuery.of(context).size.width > 450
+                                          ? 200
+                                          : MediaQuery.of(context).size.width / 3 - 28,
+                                      child: HomeScreenCardSmall(
+                                        width: MediaQuery.of(context).size.width > 450
+                                            ? 200
+                                            : MediaQuery.of(context).size.width / 2 - 25,
+                                        isComingSoon: false,
+                                        reduceImageSize: true,
+                                        title: 'Hostel Complaints',
+                                        child: 'assets/icons/hostel_complaints.svg', // keep as string
+                                        onTap: () {
+                                          context.push("/hostel-complaints");
+                                        },
+                                      ),
+                                    ),
+
+
                                   ],
                                 ),
                               ],
