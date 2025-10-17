@@ -18,6 +18,8 @@ DROP TABLE IF EXISTS lost_images CASCADE;
 DROP TABLE IF EXISTS found_images CASCADE;
 DROP TABLE IF EXISTS transactions CASCADE;
 DROP TABLE IF EXISTS face CASCADE;
+DROP TABLE IF EXISTS hostel_complaints CASCADE;
+DROP TABLE IF EXISTS hostel_complaint_images CASCADE;
 
 
 -- Re-create the tables and types
@@ -230,4 +232,22 @@ CREATE TABLE IF NOT EXISTS announcements
     tags TEXT[],
     category TEXT[],
     imageURI TEXT
+);
+
+CREATE TABLE IF NOT EXISTS hostel_complaints
+(
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    complaint_description VARCHAR(1000) NOT NULL,
+    complaint_data JSONB DEFAULT '{}',
+    complaint_status VARCHAR(50) DEFAULT 'received',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    resolved_at TIMESTAMP NULL
+);
+
+CREATE TABLE IF NOT EXISTS hostel_complaint_images
+(
+    id BIGSERIAL PRIMARY KEY,
+    complaint_id BIGINT NOT NULL REFERENCES hostel_complaints(id) ON DELETE CASCADE,
+    image_url VARCHAR(256) NOT NULL
 );

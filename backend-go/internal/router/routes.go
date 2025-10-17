@@ -125,4 +125,12 @@ func SetupRoutes(router *gin.Engine) {
 		api.POST("/order", middlewares.AuthMiddleware(), controller.CreateOrder)
 		api.GET("/orders", middlewares.AuthMiddleware(), controller.GetUserOrders)
 	}
+
+	//Hostel Complaints routes
+	hostelComplaintsGroup := router.Group("/hostel-complaints")
+	{
+		hostelComplaintsGroup.POST("/", middlewares.AuthMiddleware(), controller.CreateComplaintHandler)
+		hostelComplaintsGroup.GET("/my", middlewares.AuthMiddleware(), controller.GetUserComplaintsHandler)
+		hostelComplaintsGroup.GET("/:id", controller.GetComplaintByIDHandler)
+	}
 }
