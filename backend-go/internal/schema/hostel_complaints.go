@@ -18,7 +18,7 @@ type HostelComplaint struct {
 
 type HostelComplaintRequest struct {
 	ComplaintDescription string                  `json:"complaint_description"`
-	ComplaintData        map[string]interface{}  `json:"complain_data"`
+	ComplaintData        map[string]interface{}  `json:"complaint_data"`
 	Images               []*multipart.FileHeader `json:"images"`
 }
 

@@ -13,8 +13,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-//TODO: all complaint retreival controller
-
 func CreateComplaintHandler(c *gin.Context) {
 	userId, err := helpers.GetUserID(c)
 	if err != nil {
@@ -32,6 +30,7 @@ func CreateComplaintHandler(c *gin.Context) {
 	var req schema.HostelComplaintRequest
 	if err := json.Unmarshal([]byte(formDataStr), &req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid form_data"})
+		return
 	}
 
 	//validating the complaintdescription
@@ -104,7 +103,7 @@ func GetComplaintByIDHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"complaint": complaint})
+	c.JSON(http.StatusOK, complaint)
 }
 
 // fetch the complaints for the current user
@@ -123,5 +122,5 @@ func GetUserComplaintsHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"complaints": complaints})
+	c.JSON(http.StatusOK, complaints)
 }
