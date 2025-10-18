@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/LambdaIITH/Dashboard/backend/internal/db"
 	"github.com/LambdaIITH/Dashboard/backend/internal/helpers"
@@ -123,4 +124,56 @@ func GetUserComplaintsHandler(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, complaints)
+}
+
+func AdminUpdateComplaintStatusHandler(c *gin.Context) {
+	//verifying admin
+	adminKey := c.GetHeader("X-Admin-Key")
+	if adminKey == "" || adminKey != os.Getenv("ADMIN_API_KEY") {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	// getting complaintID, new status, and validating them
+	idStr := c.Param("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil || id <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Complaint ID"})
+		return
+	}
+	var m map[string]string
+	if err := c.ShouldBindJSON(&m); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON body"})
+		return
+	}
+
+	v, ok := m["new_status"]
+	status := strings.TrimSpace(v)
+	if !ok || status == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing or empty new_status"})
+		return
+	}
+
+	ctx := context.Background()
+
+	// updating in db
+	if err := db.UpdateComplaintStatus(ctx, id, status); err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Complaint not found"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update status in db"})
+		return
+	}
+
+	complaint, err := db.GetComplaintByID(ctx, id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Status update, but complaint fetch failed."})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":   "Status updated",
+		"complaint": complaint,
+	})
 }

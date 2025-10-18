@@ -185,3 +185,25 @@ func GetUserComplaints(ctx context.Context, userID int64) ([]map[string]interfac
 
 	return complaints, nil
 }
+
+func UpdateComplaintStatus(ctx context.Context, complaintID int64, status string) error {
+	query := `
+	UPDATE hostel_complaints
+	SET complaint_status = $2::text,
+		resolved_at = CASE
+			WHEN $2::text IN ('resolved', 'closed') THEN CURRENT_TIMESTAMP
+			ELSE NULL
+		END
+	WHERE id = $1;
+	`
+
+	tag, err := config.DB.Exec(ctx, query, complaintID, status)
+	if err != nil {
+		return fmt.Errorf("failed to update the complaint status: %w", err)
+	}
+
+	if tag.RowsAffected() == 0 {
+		return fmt.Errorf("complaint not found")
+	}
+	return nil
+}

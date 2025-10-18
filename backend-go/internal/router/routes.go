@@ -132,5 +132,8 @@ func SetupRoutes(router *gin.Engine) {
 		hostelComplaintsGroup.POST("/", middlewares.AuthMiddleware(), controller.CreateComplaintHandler)
 		hostelComplaintsGroup.GET("/my", middlewares.AuthMiddleware(), controller.GetUserComplaintsHandler)
 		hostelComplaintsGroup.GET("/:id", controller.GetComplaintByIDHandler)
+
+		//admin only
+		hostelComplaintsGroup.PATCH("/:id/status", controller.AdminUpdateComplaintStatusHandler)
 	}
 }
