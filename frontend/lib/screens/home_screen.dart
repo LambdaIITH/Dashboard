@@ -816,6 +816,32 @@ class _HomeScreenState extends State<HomeScreen> {
                                         },
                                       ),
                                     ),
+                                    SizedBox(
+                                      width: MediaQuery.of(context).size.width >
+                                              450
+                                          ? 200
+                                          : MediaQuery.of(context).size.width /
+                                                  3 -
+                                              28,
+                                      child: HomeScreenCardSmall(
+                                        width:
+                                            MediaQuery.of(context).size.width >
+                                                    450
+                                                ? 200
+                                                : MediaQuery.of(context)
+                                                            .size
+                                                            .width /
+                                                        2 -
+                                                    25,
+                                        isComingSoon: false,
+                                        reduceImageSize: true,
+                                        title: 'Face Upload',
+                                        child: 'assets/icons/face-scan.svg',
+                                        onTap: () {
+                                          context.push("/face_upload");
+                                        },
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ],
