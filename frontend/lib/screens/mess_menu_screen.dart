@@ -1,4 +1,3 @@
-import 'package:dashbaord/constants/admins.dart';
 import 'package:dashbaord/services/api_service.dart';
 import 'package:dashbaord/services/shared_service.dart';
 import 'package:dashbaord/utils/loading_widget.dart';
@@ -110,8 +109,6 @@ class _MessMenuScreenState extends State<MessMenuScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final textColor =
-        Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
     return isLoading
         ? CustomLoadingScreen()
         : Scaffold(

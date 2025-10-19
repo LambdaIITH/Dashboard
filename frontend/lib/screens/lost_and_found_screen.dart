@@ -7,7 +7,6 @@ import 'package:dashbaord/widgets/notif_perm.dart';
 import 'package:flutter/material.dart';
 import 'package:dashbaord/models/lost_and_found_model.dart';
 import 'package:dashbaord/services/analytics_service.dart';
-import 'package:dashbaord/utils/bold_text.dart';
 import 'package:dashbaord/widgets/lost_found_item.dart';
 import 'package:dashbaord/services/api_service.dart';
 import 'package:go_router/go_router.dart';

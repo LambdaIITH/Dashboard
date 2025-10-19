@@ -759,24 +759,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                         onTap: () {
                                           context.push("/merch");
                                           return;
-                                          if (widget.isGuest) {
-                                            showError();
-                                          } else {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              SnackBar(
-                                                content: Text('Coming soon!'),
-                                                duration:
-                                                    const Duration(seconds: 2),
-                                                behavior:
-                                                    SnackBarBehavior.floating,
-                                                shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            10)),
-                                              ),
-                                            );
-                                          }
                                         },
                                       ),
                                     ),

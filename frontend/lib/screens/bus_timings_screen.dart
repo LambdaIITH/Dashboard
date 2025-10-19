@@ -71,8 +71,6 @@ class _BusTimingsScreenState extends State<BusTimingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final textColor =
-        Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
     return isLoading
         ? CustomLoadingScreen()
         : Scaffold(
