@@ -245,6 +245,10 @@ class _MerchPaymentScreenState extends State<MerchPaymentScreen>
             );
           },
         );
+      } else if (result != null && result.containsKey('error')) {
+        setState(() {
+          _errorMessage = result['error'];
+        });
       } else {
         setState(() {
           _errorMessage =
@@ -507,7 +511,7 @@ class _MerchPaymentScreenState extends State<MerchPaymentScreen>
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            'Please complete the payment using any UPI app and enter the transaction ID you received',
+                            'Please complete the payment using any UPI app and enter the transaction ID you received. Ensure that you pay the exact amount displayed before submitting the transaction ID. Each transaction ID can be used for only one order.',
                             style: TextStyle(
                               color: theme.colorScheme.onSurfaceVariant,
                               fontSize: 13,

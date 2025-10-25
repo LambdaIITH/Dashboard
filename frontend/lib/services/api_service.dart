@@ -1066,9 +1066,26 @@ class ApiServices {
         'is_oversized': isOversized,
       });
       return response.data;
+    } on DioException catch (e) {
+      debugPrint("Failed to create merchandise order: $e");
+      // Return error details from the backend
+      if (e.response != null && e.response?.data != null) {
+        final errorData = e.response!.data as Map<String, dynamic>;
+        return {
+          'error': errorData['error'] ?? 'An error occurred',
+          'status': e.response?.statusCode,
+        };
+      }
+      return {
+        'error': 'An error occurred during order creation',
+        'status': e.response?.statusCode,
+      };
     } catch (e) {
       debugPrint("Failed to create merchandise order: $e");
-      return null;
+      return {
+        'error': 'An unexpected error occurred',
+        'status': null,
+      };
     }
   }
 

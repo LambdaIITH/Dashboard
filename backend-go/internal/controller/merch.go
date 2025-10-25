@@ -113,6 +113,10 @@ func CreateOrder(c *gin.Context) {
 	orderID, err := db.CreateOrder(c.Request.Context(), order)
 	if err != nil {
 		fmt.Println("ERROR", err.Error())
+		if strings.Contains(err.Error(), "duplicate transaction_id") {
+			c.JSON(http.StatusConflict, gin.H{"error": "This transaction ID has already been used. Please verify and try again."})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create order"})
 		return
 	}

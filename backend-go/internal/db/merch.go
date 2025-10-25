@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"github.com/LambdaIITH/Dashboard/backend/config"
 	"github.com/LambdaIITH/Dashboard/backend/internal/schema"
@@ -136,8 +137,19 @@ func GetMerchItem(c context.Context, id int) (*schema.Merch, error) {
 
 // Create an order
 func CreateOrder(c context.Context, order schema.Order) (int, error) {
-	var orderID int
+	var exists bool
 	err := config.DB.QueryRow(c, `
+		SELECT EXISTS(SELECT 1 FROM orders WHERE transaction_id = $1)
+	`, order.TransactionID).Scan(&exists)
+	if err != nil {
+		return 0, err
+	}
+	if exists {
+		return 0, fmt.Errorf("duplicate transaction_id")
+	}
+
+	var orderID int
+	err = config.DB.QueryRow(c, `
         INSERT INTO orders (user_id, merch_id, size, transaction_id, display_name, status, order_date, is_oversized) 
         VALUES ($1, $2, $3, $4, $5, $6, CURRENT_DATE, $7) RETURNING id`,
 		order.UserID, order.MerchID, order.Size, order.TransactionID, order.DisplayName, order.Status, order.IsOversized,
