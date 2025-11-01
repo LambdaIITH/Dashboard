@@ -191,8 +191,9 @@ def delete_item_handler(
     
     try:
         with conn.cursor() as cur:
-            query = f"DELETE from {table_name} WHERE {table_name}.id = {item_id}"
-            cur.execute(query)
+            # Use parameterized query for item_id (table_name is already validated)
+            query = f"DELETE from {table_name} WHERE {table_name}.id = %s"
+            cur.execute(query, (item_id,))
         
         S3Client.deleteFromCloud(item_id, table_name)
         conn.commit()
