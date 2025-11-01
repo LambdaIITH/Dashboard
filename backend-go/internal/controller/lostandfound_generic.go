@@ -4,6 +4,7 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 	"strconv"
@@ -28,8 +29,33 @@ type LfResponse struct {
 	user_email      string
 }
 
+// Whitelist of allowed table names to prevent SQL injection
+var allowedControllerTables = map[string]bool{
+	"lost":         true,
+	"found":        true,
+	"lost_images":  true,
+	"found_images": true,
+}
+
+// validateTableName checks if a table name is in the allowed list
+func validateControllerTableName(tableName string) error {
+	if !allowedControllerTables[tableName] {
+		return fmt.Errorf("invalid table name: %s", tableName)
+	}
+	return nil
+}
+
 // AddItemGenericHandler handles adding a new item (lost or found)
 func AddItemGenericHandler(c *gin.Context, tableName, imagesTableName string) {
+	if err := validateControllerTableName(tableName); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if err := validateControllerTableName(imagesTableName); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	// Parse form data
 	formData := c.PostForm("form_data")
 	var formDataDict map[string]interface{}
@@ -81,6 +107,15 @@ func AddItemGenericHandler(c *gin.Context, tableName, imagesTableName string) {
 
 // GetAllItemsGenericHandler fetches all items with their images
 func GetAllItemsGenericHandler(c *gin.Context, tableName, imagesTableName string) {
+	if err := validateControllerTableName(tableName); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if err := validateControllerTableName(imagesTableName); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	// Fetch all items
 	items, err := db.GetAllItems(c, tableName, imagesTableName)
 	if err != nil {
@@ -129,6 +164,15 @@ func GetAllItemsGenericHandler(c *gin.Context, tableName, imagesTableName string
 
 // GetItemByIDGenericHandler fetches a specific item by ID
 func GetItemByIDGenericHandler(c *gin.Context, tableName, imagesTableName string) {
+	if err := validateControllerTableName(tableName); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if err := validateControllerTableName(imagesTableName); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	// Parse item ID
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -186,6 +230,15 @@ func GetItemByIDGenericHandler(c *gin.Context, tableName, imagesTableName string
 
 // DeleteItemGenericHandler deletes an item
 func DeleteItemGenericHandler(c *gin.Context, tableName, imagesTableName string) {
+	if err := validateControllerTableName(tableName); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if err := validateControllerTableName(imagesTableName); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	// Get user ID
 	userID, err := helpers.GetUserID(c)
 	if err != nil {
@@ -240,6 +293,11 @@ func DeleteItemGenericHandler(c *gin.Context, tableName, imagesTableName string)
 
 // EditItemGenericHandler edits an existing item
 func EditItemGenericHandler(c *gin.Context, tableName string) {
+	if err := validateControllerTableName(tableName); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	// Get user ID
 	userID, err := helpers.GetUserID(c)
 	if err != nil {
@@ -279,6 +337,15 @@ func EditItemGenericHandler(c *gin.Context, tableName string) {
 
 // SearchItemsGenericHandler searches for items
 func SearchItemsGenericHandler(c *gin.Context, tableName, imagesTableName string) {
+	if err := validateControllerTableName(tableName); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if err := validateControllerTableName(imagesTableName); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	query := c.Query("query")
 
 	// Search items

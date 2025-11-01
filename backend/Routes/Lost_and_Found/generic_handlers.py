@@ -11,6 +11,28 @@ from utils import conn, S3Client
 from models import LfItem, LfResponse
 from .funcs import get_image_dict, authorize_edit_delete
 
+# Whitelist of allowed table names to prevent SQL injection
+ALLOWED_TABLES = {'lost', 'found'}
+ALLOWED_IMAGES_TABLES = {'lost_images', 'found_images'}
+
+
+def _validate_table_name(table_name: str, allowed_tables: set) -> None:
+    """
+    Validate that a table name is in the allowed list.
+    
+    Args:
+        table_name: Name of the table to validate
+        allowed_tables: Set of allowed table names
+        
+    Raises:
+        HTTPException: If table name is not in allowed list
+    """
+    if table_name not in allowed_tables:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid table name: {table_name}"
+        )
+
 
 async def add_item_handler(
     request: Request,
@@ -34,6 +56,7 @@ async def add_item_handler(
     Returns:
         Success message dictionary
     """
+    _validate_table_name(table_name, ALLOWED_TABLES)
     try:
         form_data_dict = json.loads(form_data)
         user_id = get_user_id(request)
@@ -72,6 +95,8 @@ async def get_all_items_handler(
     Returns:
         List of items with their images
     """
+    _validate_table_name(table_name, ALLOWED_TABLES)
+    _validate_table_name(images_table_name, ALLOWED_IMAGES_TABLES)
     try:
         with conn.cursor() as cur:
             cur.execute(
@@ -156,6 +181,7 @@ def delete_item_handler(
     Returns:
         Success message dictionary
     """
+    _validate_table_name(table_name, ALLOWED_TABLES)
     user_id = get_user_id(request)
     
     try:
@@ -201,6 +227,7 @@ def edit_item_handler(
     Returns:
         Success message dictionary
     """
+    _validate_table_name(table_name, ALLOWED_TABLES)
     user_id = get_user_id(request)
     
     try:

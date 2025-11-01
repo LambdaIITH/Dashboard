@@ -6,6 +6,25 @@ This module provides reusable query functions that work for both 'lost' and 'fou
 from pypika import Query, Table, Order
 from typing import Dict, Any
 
+# Whitelist of allowed table names to prevent SQL injection
+ALLOWED_TABLES = {'lost', 'found'}
+ALLOWED_IMAGES_TABLES = {'lost_images', 'found_images'}
+
+
+def _validate_table_name(table_name: str, allowed_tables: set) -> None:
+    """
+    Validate that a table name is in the allowed list.
+    
+    Args:
+        table_name: Name of the table to validate
+        allowed_tables: Set of allowed table names
+        
+    Raises:
+        ValueError: If table name is not in allowed list
+    """
+    if table_name not in allowed_tables:
+        raise ValueError(f"Invalid table name: {table_name}")
+
 
 def insert_in_table(table_name: str, form_data: Dict[str, Any], user_id: int) -> str:
     """
@@ -19,6 +38,7 @@ def insert_in_table(table_name: str, form_data: Dict[str, Any], user_id: int) ->
     Returns:
         SQL query string with RETURNING clause
     """
+    _validate_table_name(table_name, ALLOWED_TABLES)
     table = Table(table_name)
     query = Query.into(table).columns('item_name', 'item_description', 'user_id').insert(
         form_data['item_name'], form_data['item_description'], user_id
@@ -42,6 +62,7 @@ def insert_images(table_name: str, image_paths: list, post_id: int) -> str:
     Returns:
         SQL query string
     """
+    _validate_table_name(table_name, ALLOWED_IMAGES_TABLES)
     images_table = Table(table_name)
     query = Query.into(images_table).columns('image_url', 'item_id')
 
@@ -53,7 +74,9 @@ def insert_images(table_name: str, image_paths: list, post_id: int) -> str:
 
 def get_all_items(table_name: str, images_table_name: str) -> str:
     """
-    Generic query to get all items with their images.
+    _validate_table_name(table_name, ALLOWED_TABLES)
+    _validate_table_name(images_table_name, ALLOWED_IMAGES_TABLES)
+        Generic query to get all items with their images.
     
     Args:
         table_name: Name of the main table ('lost' or 'found')
@@ -85,7 +108,8 @@ def get_all_items(table_name: str, images_table_name: str) -> str:
 
 def update_in_table(table_name: str, item_id: int, form_data: Dict[str, Any]) -> str:
     """
-    Generic update query for lost/found items.
+    _validate_table_name(table_name, ALLOWED_TABLES)
+        Generic update query for lost/found items.
     
     Args:
         table_name: Name of the table ('lost' or 'found')
@@ -109,7 +133,8 @@ def update_in_table(table_name: str, item_id: int, form_data: Dict[str, Any]) ->
 
 def get_particular_item(table_name: str, item_id: int) -> str:
     """
-    Generic query to get a specific item with user details.
+    _validate_table_name(table_name, ALLOWED_TABLES)
+        Generic query to get a specific item with user details.
     
     Args:
         table_name: Name of the table ('lost' or 'found')
@@ -130,7 +155,8 @@ def get_particular_item(table_name: str, item_id: int) -> str:
 
 def delete_an_item_images(images_table_name: str, item_id: int) -> str:
     """
-    Generic query to delete all images for an item.
+    _validate_table_name(images_table_name, ALLOWED_IMAGES_TABLES)
+        Generic query to delete all images for an item.
     
     Args:
         images_table_name: Name of the images table ('lost_images' or 'found_images')
@@ -146,7 +172,8 @@ def delete_an_item_images(images_table_name: str, item_id: int) -> str:
 
 def get_all_image_uris(images_table_name: str, item_id: int) -> str:
     """
-    Generic query to get all image URLs for an item.
+    _validate_table_name(images_table_name, ALLOWED_IMAGES_TABLES)
+        Generic query to get all image URLs for an item.
     
     Args:
         images_table_name: Name of the images table ('lost_images' or 'found_images')
@@ -162,7 +189,8 @@ def get_all_image_uris(images_table_name: str, item_id: int) -> str:
 
 def search_items(table_name: str, search_query: str, max_results: int = 10) -> str:
     """
-    Generic search query for lost/found items.
+    _validate_table_name(table_name, ALLOWED_TABLES)
+        Generic search query for lost/found items.
     
     Args:
         table_name: Name of the table ('lost' or 'found')
@@ -184,7 +212,8 @@ def search_items(table_name: str, search_query: str, max_results: int = 10) -> s
 
 def get_some_image_uris(images_table_name: str, item_ids: list) -> str:
     """
-    Generic query to get image URLs for multiple items.
+    _validate_table_name(images_table_name, ALLOWED_IMAGES_TABLES)
+        Generic query to get image URLs for multiple items.
     
     Args:
         images_table_name: Name of the images table ('lost_images' or 'found_images')

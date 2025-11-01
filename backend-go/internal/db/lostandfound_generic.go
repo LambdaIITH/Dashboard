@@ -10,8 +10,28 @@ import (
 	"github.com/LambdaIITH/Dashboard/backend/internal/schema"
 )
 
+// Whitelist of allowed table names to prevent SQL injection
+var allowedTables = map[string]bool{
+	"lost":         true,
+	"found":        true,
+	"lost_images":  true,
+	"found_images": true,
+}
+
+// validateTableName checks if a table name is in the allowed list
+func validateTableName(tableName string) error {
+	if !allowedTables[tableName] {
+		return fmt.Errorf("invalid table name: %s", tableName)
+	}
+	return nil
+}
+
 // InsertInTable inserts a new item (lost or found) into the specified table
 func InsertInTable(ctx context.Context, tableName string, formData map[string]interface{}, userID int) (int, error) {
+	if err := validateTableName(tableName); err != nil {
+		return 0, err
+	}
+
 	query := fmt.Sprintf(`
         INSERT INTO %s (item_name, item_description, user_id)
         VALUES ($1, $2, $3)
@@ -29,6 +49,10 @@ func InsertInTable(ctx context.Context, tableName string, formData map[string]in
 
 // InsertImages inserts image URLs for an item into the specified images table
 func InsertImages(ctx context.Context, imagesTableName string, imagePaths []string, postID int) error {
+	if err := validateTableName(imagesTableName); err != nil {
+		return err
+	}
+
 	query := fmt.Sprintf(`INSERT INTO %s (image_url, item_id) VALUES ($1, $2)`, imagesTableName)
 
 	for _, imagePath := range imagePaths {
@@ -43,6 +67,13 @@ func InsertImages(ctx context.Context, imagesTableName string, imagePaths []stri
 
 // GetAllItems retrieves all items from the specified table with their images
 func GetAllItems(ctx context.Context, tableName, imagesTableName string) ([]map[string]interface{}, error) {
+	if err := validateTableName(tableName); err != nil {
+		return nil, err
+	}
+	if err := validateTableName(imagesTableName); err != nil {
+		return nil, err
+	}
+
 	query := fmt.Sprintf(`
         SELECT
             f.id,
@@ -100,6 +131,10 @@ func GetAllItems(ctx context.Context, tableName, imagesTableName string) ([]map[
 
 // GetParticularItem retrieves a specific item with user details
 func GetParticularItem(ctx context.Context, tableName string, itemID int) (*schema.LostFoundItem, error) {
+	if err := validateTableName(tableName); err != nil {
+		return nil, err
+	}
+
 	query := fmt.Sprintf(`
         SELECT 
             %s.id, 
@@ -134,6 +169,10 @@ func GetParticularItem(ctx context.Context, tableName string, itemID int) (*sche
 
 // UpdateInTable updates an item in the specified table
 func UpdateInTable(ctx context.Context, tableName string, itemID int, formData map[string]interface{}) (map[string]interface{}, error) {
+	if err := validateTableName(tableName); err != nil {
+		return nil, err
+	}
+
 	query := fmt.Sprintf(`
         UPDATE %s 
         SET item_name = $1, item_description = $2 
@@ -170,6 +209,10 @@ func UpdateInTable(ctx context.Context, tableName string, itemID int, formData m
 
 // DeleteAllImageURIs deletes and returns all image URLs for an item
 func DeleteAllImageURIs(ctx context.Context, imagesTableName string, itemID int) ([]string, error) {
+	if err := validateTableName(imagesTableName); err != nil {
+		return nil, err
+	}
+
 	query := fmt.Sprintf(`SELECT image_url FROM %s WHERE item_id = $1`, imagesTableName)
 	rows, err := config.DB.Query(ctx, query, itemID)
 	if err != nil {
@@ -191,6 +234,10 @@ func DeleteAllImageURIs(ctx context.Context, imagesTableName string, itemID int)
 
 // DeleteItemImages deletes all images for an item from the images table
 func DeleteItemImages(ctx context.Context, imagesTableName string, itemID int) (int64, error) {
+	if err := validateTableName(imagesTableName); err != nil {
+		return 0, err
+	}
+
 	query := fmt.Sprintf(`DELETE FROM %s WHERE item_id = $1`, imagesTableName)
 	result, err := config.DB.Exec(ctx, query, itemID)
 	if err != nil {
@@ -202,6 +249,10 @@ func DeleteItemImages(ctx context.Context, imagesTableName string, itemID int) (
 
 // SearchItems searches for items matching the query string
 func SearchItems(ctx context.Context, tableName, searchQuery string) ([]map[string]interface{}, error) {
+	if err := validateTableName(tableName); err != nil {
+		return nil, err
+	}
+
 	query := fmt.Sprintf(`
         SELECT * 
         FROM %s 
@@ -247,6 +298,10 @@ func SearchItems(ctx context.Context, tableName, searchQuery string) ([]map[stri
 
 // GetSomeImageURIs retrieves image URLs for multiple items
 func GetSomeImageURIs(ctx context.Context, imagesTableName string, itemIDs []int) ([]schema.ImageURI, error) {
+	if err := validateTableName(imagesTableName); err != nil {
+		return nil, err
+	}
+
 	if len(itemIDs) == 0 {
 		return []schema.ImageURI{}, nil
 	}
