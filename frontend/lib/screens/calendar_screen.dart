@@ -1,6 +1,7 @@
 import 'package:dashbaord/extensions.dart';
 import 'package:dashbaord/models/lecture_model.dart';
 import 'package:dashbaord/models/time_table_model.dart';
+import 'package:dashbaord/providers/timetable_provider.dart';
 import 'package:dashbaord/services/api_service.dart';
 import 'package:dashbaord/services/shared_service.dart';
 import 'package:dashbaord/widgets/custom_appbar.dart';
@@ -16,11 +17,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:calendar_view/calendar_view.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 
-class CalendarScreen extends StatefulWidget {
+class CalendarScreen extends ConsumerStatefulWidget {
   final Timetable? timetable;
   final Function(String, String, List<Lecture>, String?, String?)?
       onLectureAdded;
@@ -34,13 +36,12 @@ class CalendarScreen extends StatefulWidget {
   });
 
   @override
-  State<CalendarScreen> createState() => _CalendarScreenState();
+  ConsumerState<CalendarScreen> createState() => _CalendarScreenState();
 }
 
-class _CalendarScreenState extends State<CalendarScreen> {
+class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   String selectedViewType = "List";
   List<String> viewTypeList = ["List", "Day", "Week", "Month"];
-  Timetable? timetable;
   DateTime? initialDate = DateTime.now();
   final List<CalendarEventData> _events = [];
 
@@ -98,7 +99,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
   @override
   void initState() {
     super.initState();
-    timetable = widget.timetable;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       requestNotifPerms(context);
     });
@@ -106,6 +106,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final timetableAsyncValue = ref.watch(timetableProvider);
+    
     return CalendarControllerProvider(
       controller: EventController()..addAll(_events),
       child: Scaffold(
@@ -118,15 +120,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 iconColor: context.customColors.customAccentColor,
                 onSelected: (value) async {
                   if (value == "refresh") {
-                    final response = await ApiServices().getTimetable(context);
-                    if (response == null) {
+                    await ref.read(timetableProvider.notifier).fetchTimetable(context);
+                    if (ref.read(timetableProvider).hasError) {
                       showError(msg: "Failed to fetch timetable");
-                      return;
                     }
-                    setState(() {
-                      timetable = response;
-                    });
-                    SharedService().saveTimetable(response);
                   } else if (value == "manageCourses") {
                     _showManageCoursesBottomSheet(context);
                   } else if (value == "shareCode") {
@@ -178,61 +175,65 @@ class _CalendarScreenState extends State<CalendarScreen> {
             )
           ],
         ),
-        body: Column(
-          children: [
-            const SizedBox(
-              height: 2,
-            ),
-            ToggleButtons(
-              isSelected: viewTypeList
-                  .map((viewType) => viewType == selectedViewType)
-                  .toList(),
-              onPressed: (int index) {
-                setState(() {
-                  selectedViewType = viewTypeList[index];
-                });
-              },
-              borderRadius: BorderRadius.circular(10),
-              selectedColor: Colors.white,
-              fillColor: context.customColors.customAccentColor,
-              constraints: BoxConstraints(
-                minHeight: 40.0,
-                minWidth: MediaQuery.of(context).size.width * 2 / 9,
+        body: timetableAsyncValue.when(
+          data: (timetable) => Column(
+            children: [
+              const SizedBox(
+                height: 2,
               ),
-              children: viewTypeList.map((String viewType) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Text(
-                    viewType,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: viewType == selectedViewType
-                          ? Colors.white
-                          : Theme.of(context).textTheme.bodyLarge?.color,
+              ToggleButtons(
+                isSelected: viewTypeList
+                    .map((viewType) => viewType == selectedViewType)
+                    .toList(),
+                onPressed: (int index) {
+                  setState(() {
+                    selectedViewType = viewTypeList[index];
+                  });
+                },
+                borderRadius: BorderRadius.circular(10),
+                selectedColor: Colors.white,
+                fillColor: context.customColors.customAccentColor,
+                constraints: BoxConstraints(
+                  minHeight: 40.0,
+                  minWidth: MediaQuery.of(context).size.width * 2 / 9,
+                ),
+                children: viewTypeList.map((String viewType) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text(
+                      viewType,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: viewType == selectedViewType
+                            ? Colors.white
+                            : Theme.of(context).textTheme.bodyLarge?.color,
+                      ),
                     ),
-                  ),
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 10),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: _getCurrentView(context),
+                  );
+                }).toList(),
               ),
-            ),
-            SizedBox(
-              height: 10,
-            )
-          ],
+              const SizedBox(height: 10),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: _getCurrentView(context, timetable),
+                ),
+              ),
+              SizedBox(
+                height: 10,
+              )
+            ],
+          ),
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stack) => Center(child: Text('Error loading timetable')),
         ),
         floatingActionButton: _buildFABs(),
       ),
     );
   }
 
-  Widget _getCurrentView(BuildContext context) {
+  Widget _getCurrentView(BuildContext context, Timetable? timetable) {
     switch (selectedViewType) {
       case "List":
         return ListViewScreen(
@@ -267,16 +268,20 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   void _showAddEventBottomSheet(BuildContext context) {
+    final timetable = ref.read(timetableProvider).value;
     showModalBottomSheet(
       context: context,
       builder: (context) {
         return AddLectureBottomSheet(
           timetable: timetable,
-          onLectureAdded: (courseCode, courseName, lectures, classRoom, slot, segment) {
-            setState(() {
-              timetable =
-                  timetable!.addCourse(courseCode, courseName, lectures);
-            });
+          onLectureAdded: (courseCode, courseName, lectures, classRoom, slot, segment) async {
+            await ref.read(timetableProvider.notifier).addCourse(
+              courseCode: courseCode,
+              courseName: courseName,
+              lectures: lectures,
+              classRoom: classRoom,
+              slot: slot,
+            );
             widget.onLectureAdded!(
                 courseCode, courseName, lectures, classRoom, slot);
           },
@@ -288,15 +293,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   void _showManageCoursesBottomSheet(BuildContext context) {
+    final timetable = ref.read(timetableProvider).value;
     showModalBottomSheet(
       context: context,
       builder: (context) {
         return ManageCoursesBottomSheet(
           timetable: timetable,
-          onEditTimetable: (editedTimetable) {
-            setState(() {
-              timetable = editedTimetable;
-            });
+          onEditTimetable: (editedTimetable) async {
+            await ref.read(timetableProvider.notifier).updateTimetable(editedTimetable);
             widget.onEditTimetable!(editedTimetable);
           },
         );
@@ -324,7 +328,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   void _shareSchedule() async {
-    final courseDetails = timetable!.courses.entries.map((entry) {
+    final timetable = ref.read(timetableProvider).value;
+    if (timetable == null) {
+      showError(msg: "No timetable to share");
+      return;
+    }
+    
+    final courseDetails = timetable.courses.entries.map((entry) {
       final code = entry.key;
       final name = entry.value['title'];
       return '$code: $name';
