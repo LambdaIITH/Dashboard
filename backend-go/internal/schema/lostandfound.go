@@ -48,3 +48,14 @@ type ImageURI struct {
 	ItemID   int    `db:"item_id"`
 	ImageURL string `db:"image_url"`
 }
+
+// LostFoundItem is a generic type that can represent both Lost and Found items
+type LostFoundItem struct {
+	ID              int    `db:"id"`
+	ItemName        string `db:"item_name"`
+	ItemDescription string `db:"item_description"`
+	UserID          int    `db:"user_id"`
+	UserName        string `db:"username"`
+	UserEmail       string `db:"user_email"`
+	CreatedAt       string `db:"created_at"`
+}
