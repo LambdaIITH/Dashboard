@@ -74,9 +74,7 @@ def insert_images(table_name: str, image_paths: list, post_id: int) -> str:
 
 def get_all_items(table_name: str, images_table_name: str) -> str:
     """
-    _validate_table_name(table_name, ALLOWED_TABLES)
-    _validate_table_name(images_table_name, ALLOWED_IMAGES_TABLES)
-        Generic query to get all items with their images.
+    Generic query to get all items with their images.
     
     Args:
         table_name: Name of the main table ('lost' or 'found')
@@ -85,6 +83,8 @@ def get_all_items(table_name: str, images_table_name: str) -> str:
     Returns:
         SQL query string
     """
+    _validate_table_name(table_name, ALLOWED_TABLES)
+    _validate_table_name(images_table_name, ALLOWED_IMAGES_TABLES)
     query = f"""
             SELECT
                 f.id,
@@ -108,8 +108,7 @@ def get_all_items(table_name: str, images_table_name: str) -> str:
 
 def update_in_table(table_name: str, item_id: int, form_data: Dict[str, Any]) -> str:
     """
-    _validate_table_name(table_name, ALLOWED_TABLES)
-        Generic update query for lost/found items.
+    Generic update query for lost/found items.
     
     Args:
         table_name: Name of the table ('lost' or 'found')
@@ -119,6 +118,7 @@ def update_in_table(table_name: str, item_id: int, form_data: Dict[str, Any]) ->
     Returns:
         SQL query string with RETURNING clause
     """
+    _validate_table_name(table_name, ALLOWED_TABLES)
     table = Table(table_name)
     query = Query.update(table)
 
@@ -133,8 +133,7 @@ def update_in_table(table_name: str, item_id: int, form_data: Dict[str, Any]) ->
 
 def get_particular_item(table_name: str, item_id: int) -> str:
     """
-    _validate_table_name(table_name, ALLOWED_TABLES)
-        Generic query to get a specific item with user details.
+    Generic query to get a specific item with user details.
     
     Args:
         table_name: Name of the table ('lost' or 'found')
@@ -143,6 +142,7 @@ def get_particular_item(table_name: str, item_id: int) -> str:
     Returns:
         SQL query string
     """
+    _validate_table_name(table_name, ALLOWED_TABLES)
     table = Table(table_name)
     users = Table("users")
     query = (Query.from_(table)
@@ -155,8 +155,7 @@ def get_particular_item(table_name: str, item_id: int) -> str:
 
 def delete_an_item_images(images_table_name: str, item_id: int) -> str:
     """
-    _validate_table_name(images_table_name, ALLOWED_IMAGES_TABLES)
-        Generic query to delete all images for an item.
+    Generic query to delete all images for an item.
     
     Args:
         images_table_name: Name of the images table ('lost_images' or 'found_images')
@@ -165,6 +164,7 @@ def delete_an_item_images(images_table_name: str, item_id: int) -> str:
     Returns:
         SQL query string
     """
+    _validate_table_name(images_table_name, ALLOWED_IMAGES_TABLES)
     images_table = Table(images_table_name)
     query = Query.from_(images_table).delete().where(images_table['item_id'] == item_id)
     return str(query)
@@ -172,8 +172,7 @@ def delete_an_item_images(images_table_name: str, item_id: int) -> str:
 
 def get_all_image_uris(images_table_name: str, item_id: int) -> str:
     """
-    _validate_table_name(images_table_name, ALLOWED_IMAGES_TABLES)
-        Generic query to get all image URLs for an item.
+    Generic query to get all image URLs for an item.
     
     Args:
         images_table_name: Name of the images table ('lost_images' or 'found_images')
@@ -182,6 +181,7 @@ def get_all_image_uris(images_table_name: str, item_id: int) -> str:
     Returns:
         SQL query string
     """
+    _validate_table_name(images_table_name, ALLOWED_IMAGES_TABLES)
     images_table = Table(images_table_name)
     query = Query.from_(images_table).select('image_url').where(images_table['item_id'] == item_id)
     return str(query)
@@ -189,8 +189,7 @@ def get_all_image_uris(images_table_name: str, item_id: int) -> str:
 
 def search_items(table_name: str, search_query: str, max_results: int = 10) -> str:
     """
-    _validate_table_name(table_name, ALLOWED_TABLES)
-        Generic search query for lost/found items.
+    Generic search query for lost/found items.
     
     Args:
         table_name: Name of the table ('lost' or 'found')
@@ -200,6 +199,7 @@ def search_items(table_name: str, search_query: str, max_results: int = 10) -> s
     Returns:
         SQL query string
     """
+    _validate_table_name(table_name, ALLOWED_TABLES)
     table = Table(table_name)
     query = (Query.from_(table)
     .select('*')
@@ -212,8 +212,7 @@ def search_items(table_name: str, search_query: str, max_results: int = 10) -> s
 
 def get_some_image_uris(images_table_name: str, item_ids: list) -> str:
     """
-    _validate_table_name(images_table_name, ALLOWED_IMAGES_TABLES)
-        Generic query to get image URLs for multiple items.
+    Generic query to get image URLs for multiple items.
     
     Args:
         images_table_name: Name of the images table ('lost_images' or 'found_images')
@@ -222,6 +221,7 @@ def get_some_image_uris(images_table_name: str, item_ids: list) -> str:
     Returns:
         SQL query string
     """
+    _validate_table_name(images_table_name, ALLOWED_IMAGES_TABLES)
     images_table = Table(images_table_name)
     query = Query.from_(images_table).select(
         images_table['item_id'], 
