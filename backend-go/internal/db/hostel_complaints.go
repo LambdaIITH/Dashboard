@@ -18,7 +18,7 @@ func CreateComplaint(ctx context.Context, userID int64, complaint *schema.Hostel
 
 	query := `
 		INSERT INTO hostel_complaints (user_id, complaint_description, complaint_data, complaint_status)
-		VALUeS ($1, $2, $3, 'received')
+		VALUeS ($1, $2, $3, 'Pending')
 		RETURNING id;
 	`
 

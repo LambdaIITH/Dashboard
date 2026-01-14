@@ -240,7 +240,7 @@ CREATE TABLE IF NOT EXISTS hostel_complaints
     user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
     complaint_description VARCHAR(1000) NOT NULL,
     complaint_data JSONB DEFAULT '{}',
-    complaint_status VARCHAR(50) DEFAULT 'received',
+    complaint_status VARCHAR(50) DEFAULT 'Pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     resolved_at TIMESTAMP NULL
 );

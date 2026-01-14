@@ -81,10 +81,25 @@ func CreateComplaintHandler(c *gin.Context) {
 		return
 	}
 
+	// Send response to user immediately
 	c.JSON(http.StatusCreated, gin.H{
 		"message":   "Complaint created Successfully",
 		"complaint": complaint,
 	})
+	
+	//Trigger Webhook for updatig to sheet
+	
+	// Fetch user details to get phone number
+	user := db.GetUser(ctx, int(userId))
+	complaint["user_phone"] = user.PhoneNumber
+
+	// parse roll number from email
+	if strings.Contains(user.Email, "@") {
+		parts := strings.Split(user.Email, "@")
+		complaint["user_roll_no"] = parts[0]
+	}
+
+	go helpers.TriggerComplaintWebhook(complaint)
 }
 
 // get specific complaint
@@ -129,7 +144,7 @@ func GetUserComplaintsHandler(c *gin.Context) {
 func AdminUpdateComplaintStatusHandler(c *gin.Context) {
 	//verifying admin
 	adminKey := c.GetHeader("X-Admin-Key")
-	if adminKey == "" || adminKey != os.Getenv("ADMIN_API_KEY") {
+	if adminKey == "" || adminKey != os.Getenv("HOSTEL_COMPLAINT_ADMIN_KEY") {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
