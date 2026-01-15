@@ -100,6 +100,9 @@ func CreateComplaintHandler(c *gin.Context) {
 	}
 
 	go helpers.TriggerComplaintWebhook(complaint)
+
+	// Send Email
+	go helpers.SendHostelComplaintEmail(user.Email, "hostel_complaint_created", complaint)
 }
 
 // get specific complaint
@@ -191,4 +194,7 @@ func AdminUpdateComplaintStatusHandler(c *gin.Context) {
 		"message":   "Status updated",
 		"complaint": complaint,
 	})
+
+	// Send Email
+	go helpers.SendHostelComplaintEmail(complaint["user_email"].(string), "hostel_complaint_status_update", complaint)
 }
