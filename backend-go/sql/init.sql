@@ -242,7 +242,9 @@ CREATE TABLE IF NOT EXISTS hostel_complaints
     complaint_data JSONB DEFAULT '{}',
     complaint_status VARCHAR(50) DEFAULT 'Pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    resolved_at TIMESTAMP NULL
+    resolved_at TIMESTAMP NULL,
+    is_sheet_synced BOOLEAN DEFAULT FALSE,
+    sheet_sync_attempts INT DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS hostel_complaint_images

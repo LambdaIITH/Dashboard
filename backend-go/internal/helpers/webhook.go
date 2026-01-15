@@ -29,13 +29,13 @@ type WebhookPayload struct {
 	IssueType            string                 `json:"issue_type"`
 }
 
-func TriggerComplaintWebhook(complaint map[string]interface{}) {
+func TriggerComplaintWebhook(complaint map[string]interface{}) error {
 	webhookURL := os.Getenv("HOSTEL_COMPLAINT_SHEET_WEBHOOK")
 	authKey := os.Getenv("HOSTEL_COMPLAINT_SHEET_TOKEN_SECRET")
 
 	if webhookURL == "" {
 		fmt.Println("Warning: HOSTEL_COMPLAINT_SHEET_WEBHOOK is not set. Skipping webhook.")
-		return
+		return nil
 	}
 
 	//Get values from complaint map
@@ -100,8 +100,7 @@ func TriggerComplaintWebhook(complaint map[string]interface{}) {
 			}
 		}
 	} else {
-		fmt.Printf("Error: complaint_data is invalid or missing in webhook payload for ID %v\n", payload.ID)
-		return
+		return fmt.Errorf("complaint_data is invalid or missing in webhook payload for ID %v", payload.ID)
 	}
 
 	if v, ok := complaint["user_phone"].(string); ok {
@@ -116,8 +115,7 @@ func TriggerComplaintWebhook(complaint map[string]interface{}) {
 
 	jsonData, err := json.Marshal(payload)
 	if err != nil {
-		fmt.Printf("Error marshaling webhook payload: %v\n", err)
-		return
+		return fmt.Errorf("error marshaling webhook payload: %w", err)
 	}
 
 	client := &http.Client{
@@ -126,21 +124,34 @@ func TriggerComplaintWebhook(complaint map[string]interface{}) {
 
 	req, err := http.NewRequest("POST", finalURL, bytes.NewBuffer(jsonData))
 	if err != nil {
-		fmt.Printf("Error creating webhook request: %v\n", err)
-		return
+		return fmt.Errorf("error creating webhook request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Printf("Error creating complaint webhook: %v\n", err)
-		return
+		return fmt.Errorf("error executing webhook request: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode >= 400 {
-		fmt.Printf("Webhook failed with status: %d\n", resp.StatusCode)
-		} else {
-			fmt.Printf("Webhook sent successfully for Complaint ID %d\n", payload.ID)
+		return fmt.Errorf("webhook failed with status: %d", resp.StatusCode)
 	}
+	
+	// Read response to check for logical error or success
+	var res map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&res); err != nil {
+		return fmt.Errorf("failed to decode apps script response (empty or invalid JSON): %w", err)
+	}
+
+	if val, ok := res["result"]; !ok || val != "success" {
+		//return error message from apps script if it exists
+		if errMsg, ok := res["error"]; ok {
+			return fmt.Errorf("apps script returned error: %v", errMsg)
+		}
+		return fmt.Errorf("apps script did not return success. Response: %v", res)
+	}
+	
+	fmt.Printf("Webhook sent successfully for Complaint ID %d\n", payload.ID)
+	return nil
 }

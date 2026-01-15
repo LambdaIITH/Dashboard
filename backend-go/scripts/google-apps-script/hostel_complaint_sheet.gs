@@ -137,7 +137,7 @@ function syncToBackend(id, status) {
   var url = BACKEND_URL + "hostel-complaints/" + id + "/status";
   
   var payload = {
-    "new_status": status.toLowerCase()
+    "new_status": status
   };
   
   var options = {

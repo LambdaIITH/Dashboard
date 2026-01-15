@@ -99,7 +99,20 @@ func CreateComplaintHandler(c *gin.Context) {
 		complaint["user_roll_no"] = parts[0]
 	}
 
-	go helpers.TriggerComplaintWebhook(complaint)
+	go func(cmp map[string]interface{}) {
+		err := helpers.TriggerComplaintWebhook(cmp)
+		
+		ctx := context.Background()
+
+		//sync to sheet
+		if err == nil {
+			//success
+			_ = db.MarkComplaintAsSynced(ctx, cmp["id"].(int64))
+		} else {
+			//failure
+			_ = db.IncrementSyncAttempts(ctx, cmp["id"].(int64))
+		}
+	}(complaint)
 
 	// Send Email
 	go helpers.SendHostelComplaintEmail(user.Email, "hostel_complaint_created", complaint)
