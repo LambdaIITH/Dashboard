@@ -154,9 +154,7 @@ func GetCombinedAllItemsHandler(c *gin.Context) {
 		fmt.Println(err)
 		return
 	}
-	if len(lostItems) > maxLimit {
-		lostItems = lostItems[:maxLimit]
-	}
+
 
 	foundItems, err := lost.GetAllFoundItems(c)
 	if err != nil {
@@ -164,9 +162,7 @@ func GetCombinedAllItemsHandler(c *gin.Context) {
 		return
 	}
 
-	if len(foundItems) > maxLimit {
-		foundItems = foundItems[:maxLimit]
-	}
+
 
 	//Step 2: Fetching images for all lost items AND found items
 	lostRows, err := config.DB.Query(c, "SELECT item_id, image_url FROM lost_images")
@@ -237,9 +233,21 @@ func GetCombinedAllItemsHandler(c *gin.Context) {
 	}
 
 	sort.Slice(response, func(i, j int) bool {
-		t1, _ := time.Parse(time.RFC3339, response[i]["created_at"].(string))
-		t2, _ := time.Parse(time.RFC3339, response[j]["created_at"].(string))
-		return t1.After(t2) //newest first
+		t1, err1 := time.Parse(time.RFC3339, response[i]["created_at"].(string))
+		t2, err2 := time.Parse(time.RFC3339, response[j]["created_at"].(string))
+		if err1 != nil && err2 != nil {
+			// Both times invalid, keep original order
+			return false
+		}
+		if err1 != nil {
+			// i is invalid, j is valid: j comes first (i is "older")
+			return false
+		}
+		if err2 != nil {
+			// j is invalid, i is valid: i comes first (i is "newer")
+			return true
+		}
+		return t1.After(t2) // newest first
 	})
 
 	if len(response) > maxLimit {
