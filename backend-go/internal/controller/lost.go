@@ -151,7 +151,7 @@ func GetCombinedAllItemsHandler(c *gin.Context) {
 	lostItems, err := lost.GetAllLostItems(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch items"})
-		fmt.Println(err)
+
 		return
 	}
 
@@ -164,45 +164,11 @@ func GetCombinedAllItemsHandler(c *gin.Context) {
 
 
 
-	//Step 2: Fetching images for all lost items AND found items
-	lostRows, err := config.DB.Query(c, "SELECT item_id, image_url FROM lost_images")
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch images"})
-		return
-	}
-	defer lostRows.Close()
-
-	foundRows, err := config.DB.Query(c, "SELECT item_id, image_url FROM found_images")
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch images"})
-		return
-	}
-	defer foundRows.Close()
-
-	//Step 3: Organize the image urls by item ID
-	imageDict := make(map[int][]string)
-	for lostRows.Next() {
-		var img schema.ImageURI
-		if err := lostRows.Scan(&img.ItemID, &img.ImageURL); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to scan images"})
-			return
-		}
-		imageDict[img.ItemID] = append(imageDict[img.ItemID], img.ImageURL)
-	}
-
-	for foundRows.Next() {
-		var img schema.ImageURI
-		if err := foundRows.Scan(&img.ItemID, &img.ImageURL); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to scan images"})
-			return
-		}
-		imageDict[img.ItemID] = append(imageDict[img.ItemID], img.ImageURL)
-	}
-
+	//Step 2: Initialize response slice
 	response := make([]map[string]any, 0, len(lostItems)+len(foundItems))
 
 	for _, item := range lostItems {
-		images := imageDict[item.ID]
+		images := item.Images
 		if images == nil {
 			images = []string{}
 		}
@@ -211,13 +177,13 @@ func GetCombinedAllItemsHandler(c *gin.Context) {
 			"id":         item.ID,
 			"name":       item.ItemName,
 			"images":     images,
-			"created_at": item.CreatedAt.Format(time.RFC3339),
+			"created_at": item.CreatedAt,
 			"type":       "lost",
 		}
 		response = append(response, itemData)
 	}
 	for _, item := range foundItems {
-		images := imageDict[item.ID]
+		images := item.Images
 		if images == nil {
 			images = []string{}
 		}
@@ -226,27 +192,15 @@ func GetCombinedAllItemsHandler(c *gin.Context) {
 			"id":         item.ID,
 			"name":       item.ItemName,
 			"images":     images,
-			"created_at": item.CreatedAt.Format(time.RFC3339),
+			"created_at": item.CreatedAt,
 			"type":       "found",
 		}
 		response = append(response, itemData)
 	}
 
 	sort.Slice(response, func(i, j int) bool {
-		t1, err1 := time.Parse(time.RFC3339, response[i]["created_at"].(string))
-		t2, err2 := time.Parse(time.RFC3339, response[j]["created_at"].(string))
-		if err1 != nil && err2 != nil {
-			// Both times invalid, keep original order
-			return false
-		}
-		if err1 != nil {
-			// i is invalid, j is valid: j comes first (i is "older")
-			return false
-		}
-		if err2 != nil {
-			// j is invalid, i is valid: i comes first (i is "newer")
-			return true
-		}
+		t1 := response[i]["created_at"].(time.Time)
+		t2 := response[j]["created_at"].(time.Time)
 		return t1.After(t2) // newest first
 	})
 
