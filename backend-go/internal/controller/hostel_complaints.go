@@ -63,6 +63,17 @@ func CreateComplaintHandler(c *gin.Context) {
 	if err == nil && form.File["images"] != nil {
 		files := form.File["images"]
 		if len(files) > 0 {
+			if len(files) > 5 {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Cannot upload more than 5 images"})
+				return
+			}
+			for _, file := range files {
+				if file.Size > 10*1024*1024 { // 10MB limit
+					c.JSON(http.StatusBadRequest, gin.H{"error": "One or more files exceed the 10MB size limit"})
+					return
+				}
+			}
+
 			s3Client := helpers.NewS3Client(os.Getenv("BUCKET_NAME"), os.Getenv("REGION"), os.Getenv("RESOURCE_URI"))
 
 			imagePaths, err := s3Client.UploadImages(files, int(complaintID), "hostel-complaints")

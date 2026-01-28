@@ -3,12 +3,15 @@ package worker
 import (
 	"context"
 	"fmt"
+	"sync/atomic"
 	"time"
 
 	"github.com/LambdaIITH/Dashboard/backend/config"
 	"github.com/LambdaIITH/Dashboard/backend/internal/db"
 	"github.com/LambdaIITH/Dashboard/backend/internal/helpers"
 )
+
+var isProcessing int32
 
 func StartRetryWorker() {
 	ticker := time.NewTicker(10 * time.Minute)
@@ -23,6 +26,11 @@ func StartRetryWorker() {
 }
 
 func processUnsyncedComplaints() {
+	if !atomic.CompareAndSwapInt32(&isProcessing, 0, 1) {
+		return
+	}
+	defer atomic.StoreInt32(&isProcessing, 0)
+
 	ctx := context.Background()
 	
 	// Fetch unsynced complaints
