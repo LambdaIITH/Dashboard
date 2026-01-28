@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/LambdaIITH/Dashboard/backend/config"
 	"github.com/LambdaIITH/Dashboard/backend/internal/db"
 	"github.com/LambdaIITH/Dashboard/backend/internal/helpers"
 )
@@ -25,7 +26,7 @@ func processUnsyncedComplaints() {
 	ctx := context.Background()
 	
 	// Fetch unsynced complaints
-	complaints, err := db.GetUnsyncedComplaints(ctx)
+	complaints, err := db.GetUnsyncedComplaints(ctx, config.DB)
 	if err != nil {
 		fmt.Printf("Error fetching unsynced complaints: %v\n", err)
 		return
@@ -44,10 +45,10 @@ func processUnsyncedComplaints() {
 
 		if err == nil {
 			// Success
-			_ = db.MarkComplaintAsSynced(ctx, complaintID)
+			_ = db.MarkComplaintAsSynced(ctx, config.DB, complaintID)
 		} else {
 			// Failure
-			_ = db.IncrementSyncAttempts(ctx, complaintID)
+			_ = db.IncrementSyncAttempts(ctx, config.DB, complaintID)
 		}
 	}
 }

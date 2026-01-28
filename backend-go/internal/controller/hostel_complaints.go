@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/LambdaIITH/Dashboard/backend/config"
 	"github.com/LambdaIITH/Dashboard/backend/internal/db"
 	"github.com/LambdaIITH/Dashboard/backend/internal/helpers"
 	"github.com/LambdaIITH/Dashboard/backend/internal/schema"
@@ -42,8 +43,16 @@ func CreateComplaintHandler(c *gin.Context) {
 
 	ctx := context.Background()
 
+	// Start Transaction
+	tx, err := config.DB.Begin(ctx)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start transaction"})
+		return
+	}
+	defer tx.Rollback(ctx)
+
 	//create complaint in db
-	complaintID, err := db.CreateComplaint(ctx, int64(userId), &req)
+	complaintID, err := db.CreateComplaint(ctx, tx, int64(userId), &req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -64,7 +73,7 @@ func CreateComplaintHandler(c *gin.Context) {
 			}
 
 			//add image uris to db
-			err = db.AddComplaintImages(ctx, complaintID, imagePaths)
+			err = db.AddComplaintImages(ctx, tx, complaintID, imagePaths)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save images"})
 				return
@@ -75,9 +84,15 @@ func CreateComplaintHandler(c *gin.Context) {
 	}
 
 	//fetching created complaint
-	complaint, err := db.GetComplaintByID(ctx, complaintID)
+	complaint, err := db.GetComplaintByID(ctx, tx, complaintID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch complaint after creating"})
+		return
+	}
+
+	// Commit Transaction
+	if err := tx.Commit(ctx); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to commit transaction"})
 		return
 	}
 
@@ -87,7 +102,7 @@ func CreateComplaintHandler(c *gin.Context) {
 		"complaint": complaint,
 	})
 	
-	//Trigger Webhook for updatig to sheet
+	//Trigger Webhook for updating to sheet
 	
 	// Fetch user details to get phone number
 	user := db.GetUser(ctx, int(userId))
@@ -107,10 +122,10 @@ func CreateComplaintHandler(c *gin.Context) {
 		//sync to sheet
 		if err == nil {
 			//success
-			_ = db.MarkComplaintAsSynced(ctx, cmp["id"].(int64))
+			_ = db.MarkComplaintAsSynced(ctx, config.DB, cmp["id"].(int64))
 		} else {
 			//failure
-			_ = db.IncrementSyncAttempts(ctx, cmp["id"].(int64))
+			_ = db.IncrementSyncAttempts(ctx, config.DB, cmp["id"].(int64))
 		}
 	}(complaint)
 
@@ -129,7 +144,7 @@ func GetComplaintByIDHandler(c *gin.Context) {
 
 	ctx := context.Background()
 
-	complaint, err := db.GetComplaintByID(ctx, id)
+	complaint, err := db.GetComplaintByID(ctx, config.DB, id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
@@ -148,7 +163,7 @@ func GetUserComplaintsHandler(c *gin.Context) {
 
 	ctx := context.Background()
 
-	complaints, err := db.GetUserComplaints(ctx, int64(userID))
+	complaints, err := db.GetUserComplaints(ctx, config.DB, int64(userID))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -188,7 +203,7 @@ func AdminUpdateComplaintStatusHandler(c *gin.Context) {
 	ctx := context.Background()
 
 	// updating in db
-	if err := db.UpdateComplaintStatus(ctx, id, status); err != nil {
+	if err := db.UpdateComplaintStatus(ctx, config.DB, id, status); err != nil {
 		if strings.Contains(err.Error(), "not found") {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Complaint not found"})
 			return
@@ -197,7 +212,7 @@ func AdminUpdateComplaintStatusHandler(c *gin.Context) {
 		return
 	}
 
-	complaint, err := db.GetComplaintByID(ctx, id)
+	complaint, err := db.GetComplaintByID(ctx, config.DB, id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Status update, but complaint fetch failed."})
 		return

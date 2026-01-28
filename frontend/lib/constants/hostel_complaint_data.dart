@@ -112,7 +112,7 @@ class HostelComplaintData {
         'Urinal Pot damaged / replacement',
       ],
       'Pantry Area': [
-        'Washbasic tap issue',
+        'Washbasin tap issue',
         'Washbasin jam',
         'Washbasin leakage',
         'Washing machine drain issue',

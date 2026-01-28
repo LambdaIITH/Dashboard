@@ -31,7 +31,7 @@ class UserComplaintModel {
       complaintData: json['complaint_data'] != null
           ? Map<String, dynamic>.from(json['complaint_data'] as Map)
           : {},
-      complaintStatus: json['complaint_status'] as String? ?? 'received',
+      complaintStatus: json['complaint_status'] as String? ?? 'Pending',
       createdAt: json['created_at'] as String,
       resolvedAt: json['resolved_at'] as String?,
       userName: json['user_name'] as String?,
