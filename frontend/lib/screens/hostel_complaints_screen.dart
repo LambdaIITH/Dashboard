@@ -14,7 +14,6 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 
-
 class HostelComplaintsScreen extends StatefulWidget {
   const HostelComplaintsScreen({super.key});
 
@@ -219,7 +218,7 @@ class _HostelComplaintsScreenState extends State<HostelComplaintsScreen>
 
     // Check for phone number
     final userDetails = await ApiServices().getUserDetails(context);
-    
+
     if (userDetails?.phone == null || userDetails?.phone == '') {
       showDialog(
         context: context,
@@ -245,9 +244,7 @@ class _HostelComplaintsScreenState extends State<HostelComplaintsScreen>
               child: const Text('Go to Profile'),
               onPressed: () {
                 Navigator.of(context).pop();
-                context.go('/me', extra: {
-                  'onThemeChanged': (int v) {}
-                });
+                context.go('/me', extra: {'onThemeChanged': (int v) {}});
               },
             ),
           ],
