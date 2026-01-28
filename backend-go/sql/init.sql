@@ -244,7 +244,9 @@ CREATE TABLE IF NOT EXISTS hostel_complaints
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     resolved_at TIMESTAMP NULL,
     is_sheet_synced BOOLEAN DEFAULT FALSE,
-    sheet_sync_attempts INT DEFAULT 0
+    sheet_sync_attempts INT DEFAULT 0,
+    hostel VARCHAR(100),
+    room_number VARCHAR(50)
 );
 
 CREATE TABLE IF NOT EXISTS hostel_complaint_images

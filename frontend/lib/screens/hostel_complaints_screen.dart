@@ -29,6 +29,8 @@ class _HostelComplaintsScreenState extends State<HostelComplaintsScreen>
   String? _subCategory;
   String? _issueType;
   final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _hostelController = TextEditingController();
+  final TextEditingController _roomController = TextEditingController();
   final List<String> _files = [];
   List<UserComplaintModel> _pastComplaints = [];
   bool _isLoadingComplaints = false;
@@ -162,6 +164,8 @@ class _HostelComplaintsScreenState extends State<HostelComplaintsScreen>
   @override
   void dispose() {
     _descriptionController.dispose();
+    _hostelController.dispose();
+    _roomController.dispose();
     _tabController.dispose();
     super.dispose();
   }
@@ -209,6 +213,28 @@ class _HostelComplaintsScreenState extends State<HostelComplaintsScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please provide a description'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    if (_hostelController.text.isEmpty || _roomController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please provide hostel name and room number'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    if (int.tryParse(_roomController.text) == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Room number must be a valid number'),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
         ),
@@ -286,6 +312,8 @@ class _HostelComplaintsScreenState extends State<HostelComplaintsScreen>
       final complaint = HostelComplaintModel(
         complaintType: _complaintType!,
         description: _descriptionController.text,
+        hostel: _hostelController.text,
+        roomNumber: _roomController.text,
         photosPaths: _files,
         complaintData: complaintData,
       );
@@ -309,7 +337,10 @@ class _HostelComplaintsScreenState extends State<HostelComplaintsScreen>
             _complaintType = null;
             _subCategory = null;
             _issueType = null;
+            _issueType = null;
             _descriptionController.clear();
+            _hostelController.clear();
+            _roomController.clear();
             _files.clear();
           });
 
@@ -596,6 +627,30 @@ class _HostelComplaintsScreenState extends State<HostelComplaintsScreen>
               : complaint.complaintDescription,
           textColor,
           Icons.description_outlined,
+        ),
+
+        const SizedBox(height: 20),
+
+        Row(
+          children: [
+            Expanded(
+              child: _buildDetailSection(
+                'Hostel',
+                complaint.hostel.isEmpty ? 'N/A' : complaint.hostel,
+                textColor,
+                Icons.apartment,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _buildDetailSection(
+                'Room',
+                complaint.roomNumber.isEmpty ? 'N/A' : complaint.roomNumber,
+                textColor,
+                Icons.meeting_room,
+              ),
+            ),
+          ],
         ),
 
         const SizedBox(height: 20),
@@ -920,6 +975,54 @@ class _HostelComplaintsScreenState extends State<HostelComplaintsScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Text(
+          'Hostel & Room',
+          style: GoogleFonts.inter(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: textColor,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          decoration: BoxDecoration(
+            color: cardColor,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
+            ),
+          ),
+          child: Column(
+            children: [
+              TextField(
+                controller: _hostelController,
+                style: GoogleFonts.inter(color: textColor),
+                decoration: InputDecoration(
+                  contentPadding: const EdgeInsets.all(16),
+                  border: InputBorder.none,
+                  hintText: 'Hostel Name',
+                  hintStyle: GoogleFonts.inter(
+                    color: textColor.withOpacity(0.5),
+                  ),
+                ),
+              ),
+              Divider(height: 1, color: isDark ? Colors.grey[700] : Colors.grey[300]),
+              TextField(
+                controller: _roomController,
+                style: GoogleFonts.inter(color: textColor),
+                decoration: InputDecoration(
+                  contentPadding: const EdgeInsets.all(16),
+                  border: InputBorder.none,
+                  hintText: 'Room Number',
+                  hintStyle: GoogleFonts.inter(
+                    color: textColor.withOpacity(0.5),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 24),
         Text(
           'Description',
           style: GoogleFonts.inter(

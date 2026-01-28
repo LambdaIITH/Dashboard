@@ -9,6 +9,8 @@ class UserComplaintModel {
   final String? userName;
   final String? userEmail;
   final List<String> images;
+  final String hostel;
+  final String roomNumber;
 
   UserComplaintModel({
     required this.id,
@@ -21,6 +23,8 @@ class UserComplaintModel {
     this.userName,
     this.userEmail,
     required this.images,
+    this.hostel = '',
+    this.roomNumber = '',
   });
 
   factory UserComplaintModel.fromJson(Map<String, dynamic> json) {
@@ -37,6 +41,8 @@ class UserComplaintModel {
       userName: json['user_name'] as String?,
       userEmail: json['user_email'] as String?,
       images: (json['images'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+      hostel: json['hostel'] as String? ?? '',
+      roomNumber: json['room_number'] as String? ?? '',
     );
   }
 
@@ -52,6 +58,8 @@ class UserComplaintModel {
       if (userName != null) 'user_name': userName,
       if (userEmail != null) 'user_email': userEmail,
       'images': images,
+      'hostel': hostel,
+      'room_number': roomNumber,
     };
   }
 
@@ -83,6 +91,6 @@ class UserComplaintModel {
 
   @override
   String toString() {
-    return 'UserComplaintModel(id: $id, type: ${getComplaintType()}, status: $complaintStatus, date: $createdAt)';
+    return 'UserComplaintModel(id: $id, type: ${getComplaintType()}, status: $complaintStatus, date: $createdAt, hostel: $hostel, room: $roomNumber)';
   }
 }

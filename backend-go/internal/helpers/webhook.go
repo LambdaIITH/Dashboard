@@ -111,6 +111,13 @@ func TriggerComplaintWebhook(complaint map[string]interface{}) error {
 		payload.UserRollNo = v
 	}
 
+	if v, ok := complaint["hostel"].(string); ok {
+		payload.HostelName = v
+	}
+	if v, ok := complaint["room_number"].(string); ok {
+		payload.RoomNumber = v
+	}
+
 	finalURL := fmt.Sprintf("%s?auth=%s", webhookURL, authKey)
 
 	jsonData, err := json.Marshal(payload)

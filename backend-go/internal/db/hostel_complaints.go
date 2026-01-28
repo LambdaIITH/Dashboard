@@ -28,13 +28,13 @@ func CreateComplaint(ctx context.Context, db DBQueryer, userID int64, complaint 
 	}
 
 	query := `
-		INSERT INTO hostel_complaints (user_id, complaint_description, complaint_data, complaint_status)
-		VALUeS ($1, $2, $3, 'Pending')
+		INSERT INTO hostel_complaints (user_id, complaint_description, complaint_data, complaint_status, hostel, room_number)
+		VALUES ($1, $2, $3, 'Pending', $4, $5)
 		RETURNING id;
 	`
 
 	var complaintID int64
-	err = db.QueryRow(ctx, query, userID, complaint.ComplaintDescription, complaintDataJSON).Scan(&complaintID)
+	err = db.QueryRow(ctx, query, userID, complaint.ComplaintDescription, complaintDataJSON, complaint.ResultHostel, complaint.ResultRoomNumber).Scan(&complaintID)
 	if err != nil {
 		return 0, fmt.Errorf("failed to create the complaint: %w", err)
 	}
@@ -84,7 +84,7 @@ func GetComplaintImages(ctx context.Context, db DBQueryer, complaintID int64) ([
 // get complaint by using the complaintID
 func GetComplaintByID(ctx context.Context, db DBQueryer, id int64) (map[string]interface{}, error) {
 	query := `
-		SELECT hc.id, hc.user_id, hc.complaint_description, hc.complaint_data, hc.complaint_status, hc.created_at, hc.resolved_at, u.name, u.email
+		SELECT hc.id, hc.user_id, hc.complaint_description, hc.complaint_data, hc.complaint_status, hc.created_at, hc.resolved_at, hc.hostel, hc.room_number, u.name, u.email
 		FROM hostel_complaints AS hc
 		INNER JOIN users AS u ON hc.user_id = u.id
 		WHERE hc.id = $1;
@@ -92,11 +92,12 @@ func GetComplaintByID(ctx context.Context, db DBQueryer, id int64) (map[string]i
 
 	var complaintID, userID int64
 	var complaintDescription, complaintStatus, userName, userEmail string
+	var hostel, roomNumber *string
 	var complaintDataJSON []byte
 	var createdAt time.Time
 	var resolvedAt interface{}
 
-	err := db.QueryRow(ctx, query, id).Scan(&complaintID, &userID, &complaintDescription, &complaintDataJSON, &complaintStatus, &createdAt, &resolvedAt, &userName, &userEmail)
+	err := db.QueryRow(ctx, query, id).Scan(&complaintID, &userID, &complaintDescription, &complaintDataJSON, &complaintStatus, &createdAt, &resolvedAt, &hostel, &roomNumber, &userName, &userEmail)
 	if err != nil {
 		return nil, fmt.Errorf("complaint not found: %w", err)
 	}
@@ -128,6 +129,15 @@ func GetComplaintByID(ctx context.Context, db DBQueryer, id int64) (map[string]i
 		"user_name":             userName,
 		"user_email":            userEmail,
 		"images":                images,
+		"hostel":                "",
+		"room_number":           "",
+	}
+
+	if hostel != nil {
+		complaint["hostel"] = *hostel
+	}
+	if roomNumber != nil {
+		complaint["room_number"] = *roomNumber
 	}
 
 	return complaint, nil
@@ -137,7 +147,7 @@ func GetComplaintByID(ctx context.Context, db DBQueryer, id int64) (map[string]i
 // get users all complaints
 func GetUserComplaints(ctx context.Context, db DBQueryer, userID int64) ([]map[string]interface{}, error) {
 	query := `
-		SELECT hc.id, hc.complaint_description, hc.complaint_data, hc.complaint_status, hc.created_at, hc.resolved_at
+		SELECT hc.id, hc.complaint_description, hc.complaint_data, hc.complaint_status, hc.created_at, hc.resolved_at, hc.hostel, hc.room_number
 		FROM hostel_complaints AS hc
 		WHERE hc.user_id = $1
 		ORDER BY hc.created_at DESC;
@@ -154,11 +164,12 @@ func GetUserComplaints(ctx context.Context, db DBQueryer, userID int64) ([]map[s
 	for rows.Next() {
 		var id int64
 		var complaintDescription, complaintStatus string
+		var hostel, roomNumber *string
 		var complaintDataJSON []byte
 		var createdAt interface{}
 		var resolvedAt interface{}
 
-		err := rows.Scan(&id, &complaintDescription, &complaintDataJSON, &complaintStatus, &createdAt, &resolvedAt)
+		err := rows.Scan(&id, &complaintDescription, &complaintDataJSON, &complaintStatus, &createdAt, &resolvedAt, &hostel, &roomNumber)
 
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan complaint: %w", err)
@@ -188,6 +199,15 @@ func GetUserComplaints(ctx context.Context, db DBQueryer, userID int64) ([]map[s
 			"created_at":            createdAt,
 			"resolved_at":           resolvedAt,
 			"images":                images,
+			"hostel":                "",
+			"room_number":           "",
+		}
+
+		if hostel != nil {
+			complaint["hostel"] = *hostel
+		}
+		if roomNumber != nil {
+			complaint["room_number"] = *roomNumber
 		}
 
 		complaints = append(complaints, complaint)
@@ -244,7 +264,7 @@ func IncrementSyncAttempts(ctx context.Context, db DBQueryer, complaintID int64)
 // fetches complaints that haven't been synced to the sheet yet ignoring complaint with >=10 fails
 func GetUnsyncedComplaints(ctx context.Context, db DBQueryer) ([]map[string]interface{}, error) {
 	query := `
-		SELECT hc.id, hc.user_id, hc.complaint_description, hc.complaint_data, hc.complaint_status, hc.created_at, hc.resolved_at, hc.sheet_sync_attempts, u.name, u.email, u.phone_number
+		SELECT hc.id, hc.user_id, hc.complaint_description, hc.complaint_data, hc.complaint_status, hc.created_at, hc.resolved_at, hc.sheet_sync_attempts, hc.hostel, hc.room_number, u.name, u.email, u.phone_number
 		FROM hostel_complaints AS hc
 		INNER JOIN users AS u ON hc.user_id = u.id
 		WHERE hc.is_sheet_synced = FALSE AND hc.sheet_sync_attempts < 10
@@ -263,12 +283,13 @@ func GetUnsyncedComplaints(ctx context.Context, db DBQueryer) ([]map[string]inte
 		var complaintID, userID int64
 		var complaintDescription, complaintStatus, userName, userEmail string
 		var userPhone *string 
+		var hostel, roomNumber *string
 		var complaintDataJSON []byte
 		var createdAt time.Time
 		var resolvedAt interface{}
 		var syncAttempts int
 
-		err := rows.Scan(&complaintID, &userID, &complaintDescription, &complaintDataJSON, &complaintStatus, &createdAt, &resolvedAt, &syncAttempts, &userName, &userEmail, &userPhone)
+		err := rows.Scan(&complaintID, &userID, &complaintDescription, &complaintDataJSON, &complaintStatus, &createdAt, &resolvedAt, &syncAttempts, &hostel, &roomNumber, &userName, &userEmail, &userPhone)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan complaint: %w", err)
 		}
@@ -308,6 +329,15 @@ func GetUnsyncedComplaints(ctx context.Context, db DBQueryer) ([]map[string]inte
 			"user_phone":            phone,
 			"images":                images,
 			"sheet_sync_attempts":   syncAttempts,
+			"hostel":                "",
+			"room_number":           "",
+		}
+		
+		if hostel != nil {
+			complaint["hostel"] = *hostel
+		}
+		if roomNumber != nil {
+			complaint["room_number"] = *roomNumber
 		}
 		
 		if strings.Contains(userEmail, "@") {
