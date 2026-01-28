@@ -835,6 +835,32 @@ class _HomeScreenState extends State<HomeScreen> {
                                                     25,
                                         isComingSoon: false,
                                         reduceImageSize: true,
+                                        title: 'FAQ Assistant',
+                                        child: 'assets/icons/faq-assistant.svg',
+                                        onTap: () {
+                                          context.push("/faq_assistant");
+                                        },
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: MediaQuery.of(context).size.width >
+                                              450
+                                          ? 200
+                                          : MediaQuery.of(context).size.width /
+                                                  3 -
+                                              28,
+                                      child: HomeScreenCardSmall(
+                                        width:
+                                            MediaQuery.of(context).size.width >
+                                                    450
+                                                ? 200
+                                                : MediaQuery.of(context)
+                                                            .size
+                                                            .width /
+                                                        2 -
+                                                    25,
+                                        isComingSoon: false,
+                                        reduceImageSize: true,
                                         title: 'Face Upload',
                                         child: 'assets/icons/face-scan.svg',
                                         onTap: () {
