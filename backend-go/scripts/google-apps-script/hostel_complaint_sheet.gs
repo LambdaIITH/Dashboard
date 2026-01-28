@@ -5,7 +5,10 @@ const ADMIN_KEY = 'VerySecretKey'
 
 function doPost(e) {
   var lock = LockService.getScriptLock();
-  lock.tryLock(10000); //10 seconds await
+  if (!lock.tryLock(10000)) { //10 seconds await
+    return ContentService.createTextOutput(JSON.stringify({ 'result': 'error', 'error': 'Server is busy, please try again later.' }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
 
   try {
     //Authentication

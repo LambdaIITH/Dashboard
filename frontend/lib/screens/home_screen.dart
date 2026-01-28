@@ -845,7 +845,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         isComingSoon: false,
                                         reduceImageSize: true,
                                         title: 'Hostel Complaints',
-                                        child: 'assets/icons/hostel_complaints.svg', // keep as string
+                                        child: 'assets/icons/hostelcomplaints.svg',
                                         onTap: () {
                                           context.push("/hostel-complaints");
                                         },
