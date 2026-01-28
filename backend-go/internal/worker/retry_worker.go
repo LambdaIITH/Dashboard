@@ -51,12 +51,16 @@ func processUnsyncedComplaints() {
 		
 		complaintID := complaint["id"].(int64)
 
-		if err == nil {
-			// Success
-			_ = db.MarkComplaintAsSynced(ctx, config.DB, complaintID)
-		} else {
+		if err != nil {
+			if err.Error() == "HOSTEL_COMPLAINT_SHEET_WEBHOOK is not set" {
+				fmt.Println("Skipping sheet sync retry: Webhook env var not set")
+				continue 
+			}
 			// Failure
 			_ = db.IncrementSyncAttempts(ctx, config.DB, complaintID)
+		} else {
+			// Success
+			_ = db.MarkComplaintAsSynced(ctx, config.DB, complaintID)
 		}
 	}
 }

@@ -86,7 +86,8 @@ class UserComplaintModel {
 
   bool isInProgress() {
     return complaintStatus.toLowerCase() == 'in_progress' ||
-        complaintStatus.toLowerCase() == 'in progress';
+        complaintStatus.toLowerCase() == 'in progress' ||
+        complaintStatus.toLowerCase() == 'on going';
   }
 
   @override

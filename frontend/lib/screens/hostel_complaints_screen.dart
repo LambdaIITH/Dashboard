@@ -837,7 +837,7 @@ class _HostelComplaintsScreenState extends State<HostelComplaintsScreen>
     } else if (complaint.isInProgress()) {
       return Colors.orange;
     } else {
-      return Colors.blue;
+      return Colors.orange;
     }
   }
 

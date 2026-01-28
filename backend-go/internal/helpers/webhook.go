@@ -35,7 +35,7 @@ func TriggerComplaintWebhook(complaint map[string]interface{}) error {
 
 	if webhookURL == "" {
 		fmt.Println("Warning: HOSTEL_COMPLAINT_SHEET_WEBHOOK is not set. Skipping webhook.")
-		return nil
+		return fmt.Errorf("HOSTEL_COMPLAINT_SHEET_WEBHOOK is not set")
 	}
 
 	//Get values from complaint map

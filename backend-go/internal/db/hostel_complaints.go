@@ -222,7 +222,7 @@ func UpdateComplaintStatus(ctx context.Context, db DBQueryer, complaintID int64,
 	UPDATE hostel_complaints
 	SET complaint_status = $2::text,
 		resolved_at = CASE
-			WHEN $2::text IN ('resolved', 'closed') THEN CURRENT_TIMESTAMP
+			WHEN LOWER($2::text) IN ('resolved', 'closed') THEN CURRENT_TIMESTAMP
 			ELSE NULL
 		END
 	WHERE id = $1;

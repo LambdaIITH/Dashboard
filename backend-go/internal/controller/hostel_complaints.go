@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -130,13 +131,15 @@ func CreateComplaintHandler(c *gin.Context) {
 		
 		ctx := context.Background()
 
-		//sync to sheet
-		if err == nil {
+		if err != nil {
+			if err.Error() == "HOSTEL_COMPLAINT_SHEET_WEBHOOK is not set" {
+				fmt.Println("Skipping sheet sync marking: Webhook env var not set")
+				return
+			}
+			_ = db.IncrementSyncAttempts(ctx, config.DB, cmp["id"].(int64))
+		} else {
 			//success
 			_ = db.MarkComplaintAsSynced(ctx, config.DB, cmp["id"].(int64))
-		} else {
-			//failure
-			_ = db.IncrementSyncAttempts(ctx, config.DB, cmp["id"].(int64))
 		}
 	}(complaint)
 
