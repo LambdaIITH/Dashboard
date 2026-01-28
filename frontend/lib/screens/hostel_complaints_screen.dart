@@ -10,8 +10,10 @@ import 'package:dashbaord/widgets/hostel_complaints/navigation_buttons.dart';
 import 'package:dashbaord/widgets/hostel_complaints/photo_picker_section.dart';
 import 'package:dashbaord/widgets/hostel_complaints/progress_indicator_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+
 
 class HostelComplaintsScreen extends StatefulWidget {
   const HostelComplaintsScreen({super.key});
@@ -210,6 +212,45 @@ class _HostelComplaintsScreenState extends State<HostelComplaintsScreen>
           content: Text('Please provide a description'),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    // Check for phone number
+    final userDetails = await ApiServices().getUserDetails(context);
+    
+    if (userDetails?.phone == null || userDetails?.phone == '') {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(
+            'Attention!',
+            style: GoogleFonts.inter(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Text(
+            'Please update your phone number in the profile section before submitting a complaint.',
+            style: GoogleFonts.inter(),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Go to Profile'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                context.go('/me', extra: {
+                  'onThemeChanged': (int v) {}
+                });
+              },
+            ),
+          ],
         ),
       );
       return;
