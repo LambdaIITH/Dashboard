@@ -1086,10 +1086,17 @@ class ApiServices {
       final complaintJson = complaint.toJson();
 
       final description = complaintJson['description'] ?? '';
+      final hostel = complaintJson['hostel'] ?? '';
+      final roomNumber = complaintJson['room_number'] ?? '';
+
       complaintJson.remove('description');
+      complaintJson.remove('hostel');
+      complaintJson.remove('room_number');
 
       final formDataJson = jsonEncode({
         'complaint_description': description,
+        'hostel': hostel,
+        'room_number': roomNumber,
         'complaint_data': complaintJson,
       });
 
