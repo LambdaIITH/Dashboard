@@ -24,6 +24,7 @@ import 'package:dashbaord/screens/mess_registration_screen.dart';
 import 'package:dashbaord/screens/profile_screen.dart';
 import 'package:dashbaord/screens/merch_shop_screen.dart';
 import 'package:dashbaord/screens/merch_orders_screen.dart';
+import 'package:dashbaord/screens/hostel_complaints_screen.dart';
 import 'package:dashbaord/services/analytics_service.dart';
 import 'package:dashbaord/utils/bus_schedule.dart';
 import 'package:dashbaord/utils/loading_widget.dart';
@@ -608,6 +609,10 @@ class AppRouter {
             },
           );
         },
+      ),
+      GoRoute(
+        path: '/hostel-complaints',
+        builder: (context, state) => const HostelComplaintsScreen(),
       ),
     ],
     errorBuilder: (context, state) => const ErrorScreen(),

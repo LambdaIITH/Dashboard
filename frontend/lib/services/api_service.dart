@@ -6,6 +6,8 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dashbaord/constants/enums/lost_and_found.dart';
 import 'package:dashbaord/models/announcement_model.dart';
 import 'package:dashbaord/models/booking_model.dart';
+import 'package:dashbaord/models/hostel_complaint_model.dart';
+import 'package:dashbaord/models/user_complaint_model.dart';
 import 'package:dashbaord/models/lecture_search_model.dart';
 import 'package:dashbaord/models/mess_menu_model.dart';
 import 'package:dashbaord/models/time_table_model.dart';
@@ -939,6 +941,7 @@ class ApiServices {
     }
     return null;
   }
+
   Future<List<String>?> getAnnouncementsCategories() async {
     try {
       debugPrint("Making request to: ${dio.options.baseUrl}/announcements/tandc");
@@ -1052,11 +1055,7 @@ class ApiServices {
   }
 
   Future<Map<String, dynamic>?> createMerchOrder(
-    int merchId, 
-    String? size, 
-    String displayName, 
-    String transactionId,
-    bool isOversized) async {
+      int merchId, String? size, String displayName, String transactionId, bool isOversized) async {
     try {
       final response = await dio.post('/merch/order', data: {
         'merch_id': merchId,
@@ -1078,6 +1077,83 @@ class ApiServices {
       return (response.data as List).map((order) => MerchOrder.fromJson(order)).toList();
     } catch (e) {
       debugPrint("Failed to fetch user's merchandise orders: $e");
+      return [];
+    }
+  }
+
+  Future<bool> postHostelComplaint(HostelComplaintModel complaint) async {
+    try {
+      final complaintJson = complaint.toJson();
+
+      final description = complaintJson['description'] ?? '';
+      final hostel = complaintJson['hostel'] ?? '';
+      final roomNumber = complaintJson['room_number'] ?? '';
+
+      complaintJson.remove('description');
+      complaintJson.remove('hostel');
+      complaintJson.remove('room_number');
+
+      final formDataJson = jsonEncode({
+        'complaint_description': description,
+        'hostel': hostel,
+        'room_number': roomNumber,
+        'complaint_data': complaintJson,
+      });
+
+      final formData = FormData.fromMap({
+        'form_data': formDataJson,
+      });
+
+      for (int i = 0; i < complaint.photosPaths.length; i++) {
+        final file = complaint.photosPaths[i];
+        formData.files.add(MapEntry(
+          'images',
+          await MultipartFile.fromFile(
+            file,
+            filename: file.split('/').last.split('\\').last,
+          ),
+        ));
+      }
+
+      debugPrint('FormData: ${formData.fields}');
+      final response = await dio.post(
+        '/hostel-complaints/',
+        data: formData,
+        options: Options(headers: {'Content-Type': 'multipart/form-data'}),
+      );
+
+      return response.statusCode == 201;
+    } catch (e) {
+      debugPrint("Failed to post hostel complaint: $e");
+      return false;
+    }
+  }
+
+  Future<List<UserComplaintModel>> getUserHostelComplaints(BuildContext context) async {
+    try {
+      final response = await dio.get('/hostel-complaints/my');
+
+      if (response.statusCode == 200) {
+        debugPrint("Data ${response.data}");
+        final data = response.data as List;
+
+        // Filter out complaints where complaint_data is null, then map to model
+        return data
+            .where((complaint) => complaint['complaint_data'] != null)
+            .map((complaint) => UserComplaintModel.fromJson(complaint))
+            .toList();
+      } else {
+        debugPrint("Failed to fetch complaints: ${response.statusCode}");
+        return [];
+      }
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        await logout(context);
+      }
+      debugPrint("Failed to fetch user complaints: $e");
+      return [];
+    } catch (e) {
+      debugPrint("Failed to fetch user complaints: $e");
       return [];
     }
   }

@@ -28,10 +28,13 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 void main() async {
+
+   WidgetsFlutterBinding.ensureInitialized();
+
   await dotenv.load(fileName: ".env");
-  WidgetsFlutterBinding.ensureInitialized();
+  // WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-    name: "Dashboard",
+    // name: "Dashboard",
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
