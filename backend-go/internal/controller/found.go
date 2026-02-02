@@ -167,7 +167,9 @@ func DeleteFoundItemHandler(c *gin.Context) {
 	}
 
 	// Get item ID from the request
-	id, err := strconv.Atoi(c.Param("id"))
+	idStr := c.PostForm("item_id")
+	
+	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid item id"})
 		return

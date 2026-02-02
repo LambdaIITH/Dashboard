@@ -35,7 +35,7 @@ func SetupRoutes(router *gin.Engine) {
 		lostGroup.GET("/all", controller.GetAllItemsHandler)
 		lostGroup.GET("/item/:id", controller.GetItemByIdHandler)
 		lostGroup.PUT("/edit_item", middlewares.AuthMiddleware(), controller.EditItemHandler)
-		lostGroup.POST("/delete_item", middlewares.AuthMiddleware(), controller.DeleteItemHandler)
+		lostGroup.DELETE("/delete_item", middlewares.AuthMiddleware(), controller.DeleteItemHandler)
 		lostGroup.GET("/search", controller.SearchItemHandler)
 	}
 
@@ -55,7 +55,7 @@ func SetupRoutes(router *gin.Engine) {
 		sellGroup.GET("/all", controller.GetAllSellItemsHandler)
 		sellGroup.GET("/get_item/:id", controller.GetSellItemByIdHandler)
 		sellGroup.PUT("/edit_item", controller.EditSellItemHandler)
-		sellGroup.POST("/delete_item", controller.DeleteSellItemHandler)
+		sellGroup.DELETE("/delete_item", controller.DeleteSellItemHandler)
 		sellGroup.GET("/search", controller.SearchSellItemHandler)
 	}
 
@@ -73,7 +73,7 @@ func SetupRoutes(router *gin.Engine) {
 		foundGroup.GET("/all", controller.GetAllFoundItemsHandler)
 		foundGroup.GET("/item/:id", controller.GetFoundItemByIdHandler)
 		foundGroup.PUT("/edit_item", middlewares.AuthMiddleware(), controller.EditFoundItemHandler)
-		foundGroup.POST("/delete_item", middlewares.AuthMiddleware(), controller.DeleteFoundItemHandler)
+		foundGroup.DELETE("/delete_item", middlewares.AuthMiddleware(), controller.DeleteFoundItemHandler)
 		foundGroup.GET("/search", controller.SearchFoundItemHandler)
 	}
 

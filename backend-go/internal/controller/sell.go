@@ -188,7 +188,10 @@ func DeleteSellItemHandler(c *gin.Context) {
 	}
 
 	// Step 2: Get item ID from the request
-	id, err := strconv.Atoi(c.Param("id"))
+	// parsing from form data
+	idStr := c.PostForm("item_id")
+
+	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid item id"})
 		return
