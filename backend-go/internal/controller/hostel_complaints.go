@@ -44,6 +44,21 @@ func CreateComplaintHandler(c *gin.Context) {
 
 	ctx := context.Background()
 
+	// Fetch user details to get email
+	user := db.GetUser(ctx, int(userId))
+
+	// Fetch Hostel Details
+	hostelDetails, errHostel := db.GetHostelDetailsByEmail(ctx, config.DB, user.Email)
+	if errHostel != nil {
+		fmt.Println("Hostel details not found for user:", user.Email)
+		req.ResultHostel = ""
+		req.ResultRoomNumber = ""
+	} else {
+		req.ResultHostel = hostelDetails.HostelBlock
+		req.ResultRoomNumber = hostelDetails.RoomNumber
+	}
+
+
 	// Start Transaction
 	tx, err := config.DB.Begin(ctx)
 	if err != nil {
@@ -116,8 +131,6 @@ func CreateComplaintHandler(c *gin.Context) {
 	
 	//Trigger Webhook for updating to sheet
 	
-	// Fetch user details to get phone number
-	user := db.GetUser(ctx, int(userId))
 	complaint["user_phone"] = user.PhoneNumber
 
 	// parse roll number from email

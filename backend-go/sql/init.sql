@@ -255,3 +255,12 @@ CREATE TABLE IF NOT EXISTS hostel_complaint_images
     complaint_id BIGINT NOT NULL REFERENCES hostel_complaints(id) ON DELETE CASCADE,
     image_url VARCHAR(256) NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS hostels
+(
+    id BIGSERIAL PRIMARY KEY,
+    email VARCHAR(256) UNIQUE NOT NULL REFERENCES users(email) ON DELETE CASCADE ON UPDATE CASCADE,
+    hostel_block VARCHAR(50) NOT NULL,
+    room_number VARCHAR(50) NOT NULL,
+    gender VARCHAR(20)
+);
