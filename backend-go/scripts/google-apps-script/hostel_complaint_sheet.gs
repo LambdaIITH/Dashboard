@@ -128,7 +128,8 @@ function onEditTrigger(e) {
     if (newStatus === "Resolved") {
       var resolvedAtCell = sheet.getRange(row, 18); // Column 18 is Resolved At
       var now = new Date();
-      resolvedAtCell.setValue(now.toISOString());
+      var formattedDate = Utilities.formatDate(now, "GMT+05:30", "yyyy-MM-dd HH:mm:ss");
+      resolvedAtCell.setValue(formattedDate);
     }
 
     // Call Backend

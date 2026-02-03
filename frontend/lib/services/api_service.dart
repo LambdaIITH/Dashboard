@@ -46,6 +46,8 @@ class ApiServices {
     final dioConfig = DioConfig();
     final client = dioConfig.getClient();
     client.options.baseUrl = backendUrl;
+    client.options.connectTimeout = const Duration(seconds: 30);
+    client.options.receiveTimeout = const Duration(seconds: 30);
     dio = client;
 
     if (!kIsWeb) {

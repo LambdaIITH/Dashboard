@@ -8,6 +8,7 @@ class ComplaintNavigationButtons extends StatelessWidget {
   final VoidCallback onPrevious;
   final VoidCallback onNext;
   final VoidCallback onSubmit;
+  final bool isLoading;
 
   const ComplaintNavigationButtons({
     super.key,
@@ -17,6 +18,7 @@ class ComplaintNavigationButtons extends StatelessWidget {
     required this.onPrevious,
     required this.onNext,
     required this.onSubmit,
+    required this.isLoading,
   });
 
   @override
@@ -26,7 +28,7 @@ class ComplaintNavigationButtons extends StatelessWidget {
         if (currentStep > 0)
           Expanded(
             child: OutlinedButton(
-              onPressed: onPrevious,
+              onPressed: isLoading ? null : onPrevious,
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 side: const BorderSide(color: Color(0xffFE724C)),
@@ -47,7 +49,11 @@ class ComplaintNavigationButtons extends StatelessWidget {
         if (currentStep > 0) const SizedBox(width: 12),
         Expanded(
           child: ElevatedButton(
-            onPressed: canGoNext ? (currentStep == 3 ? onSubmit : onNext) : null,
+            onPressed: canGoNext
+                ? (currentStep == 3
+                    ? (isLoading ? null : onSubmit)
+                    : (isLoading ? null : onNext))
+                : null,
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
               backgroundColor: const Color(0xffFE724C),
@@ -56,14 +62,23 @@ class ComplaintNavigationButtons extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: Text(
-              currentStep == 3 ? 'Submit' : 'Next',
-              style: GoogleFonts.inter(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-            ),
+            child: isLoading && currentStep == 3
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : Text(
+                    currentStep == 3 ? 'Submit' : 'Next',
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
           ),
         ),
       ],

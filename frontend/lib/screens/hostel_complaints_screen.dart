@@ -32,6 +32,7 @@ class _HostelComplaintsScreenState extends State<HostelComplaintsScreen>
   final List<String> _files = [];
   List<UserComplaintModel> _pastComplaints = [];
   bool _isLoadingComplaints = false;
+  bool _isSubmitting = false;
 
   bool _needsSubCategory() => HostelComplaintData.hasSubCategory(_complaintType);
 
@@ -205,6 +206,8 @@ class _HostelComplaintsScreenState extends State<HostelComplaintsScreen>
   }
 
   void _submitComplaint() async {
+    if (_isSubmitting) return;
+
     if (_descriptionController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -216,10 +219,33 @@ class _HostelComplaintsScreenState extends State<HostelComplaintsScreen>
       return;
     }
 
+    setState(() {
+      _isSubmitting = true;
+    });
+
     // Check for phone number
     final userDetails = await ApiServices().getUserDetails(context);
 
-    if (userDetails?.phone == null || userDetails?.phone == '') {
+    if (userDetails == null) {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to verify user profile. Please check your connection.'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      return;
+    }
+
+    if (userDetails.phone == null || userDetails.phone == '') {
+      setState(() {
+        _isSubmitting = false;
+      });
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -312,11 +338,15 @@ class _HostelComplaintsScreenState extends State<HostelComplaintsScreen>
             _issueType = null;
             _descriptionController.clear();
             _files.clear();
+            _isSubmitting = false;
           });
 
           _loadPastComplaints();
         }
       } else {
+        setState(() {
+          _isSubmitting = false;
+        });
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -339,6 +369,9 @@ class _HostelComplaintsScreenState extends State<HostelComplaintsScreen>
           ),
         );
       }
+      setState(() {
+        _isSubmitting = false;
+      });
     }
   }
 
@@ -418,6 +451,7 @@ class _HostelComplaintsScreenState extends State<HostelComplaintsScreen>
             onPrevious: _previousStep,
             onNext: _nextStep,
             onSubmit: _submitComplaint,
+            isLoading: _isSubmitting,
           ),
         ],
       ),
