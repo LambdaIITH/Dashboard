@@ -20,6 +20,8 @@ DROP TABLE IF EXISTS transactions CASCADE;
 DROP TABLE IF EXISTS face CASCADE;
 DROP TABLE IF EXISTS hostel_complaints CASCADE;
 DROP TABLE IF EXISTS hostel_complaint_images CASCADE;
+DROP TABLE IF EXISTS selling CASCADE;
+DROP TABLE IF EXISTS selling_images CASCADE;
 
 
 -- Re-create the tables and types
@@ -263,4 +265,22 @@ CREATE TABLE IF NOT EXISTS hostels
     hostel_block VARCHAR(50) NOT NULL,
     room_number VARCHAR(50) NOT NULL,
     gender VARCHAR(20)
+);
+
+-- Marketplace/Buy-Sell tables
+CREATE TABLE IF NOT EXISTS selling
+(
+    id BIGSERIAL PRIMARY KEY,
+    item_name VARCHAR(256) NOT NULL,
+    item_description VARCHAR(1000) NOT NULL,
+    selling_price NUMERIC(10, 2) NOT NULL DEFAULT 0.00,
+    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS selling_images
+(
+    id BIGSERIAL PRIMARY KEY,
+    image_url VARCHAR(512) NOT NULL,
+    item_id BIGINT NOT NULL REFERENCES selling(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
