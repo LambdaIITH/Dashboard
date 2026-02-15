@@ -6,6 +6,7 @@ import 'package:dashbaord/main.dart';
 import 'package:dashbaord/models/mess_menu_model.dart';
 import 'package:dashbaord/models/time_table_model.dart';
 import 'package:dashbaord/models/user_model.dart';
+import 'package:dashbaord/providers/timetable_provider.dart';
 import 'package:dashbaord/services/analytics_service.dart';
 import 'package:dashbaord/services/api_service.dart';
 import 'package:dashbaord/services/event_notification_service.dart';
@@ -25,13 +26,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:in_app_update/in_app_update.dart';
 import 'package:text_scroll/text_scroll.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   final bool isGuest;
   final ValueChanged<int> onThemeChanged;
   final String? code;
@@ -42,10 +44,10 @@ class HomeScreen extends StatefulWidget {
       this.code});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
 
@@ -66,7 +68,6 @@ class _HomeScreenState extends State<HomeScreen> {
   bool isLoading = true;
   String image = '';
   int mainGateStatus = -1;
-  Timetable? timetable;
 
   void sendTokenToServer(String token, String deviceType) async {
     final response =
@@ -179,40 +180,7 @@ class _HomeScreenState extends State<HomeScreen> {
     await SharedService().saveBusSchedule(response);
   }
 
-  Future<void> fetchTimetable() async {
-    Timetable? localTimetable = await SharedService().getTimetable();
-    Timetable? response;
-    if (!widget.isGuest) {
-      response = await ApiServices().getTimetable(context);
-    }
 
-    if (response == null) {
-      if (localTimetable == null) {
-        showError(msg: "Timetable not found. Please add courses.");
-        setState(() {
-          timetable = Timetable(courses: {}, slots: []);
-          changeState();
-        });
-        return;
-      } else {
-        showError(msg: "Timetable Server refresh failed...");
-        localTimetable.cleanUp();
-        setState(() {
-          timetable = localTimetable;
-          changeState();
-        });
-        return;
-      }
-    } else {
-      response.cleanUp();
-      setState(() {
-        timetable = response;
-        changeState();
-      });
-
-      await SharedService().saveTimetable(response);
-    }
-  }
 
   Future<void> fetchUser() async {
     final response = await ApiServices().getUserDetails(context);
@@ -311,7 +279,10 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     fetchMessMenu();
     fetchBus();
-    fetchTimetable();
+    // Fetch timetable using Riverpod provider
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(timetableProvider.notifier).fetchTimetable(context, isGuest: widget.isGuest);
+    });
     setUpFirebaseMessaging();
     analyticsService.logScreenView(screenName: "HomeScreen");
     // Initialize the controller properly
@@ -328,7 +299,8 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     fetchMessMenu();
     fetchBus();
-    fetchTimetable();
+    // Refresh timetable using Riverpod provider
+    await ref.read(timetableProvider.notifier).fetchTimetable(context, isGuest: widget.isGuest);
     getMainGateStatus();
   }
 
@@ -433,32 +405,22 @@ class _HomeScreenState extends State<HomeScreen> {
                     response[1] as int; // Assuming status is in response[1]
                 String message = response[2] as String;
                 if (status == 200) {
+                  final timetable = ref.read(timetableProvider).value;
                   showModalBottomSheet(
                     context: context,
                     builder: (context) {
                       return ManageCoursesBottomSheet(
                         timetable: timetable,
                         onEditTimetable: (editedTimetable) async {
-                          setState(() {
-                            timetable = editedTimetable;
-                          });
-                          final res =
-                              await ApiServices().postTimetable(timetable!);
-                          if (res['status'] != 200) {
-                            showError(msg: "Failed to save timetable.");
-                          } else {
-                            showError(msg: "Timetable saved successfully!");
-                            await SharedService().saveTimetable(timetable!);
-                          }
+                          await ref.read(timetableProvider.notifier).updateTimetable(editedTimetable);
+                          showError(msg: "Timetable saved successfully!");
                         },
                         isAddCourses: true,
                       );
                     },
                     isScrollControlled: true,
                   );
-                  setState(() {
-                    timetable = sharedTimetable;
-                  });
+                  ref.read(timetableProvider.notifier).setTimetable(sharedTimetable);
                   showError(msg: "Timetable accepted successfully!");
                 } else {
                   showError(
@@ -483,6 +445,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     timeDilation = 1;
+    final timetableAsyncValue = ref.watch(timetableProvider);
+    
     return Scaffold(
         appBar: AppBar(
           toolbarHeight: 0.0,
@@ -533,53 +497,38 @@ class _HomeScreenState extends State<HomeScreen> {
                               selectable: true,
                             ),
                           const SizedBox(height: 28),
-                          HomeScreenSchedule(
-                            timetable: timetable,
-                            onEditTimetable: (editedTimetable) async {
-                              setState(
-                                () {
-                                  timetable = editedTimetable;
-                                },
-                              );
-                              final res =
-                                  await ApiServices().postTimetable(timetable!);
-                              if (res['status'] != 200) {
-                                showError(msg: "Failed to save timetable.");
-                              } else {
+                          timetableAsyncValue.when(
+                            data: (timetable) => HomeScreenSchedule(
+                              timetable: timetable,
+                              onEditTimetable: (editedTimetable) async {
+                                await ref.read(timetableProvider.notifier).updateTimetable(editedTimetable);
                                 showError(msg: "Timetable saved successfully!");
-                                await SharedService().saveTimetable(timetable!);
                                 clearAllNotifications();
                                 EventNotificationService
                                     .scheduleWeeklyNotifications(
-                                        timetable: timetable!);
-                              }
-                            },
-                            onLectureAdded: (courseCode, courseName, lectures,
-                                String? classRoom, String? slot) async {
-                              if (timetable != null) {
-                                setState(
-                                  () {
-                                    timetable = timetable!.addCourse(
-                                        courseCode, courseName, lectures,
-                                        classRoom: classRoom, slot: slot);
-                                  },
+                                        timetable: editedTimetable);
+                              },
+                              onLectureAdded: (courseCode, courseName, lectures,
+                                  String? classRoom, String? slot) async {
+                                await ref.read(timetableProvider.notifier).addCourse(
+                                  courseCode: courseCode,
+                                  courseName: courseName,
+                                  lectures: lectures,
+                                  classRoom: classRoom,
+                                  slot: slot,
                                 );
-                                final res = await ApiServices()
-                                    .postTimetable(timetable!);
-                                if (res['status'] != 200) {
-                                  showError(msg: "Failed to save timetable.");
-                                } else {
-                                  showError(
-                                      msg: "Timetable saved successfully!");
-                                  await SharedService()
-                                      .saveTimetable(timetable!);
+                                final updatedTimetable = ref.read(timetableProvider).value;
+                                if (updatedTimetable != null) {
+                                  showError(msg: "Timetable saved successfully!");
                                   clearAllNotifications();
                                   EventNotificationService
                                       .scheduleWeeklyNotifications(
-                                          timetable: timetable!);
+                                          timetable: updatedTimetable);
                                 }
-                              }
-                            },
+                              },
+                            ),
+                            loading: () => const Center(child: CircularProgressIndicator()),
+                            error: (error, stack) => Center(child: Text('Error loading timetable')),
                           ),
                           const SizedBox(height: 15),
                           HomeScreenBusTimings(
