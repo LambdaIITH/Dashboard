@@ -11,8 +11,15 @@ def get_image_dict(images: List[Tuple[int, str]]) -> Dict[int, List[str]]:
     return image_dict
 
 def authorize_edit_delete(table: str, item_id: int, user_id:int, conn):
+    # Validate table name to prevent SQL injection
+    allowed_tables = {'lost', 'found'}
+    if table not in allowed_tables:
+        raise HTTPException(status_code=400, detail="Invalid table name")
+    
     with conn.cursor() as cur: 
-        cur.execute( f"SELECT {table}.user_id FROM {table} WHERE {table}.id = {item_id}" )
+        # Use parameterized query for item_id but table name is validated
+        query = f"SELECT {table}.user_id FROM {table} WHERE {table}.id = %s"
+        cur.execute(query, (item_id,))
         
         authorized_id = cur.fetchone()
         if not authorized_id:
