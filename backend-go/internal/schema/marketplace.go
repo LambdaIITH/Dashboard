@@ -12,6 +12,7 @@ type SellingItem struct {
 	UserID          int       `db:"user_id"`
 	UserName        string    `db:"username"`
 	UserEmail       string    `db:"user_email"`
+	UserPhoneNumber string    `db:"user_phone_number"`
 	Images          []string  `db:"images"`
 	CreatedAt       time.Time `db:"created_at"`
 }

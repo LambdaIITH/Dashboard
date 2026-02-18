@@ -21,6 +21,7 @@ type BSResponse struct {
 	ItemDescription string   `json:"description"`
 	UserName        string   `json:"username"`
 	UserEmail       string   `json:"user_email"`
+	UserPhoneNumber string   `json:"user_phone_number"`
 	Images          []string `json:"images"`
 	SellingPrice    float64  `json:"selling_price"`
 	CreatedAt       string   `json:"created_at"`
@@ -189,6 +190,7 @@ func GetSellingItemByIdHandler(c *gin.Context) {
 		ItemDescription: item.ItemDescription,
 		UserEmail:       item.UserEmail,
 		UserName:        item.UserName,
+		UserPhoneNumber: item.UserPhoneNumber,
 		Images:          imageURLs,
 		SellingPrice:    item.SellingPrice,
 		CreatedAt:       item.CreatedAt.Format("2006-01-02 15:04:05"),
