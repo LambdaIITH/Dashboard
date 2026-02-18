@@ -388,5 +388,21 @@ func GetMySellingItemsHandler(c *gin.Context) {
 		items[i].Images = imageDict[items[i].ID]
 	}
 
-	c.JSON(http.StatusOK, items)
+	response := make([]map[string]any, 0, len(items))
+
+	for _, item := range items {
+		images := imageDict[item.ID]
+		if images == nil {
+			images = []string{}
+		}
+
+		itemData := map[string]any{
+			"id":     item.ID,
+			"name":   item.ItemName,
+			"images": images,
+		}
+		response = append(response, itemData)
+	}
+
+	c.JSON(http.StatusOK, response)
 }	
