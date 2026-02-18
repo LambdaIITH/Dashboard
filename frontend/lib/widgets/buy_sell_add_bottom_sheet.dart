@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'dart:io';
-import 'package:dashbaord/constants/enums/buy_and_sell.dart';
 import 'package:dashbaord/services/api_service.dart';
 
 class BuySellAddBottomSheet extends StatefulWidget {
@@ -25,21 +24,8 @@ class _BuySellAddBottomSheetState extends State<BuySellAddBottomSheet> {
   final _priceController = TextEditingController();
   final _descriptionController = TextEditingController();
 
-  BuyOrSell _type = BuyOrSell.sell;
-  String _condition = 'New';
-  String _category = 'Electronics';
   List<File> _images = [];
   bool _isLoading = false;
-
-  final List<String> _conditions = ['New', 'Like New', 'Good', 'Fair', 'Poor'];
-  final List<String> _categories = [
-    'Electronics',
-    'Books',
-    'Furniture',
-    'Clothing',
-    'Sports',
-    'Other'
-  ];
 
   @override
   void dispose() {
@@ -220,7 +206,7 @@ class _BuySellAddBottomSheetState extends State<BuySellAddBottomSheet> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Add Listing',
+                      'Sell an Item',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -245,55 +231,6 @@ class _BuySellAddBottomSheetState extends State<BuySellAddBottomSheet> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Type selector
-                        Text(
-                          'Type',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: textColor,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: RadioListTile<BuyOrSell>(
-                                title: Text(
-                                  'Buying',
-                                  style: TextStyle(color: textColor),
-                                ),
-                                value: BuyOrSell.buy,
-                                groupValue: _type,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _type = value!;
-                                  });
-                                },
-                                contentPadding: EdgeInsets.zero,
-                                activeColor: const Color(0xffFE724C),
-                              ),
-                            ),
-                            Expanded(
-                              child: RadioListTile<BuyOrSell>(
-                                title: Text(
-                                  'Selling',
-                                  style: TextStyle(color: textColor),
-                                ),
-                                value: BuyOrSell.sell,
-                                groupValue: _type,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _type = value!;
-                                  });
-                                },
-                                contentPadding: EdgeInsets.zero,
-                                activeColor: const Color(0xffFE724C),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
                         // Item name
                         TextFormField(
                           controller: _itemNameController,
@@ -357,84 +294,6 @@ class _BuySellAddBottomSheetState extends State<BuySellAddBottomSheet> {
                               return 'Please enter price';
                             }
                             return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        // Category
-                        DropdownButtonFormField<String>(
-                          value: _category,
-                          dropdownColor: cardColor,
-                          style: TextStyle(color: textColor),
-                          decoration: InputDecoration(
-                            labelText: 'Category',
-                            labelStyle: TextStyle(color: textColor.withOpacity(0.7)),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: borderColor),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: borderColor),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(
-                                color: Color(0xffFE724C),
-                                width: 2,
-                              ),
-                            ),
-                          ),
-                          items: _categories.map((String category) {
-                            return DropdownMenuItem<String>(
-                              value: category,
-                              child: Text(category),
-                            );
-                          }).toList(),
-                          onChanged: (String? newValue) {
-                            if (newValue != null) {
-                              setState(() {
-                                _category = newValue;
-                              });
-                            }
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        // Condition
-                        DropdownButtonFormField<String>(
-                          value: _condition,
-                          dropdownColor: cardColor,
-                          style: TextStyle(color: textColor),
-                          decoration: InputDecoration(
-                            labelText: 'Condition',
-                            labelStyle: TextStyle(color: textColor.withOpacity(0.7)),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: borderColor),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: borderColor),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(
-                                color: Color(0xffFE724C),
-                                width: 2,
-                              ),
-                            ),
-                          ),
-                          items: _conditions.map((String condition) {
-                            return DropdownMenuItem<String>(
-                              value: condition,
-                              child: Text(condition),
-                            );
-                          }).toList(),
-                          onChanged: (String? newValue) {
-                            if (newValue != null) {
-                              setState(() {
-                                _condition = newValue;
-                              });
-                            }
                           },
                         ),
                         const SizedBox(height: 16),

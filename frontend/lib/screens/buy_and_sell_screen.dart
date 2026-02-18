@@ -11,6 +11,7 @@ import 'package:dashbaord/services/analytics_service.dart';
 import 'package:dashbaord/widgets/buy_sell_item.dart';
 import 'package:dashbaord/services/api_service.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -26,6 +27,7 @@ class _BuyAndSellScreenState extends State<BuyAndSellScreen> {
   String _search = '';
   late final TextEditingController _searchController;
   final analyticsService = FirebaseAnalyticsService();
+  bool isTabOneSelected = true; // true = All Items, false = My Listings
 
   void requestNotifPerms(BuildContext bc) async {
     PermissionStatus status = await Permission.notification.status;
@@ -81,11 +83,17 @@ class _BuyAndSellScreenState extends State<BuyAndSellScreen> {
   }
 
   void onRefresh() {
-    getItems();
+    if (isTabOneSelected) {
+      getItems();
+    } else {
+      getMyItems();
+    }
   }
 
   bool isLoading = true;
   late UserModel user;
+  List<Widget> allItems = [];
+  List<Widget> myItems = [];
 
   Future<void> fetchUser() async {
     final response = await ApiServices().getUserDetails(context);
@@ -107,6 +115,18 @@ class _BuyAndSellScreenState extends State<BuyAndSellScreen> {
       data = await ApiServices().searchMarketplaceItems(_search, context);
     }
 
+    print('=== GET ALL ITEMS RESPONSE ===');
+    print('Full response: $data');
+    if (data['status'] == 200) {
+      final items = data['items'] as List<dynamic>;
+      print('Number of items: ${items.length}');
+      if (items.isNotEmpty) {
+        print('First item keys: ${items[0].keys}');
+        print('First item: ${items[0]}');
+      }
+    }
+    print('==============================');
+
     List<Widget> finalItems = [];
     if (data['status'] == 200) {
       final items = data['items'] as List<dynamic>;
@@ -116,10 +136,49 @@ class _BuyAndSellScreenState extends State<BuyAndSellScreen> {
           item: BuyAndSellModel.fromJson(item),
         ) as Widget;
       }));
-      return finalItems;
-    } else {
-      return finalItems;
     }
+    setState(() {
+      allItems = finalItems;
+    });
+    return finalItems;
+  }
+
+  Future<List<Widget>> getMyItems() async {
+    final Map<String, dynamic> data = await ApiServices().getMyMarketplaceItems(context);
+
+    print('=== GET MY ITEMS RESPONSE ===');
+    print('Full response: $data');
+    if (data['status'] == 200) {
+      final items = data['items'] as List<dynamic>;
+      print('Number of items: ${items.length}');
+      if (items.isNotEmpty) {
+        print('First item keys: ${items[0].keys}');
+        print('First item: ${items[0]}');
+      }
+    }
+    print('============================');
+
+    List<Widget> finalItems = [];
+    if (data['status'] == 200) {
+      final items = data['items'] as List<dynamic>;
+
+      finalItems.addAll(items.map((item) {
+        final model = BuyAndSellModel.fromJson(item);
+        return BuySellItem(
+          currentUserEmail: user.email,
+          item: model,
+          showDeleteButton: true,
+          onDeleted: () {
+            // Refresh the list after deletion
+            getMyItems();
+          },
+        ) as Widget;
+      }));
+    }
+    setState(() {
+      myItems = finalItems;
+    });
+    return finalItems;
   }
 
   @override
@@ -130,6 +189,8 @@ class _BuyAndSellScreenState extends State<BuyAndSellScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       requestNotifPerms(context);
+      getItems();
+      getMyItems();
     });
 
     if (widget.currentUserEmail != null) {
@@ -159,6 +220,97 @@ class _BuyAndSellScreenState extends State<BuyAndSellScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
+
+    final List<Widget> tabNames = [
+      Text(
+        'All Items',
+        style: GoogleFonts.inter(
+          fontSize: 18.0,
+          fontWeight: FontWeight.w600,
+          color: textColor,
+        ),
+      ),
+      Text(
+        'My Listings',
+        style: GoogleFonts.inter(
+          fontSize: 18.0,
+          fontWeight: FontWeight.w600,
+          color: textColor,
+        ),
+      ),
+    ];
+
+    Widget buildItemsGrid(List<Widget> items, {bool showSearch = true}) {
+      return Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (showSearch) ...[
+              CustomSearchBar(
+                controller: _searchController,
+                onSearch: (value) {
+                  setState(() {
+                    _search = value;
+                  });
+                  getItems();
+                },
+              ),
+              const SizedBox(height: 20),
+            ],
+            Expanded(
+              child: items.isEmpty
+                  ? const Center(
+                      child: Text(
+                        'No items found',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    )
+                  : GridView.count(
+                      shrinkWrap: true,
+                      crossAxisCount: 2,
+                      childAspectRatio: getAspectRatio(context),
+                      mainAxisSpacing: 12,
+                      crossAxisSpacing: 12,
+                      children: items,
+                    ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    Widget allItemsTab = RefreshIndicator(
+      onRefresh: () async {
+        await getItems();
+      },
+      child: FutureBuilder(
+        future: allItems.isEmpty ? getItems() : Future.value(allItems),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting && allItems.isEmpty) {
+            return const Center(child: CustomLoadingScreen());
+          }
+          return buildItemsGrid(allItems);
+        },
+      ),
+    );
+
+    Widget myListingsTab = RefreshIndicator(
+      onRefresh: () async {
+        await getMyItems();
+      },
+      child: FutureBuilder(
+        future: myItems.isEmpty ? getMyItems() : Future.value(myItems),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting && myItems.isEmpty) {
+            return const Center(child: CustomLoadingScreen());
+          }
+          return buildItemsGrid(myItems, showSearch: false);
+        },
+      ),
+    );
+
     return isLoading
         ? CustomLoadingScreen()
         : WillPopScope(
@@ -171,8 +323,8 @@ class _BuyAndSellScreenState extends State<BuyAndSellScreen> {
                   Icons.add,
                   size: 30.0,
                 ),
-                onPressed: () {
-                  showModalBottomSheet(
+                onPressed: () async {
+                  await showModalBottomSheet(
                     context: context,
                     isScrollControlled: true,
                     backgroundColor: Colors.transparent,
@@ -180,60 +332,85 @@ class _BuyAndSellScreenState extends State<BuyAndSellScreen> {
                       currentUserEmail: user.email,
                     ),
                   );
+                  // Reload items after bottom sheet closes
+                  getItems();
+                  getMyItems();
                 },
               ),
               appBar: CustomAppBar(
                 title: 'Marketplace',
               ),
-              body: RefreshIndicator(
-                onRefresh: () {
-                  return Future.delayed(
-                    const Duration(seconds: 1),
-                    () {
-                      getItems();
-                    },
-                  );
-                },
-                child: FutureBuilder(
-                  future: getItems(),
-                  builder: (context, snapshot) {
-                    switch (snapshot.connectionState) {
-                      case ConnectionState.done:
-                        final items = snapshot.data!;
-                        return Padding(
-                          padding: const EdgeInsets.all(20),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              CustomSearchBar(),
-                              const SizedBox(
-                                height: 20,
-                              ),
-                              Expanded(
-                                child: items.isEmpty
-                                    ? const Center(
-                                        child: Text(
-                                          'No items found',
-                                          style: TextStyle(fontSize: 16),
-                                        ),
-                                      )
-                                    : GridView.count(
-                                        shrinkWrap: true,
-                                        crossAxisCount: 2,
-                                        childAspectRatio: getAspectRatio(context),
-                                        mainAxisSpacing: 12,
-                                        crossAxisSpacing: 12,
-                                        children: items,
-                                      ),
-                              ),
-                            ],
+              body: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    child: Container(
+                      height: 45,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).cardColor,
+                        borderRadius: BorderRadius.circular(25),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
                           ),
-                        );
-                      default:
-                        return const Center(child: CustomLoadingScreen());
-                    }
-                  },
-                ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: InkWell(
+                              onTap: () {
+                                if (!isTabOneSelected) {
+                                  setState(() {
+                                    isTabOneSelected = true;
+                                  });
+                                  getItems();
+                                }
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: isTabOneSelected
+                                      ? const Color(0xffFE724C)
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                                alignment: Alignment.center,
+                                child: tabNames[0],
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: InkWell(
+                              onTap: () {
+                                if (isTabOneSelected) {
+                                  setState(() {
+                                    isTabOneSelected = false;
+                                  });
+                                  getMyItems();
+                                }
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: !isTabOneSelected
+                                      ? const Color(0xffFE724C)
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                                alignment: Alignment.center,
+                                child: tabNames[1],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: isTabOneSelected ? allItemsTab : myListingsTab,
+                  ),
+                ],
               ),
             ),
           );

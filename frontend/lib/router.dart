@@ -1,4 +1,3 @@
-import 'package:dashbaord/constants/enums/buy_and_sell.dart';
 import 'package:dashbaord/constants/enums/lost_and_found.dart';
 import 'package:dashbaord/error.dart';
 import 'package:dashbaord/models/mess_menu_model.dart';
@@ -423,29 +422,8 @@ class AppRouter {
         path: '/marketplace/:item/:id',
         pageBuilder: (context, state) {
           final id = state.pathParameters['id'];
-          final item = state.pathParameters['item'];
 
           if (id == null) {
-            return CustomTransitionPage(
-              child: const ErrorScreen(),
-              transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                return SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0, 0),
-                    end: Offset.zero,
-                  ).animate(animation),
-                  child: child,
-                );
-              },
-            );
-          }
-
-          BuyOrSell bos;
-          if (item == 'buy') {
-            bos = BuyOrSell.buy;
-          } else if (item == 'sell') {
-            bos = BuyOrSell.sell;
-          } else {
             return CustomTransitionPage(
               child: const ErrorScreen(),
               transitionsBuilder: (context, animation, secondaryAnimation, child) {
@@ -468,7 +446,6 @@ class AppRouter {
             child: BuyAndSellItemScreen(
               currentUserEmail: currentUserEmail,
               id: id,
-              buyOrSell: bos,
             ),
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return SlideTransition(
