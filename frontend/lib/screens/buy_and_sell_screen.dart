@@ -180,6 +180,7 @@ class _BuyAndSellScreenState extends State<BuyAndSellScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _debounce?.cancel();
     super.dispose();
   }
 
