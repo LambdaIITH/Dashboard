@@ -18,10 +18,10 @@ import (
 type BSResponse struct {
 	ID              int      `json:"id"`
 	ItemName        string   `json:"item_name"`
-	ItemDescription string   `json:"item_description"`
+	ItemDescription string   `json:"description"`
 	UserName        string   `json:"username"`
 	UserEmail       string   `json:"user_email"`
-	Images          []string `json:"image_urls"`
+	Images          []string `json:"images"`
 	SellingPrice    float64  `json:"selling_price"`
 	CreatedAt       string   `json:"created_at"`
 }
