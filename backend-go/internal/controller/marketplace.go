@@ -216,7 +216,7 @@ func DeleteSellingItemHandler(c *gin.Context) {
 	}
 
 	// Step 3: Check if the user is authorized to delete the item
-	res, err := buyandsell.AuthorizeEditDeleteItem(c, itemID, userID)
+	res, err := buyandsell.AuthorizeEditDeleteSellingItem(c, itemID, userID)
 	if err != nil || !res {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return

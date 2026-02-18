@@ -341,3 +341,19 @@ func GetSellingItemsByUserID(ctx context.Context, userID int) ([]schema.SellingI
 
 	return sellingItems, nil
 }
+
+func AuthorizeEditDeleteSellingItem(ctx context.Context, itemID int, userID int) (bool, error) {
+	query := `SELECT user_id FROM selling WHERE id = $1`
+	var ownerID int
+	err := config.DB.QueryRow(ctx, query, itemID).Scan(&ownerID)
+	if err != nil {
+		return false, fmt.Errorf("failed to authorize edit/delete item: %v", err)
+	}
+
+	if ownerID != userID {
+		return false, nil
+	}
+
+	return true, nil
+}
+
