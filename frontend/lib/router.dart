@@ -1,9 +1,12 @@
+import 'package:dashbaord/constants/enums/buy_and_sell.dart';
 import 'package:dashbaord/constants/enums/lost_and_found.dart';
 import 'package:dashbaord/error.dart';
 import 'package:dashbaord/models/mess_menu_model.dart';
 import 'package:dashbaord/models/user_model.dart';
 import 'package:dashbaord/screens/announcement_full_screen.dart';
 import 'package:dashbaord/screens/announcement_screen.dart';
+import 'package:dashbaord/screens/buy_and_sell_item_screen.dart';
+import 'package:dashbaord/screens/buy_and_sell_screen.dart';
 import 'package:dashbaord/screens/campus_map_screen.dart';
 import 'package:dashbaord/screens/city_bus_screen.dart';
 import 'package:dashbaord/screens/bus_timings_screen.dart';
@@ -380,6 +383,92 @@ class AppRouter {
               currentUserEmail: currentUserEmail,
               id: id,
               lostOrFound: lrf,
+            ),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(1, 0),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
+              );
+            },
+          );
+        },
+      ),
+      GoRoute(
+        path: '/marketplace',
+        pageBuilder: (context, state) {
+          final data = state.extra as Map<String, dynamic>? ?? {};
+          final currentUserEmail = data['currentUserEmail'] as String?;
+
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: BuyAndSellScreen(
+              currentUserEmail: currentUserEmail,
+            ),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(1, 0),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
+              );
+            },
+          );
+        },
+      ),
+      GoRoute(
+        path: '/marketplace/:item/:id',
+        pageBuilder: (context, state) {
+          final id = state.pathParameters['id'];
+          final item = state.pathParameters['item'];
+
+          if (id == null) {
+            return CustomTransitionPage(
+              child: const ErrorScreen(),
+              transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                return SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 0),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: child,
+                );
+              },
+            );
+          }
+
+          BuyOrSell bos;
+          if (item == 'buy') {
+            bos = BuyOrSell.buy;
+          } else if (item == 'sell') {
+            bos = BuyOrSell.sell;
+          } else {
+            return CustomTransitionPage(
+              child: const ErrorScreen(),
+              transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                return SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 0),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: child,
+                );
+              },
+            );
+          }
+
+          final data = state.extra as Map<String, dynamic>? ?? {};
+          final currentUserEmail = data['currentUserEmail'] as String?;
+
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: BuyAndSellItemScreen(
+              currentUserEmail: currentUserEmail,
+              id: id,
+              buyOrSell: bos,
             ),
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return SlideTransition(
