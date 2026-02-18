@@ -349,3 +349,21 @@ func SearchSellingItemHandler(c *gin.Context) {
 	// Step 5: Return the response with item details and images
 	c.JSON(http.StatusOK, response)
 }
+
+func GetMySellingItemsHandler(c *gin.Context) {
+	// Step 1: Get the user ID
+	userID, err := helpers.GetUserID(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Step 2: Fetch selling items for the user
+	items, err := buyandsell.GetSellingItemsByUserID(c, userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch items"})
+		return
+	}
+
+	c.JSON(http.StatusOK, items)
+}	

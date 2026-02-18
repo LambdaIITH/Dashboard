@@ -58,6 +58,7 @@ func SetupRoutes(router *gin.Engine) {
 		marketplaceGroup.PUT("/edit_item", middlewares.AuthMiddleware(), controller.EditSellingItemHandler)
 		marketplaceGroup.DELETE("/delete_item", middlewares.AuthMiddleware(), controller.DeleteSellingItemHandler)
 		marketplaceGroup.GET("/search", controller.SearchSellingItemHandler)
+		marketplaceGroup.GET("/my_items", middlewares.AuthMiddleware(), controller.GetMySellingItemsHandler)
 	}
 
 	userGroup := router.Group("/user")

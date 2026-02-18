@@ -307,3 +307,35 @@ func GetSomeImgUrisSelling(ctx context.Context, itemIDs []int) ([]schema.Selling
 
 	return imageURIs, nil
 }
+
+func GetSellingItemsByUserID(ctx context.Context, userID int) ([]schema.SellingItem, error) {
+	// Query to get selling items by user ID
+	query := `
+		SELECT id, item_name, item_description, user_id, created_at, selling_price
+		FROM selling
+		WHERE user_id = $1
+		ORDER BY created_at DESC
+	`
+
+	rows, err := config.DB.Query(ctx, query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var sellingItems []schema.SellingItem
+
+	for rows.Next() {
+		var item schema.SellingItem
+		if err := rows.Scan(&item.ID, &item.ItemName, &item.ItemDescription, &item.UserID, &item.CreatedAt, &item.SellingPrice); err != nil {
+			return nil, err
+		}
+		sellingItems = append(sellingItems, item)
+	}
+
+	if rows.Err() != nil {
+		return nil, rows.Err()
+	}
+
+	return sellingItems, nil
+}
