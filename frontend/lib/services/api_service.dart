@@ -840,7 +840,6 @@ class ApiServices {
   Future<Map<String, dynamic>> getMarketplaceItems(BuildContext context) async {
     try {
       final response = await dio.get('/marketplace/all');
-
       final items = (response.data as List).map((e) => e).toList();
       return {'status': response.statusCode, 'items': items};
     } on DioException catch (e) {
@@ -852,6 +851,39 @@ class ApiServices {
         return {'error': e.response?.data['detail'], 'status': e.response?.statusCode};
       }
       return {'error': 'get Marketplace items failed', 'status': e.response?.statusCode};
+    }
+  }
+
+  Future<Map<String, dynamic>> getMyMarketplaceItems(BuildContext context) async {
+    try {
+      final response = await dio.get('/marketplace/my_items');
+
+      // Handle different response formats
+      List<dynamic> items;
+      if (response.data is List) {
+        items = response.data as List<dynamic>;
+      } else if (response.data is Map) {
+        // If backend returns a map with items key
+        items = (response.data['items'] ?? []) as List<dynamic>;
+      } else {
+        items = [];
+      }
+
+      return {'status': response.statusCode, 'items': items};
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        await logout(context);
+        return {'error': 'Unauthorized user', 'status': 401, 'items': []};
+      }
+      if (e.response != null) {
+        return {
+          'error':
+              e.response?.data['detail'] ?? e.response?.data['error'] ?? 'Failed to fetch items',
+          'status': e.response?.statusCode,
+          'items': []
+        };
+      }
+      return {'error': 'get my Marketplace items failed', 'status': 500, 'items': []};
     }
   }
 
@@ -942,11 +974,28 @@ class ApiServices {
     try {
       const url = "/marketplace/delete_item";
 
+      print('=== DELETE ITEM REQUEST ===');
+      print('URL: $url');
+      print('Item ID: $id');
+      print('Payload: {"item_id": $id}');
+      print('==========================');
+
       final formData = FormData.fromMap({"item_id": id});
       final response = await dio.delete(url, data: formData);
 
+      print('=== DELETE ITEM RESPONSE ===');
+      print('Status: ${response.statusCode}');
+      print('Response: ${response.data}');
+      print('============================');
+
       return {'status': response.statusCode};
     } on DioException catch (e) {
+      print('=== DELETE ITEM ERROR ===');
+      print('Error: $e');
+      print('Response: ${e.response?.data}');
+      print('Status: ${e.response?.statusCode}');
+      print('=========================');
+
       if (e.response?.statusCode == 401) {
         await logout(context);
         return {'error': 'Unauthorized user', 'status': 401};
