@@ -163,10 +163,10 @@ func GetParticularSellingItem(ctx context.Context, itemID int) (schema.SellingIt
 			u.email,
 			s.created_at,
 			s.selling_price
-			s.user_phone_number
-		FROM
+			u.phone_number
+			FROM
 			selling s
-		JOIN
+			JOIN
 			users u ON s.user_id = u.id
 		WHERE
 			s.id = $1
