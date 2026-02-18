@@ -164,9 +164,9 @@ func GetParticularSellingItem(ctx context.Context, itemID int) (schema.SellingIt
 			u.phone_number,
 			s.created_at,
 			s.selling_price
-			FROM
+		FROM
 			selling s
-			JOIN
+		JOIN
 			users u ON s.user_id = u.id
 		WHERE
 			s.id = $1
@@ -184,6 +184,13 @@ func GetParticularSellingItem(ctx context.Context, itemID int) (schema.SellingIt
 		&sellingItem.CreatedAt,
 		&sellingItem.SellingPrice,
 	)
+
+	if sellingItem.UserPhoneNumber == "" {
+		// If the phone number is not available, set it to an empty string
+		sellingItem.UserPhoneNumber = ""
+	}
+
+
 	if err != nil {
 		return sellingItem, err
 	}
