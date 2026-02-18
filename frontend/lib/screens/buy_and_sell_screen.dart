@@ -14,6 +14,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'dart:async';
 
 class BuyAndSellScreen extends StatefulWidget {
   const BuyAndSellScreen({super.key, required this.currentUserEmail});
@@ -28,6 +29,7 @@ class _BuyAndSellScreenState extends State<BuyAndSellScreen> {
   late final TextEditingController _searchController;
   final analyticsService = FirebaseAnalyticsService();
   bool isTabOneSelected = true; // true = All Items, false = My Listings
+  Timer? _debounce;
 
   void requestNotifPerms(BuildContext bc) async {
     PermissionStatus status = await Permission.notification.status;
@@ -225,10 +227,13 @@ class _BuyAndSellScreenState extends State<BuyAndSellScreen> {
               CustomSearchBar(
                 controller: _searchController,
                 onSearch: (value) {
-                  setState(() {
-                    _search = value;
+                  if (_debounce?.isActive ?? false) _debounce!.cancel();
+                  _debounce = Timer(const Duration(milliseconds: 500), () {
+                    setState(() {
+                      _search = value;
+                    });
+                    getItems();
                   });
-                  getItems();
                 },
               ),
               const SizedBox(height: 20),
