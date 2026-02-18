@@ -14,14 +14,14 @@ import (
 func InsertInSellingTable(ctx context.Context, form_data map[string]interface{}, user_ID int) (int, error) {
 	// Query to insert the selling item in the database
 	query := `
-        INSERT INTO selling (item_name, item_description, user_id)
-        VALUES ($1, $2, $3)
+        INSERT INTO selling (item_name, item_description, user_id, selling_price)
+        VALUES ($1, $2, $3, $4)
         RETURNING id
     `
 
 	// Execute the query and retrieve the inserted ID
 	var sellingId int
-	err := config.DB.QueryRow(ctx, query, form_data["item_name"], form_data["item_description"], user_ID).Scan(&sellingId)
+	err := config.DB.QueryRow(ctx, query, form_data["item_name"], form_data["item_description"], user_ID, form_data["selling_price"]).Scan(&sellingId)
 	if err != nil {
 		return 0, err
 	}
