@@ -161,9 +161,9 @@ func GetParticularSellingItem(ctx context.Context, itemID int) (schema.SellingIt
 			s.item_description,
 			u.name,
 			u.email,
+			u.phone_number,
 			s.created_at,
 			s.selling_price
-			u.phone_number
 			FROM
 			selling s
 			JOIN
