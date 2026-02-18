@@ -115,18 +115,6 @@ class _BuyAndSellScreenState extends State<BuyAndSellScreen> {
       data = await ApiServices().searchMarketplaceItems(_search, context);
     }
 
-    print('=== GET ALL ITEMS RESPONSE ===');
-    print('Full response: $data');
-    if (data['status'] == 200) {
-      final items = data['items'] as List<dynamic>;
-      print('Number of items: ${items.length}');
-      if (items.isNotEmpty) {
-        print('First item keys: ${items[0].keys}');
-        print('First item: ${items[0]}');
-      }
-    }
-    print('==============================');
-
     List<Widget> finalItems = [];
     if (data['status'] == 200) {
       final items = data['items'] as List<dynamic>;
@@ -146,27 +134,13 @@ class _BuyAndSellScreenState extends State<BuyAndSellScreen> {
   Future<List<Widget>> getMyItems() async {
     final Map<String, dynamic> data = await ApiServices().getMyMarketplaceItems(context);
 
-    print('=== GET MY ITEMS RESPONSE ===');
-    print('Full response: $data');
-    if (data['status'] == 200) {
-      final items = data['items'] as List<dynamic>;
-      print('Number of items: ${items.length}');
-      if (items.isNotEmpty) {
-        print('First item keys: ${items[0].keys}');
-        print('First item: ${items[0]}');
-      }
-    }
-    print('============================');
-
     List<Widget> finalItems = [];
     if (data['status'] == 200) {
       final items = data['items'] as List<dynamic>;
-
       finalItems.addAll(items.map((item) {
-        final model = BuyAndSellModel.fromJson(item);
         return BuySellItem(
           currentUserEmail: user.email,
-          item: model,
+          item: BuyAndSellModel.fromJson(item),
           showDeleteButton: true,
           onDeleted: () {
             // Refresh the list after deletion

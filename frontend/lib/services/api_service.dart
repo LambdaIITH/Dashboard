@@ -972,30 +972,11 @@ class ApiServices {
     required BuildContext context,
   }) async {
     try {
-      const url = "/marketplace/delete_item";
-
-      print('=== DELETE ITEM REQUEST ===');
-      print('URL: $url');
-      print('Item ID: $id');
-      print('Payload: {"item_id": $id}');
-      print('==========================');
-
-      final formData = FormData.fromMap({"item_id": id});
-      final response = await dio.delete(url, data: formData);
-
-      print('=== DELETE ITEM RESPONSE ===');
-      print('Status: ${response.statusCode}');
-      print('Response: ${response.data}');
-      print('============================');
+      final url = "/marketplace/delete_item/$id";
+      final response = await dio.delete(url);
 
       return {'status': response.statusCode};
     } on DioException catch (e) {
-      print('=== DELETE ITEM ERROR ===');
-      print('Error: $e');
-      print('Response: ${e.response?.data}');
-      print('Status: ${e.response?.statusCode}');
-      print('=========================');
-
       if (e.response?.statusCode == 401) {
         await logout(context);
         return {'error': 'Unauthorized user', 'status': 401};

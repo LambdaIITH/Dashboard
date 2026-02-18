@@ -24,11 +24,12 @@ class _CustomCarouselState extends State<CustomCarousel> {
   Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
       children: [
         CarouselSlider(
           options: CarouselOptions(
             viewportFraction: 1,
-            height: widget.height,
+            height: widget.height - 20,
             onPageChanged: (index, reason) {
               setState(() {
                 selectedIndex = index;
@@ -62,9 +63,7 @@ class _CustomCarouselState extends State<CustomCarousel> {
                 margin: const EdgeInsets.symmetric(horizontal: 2),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
-                  color: i == selectedIndex
-                      ? const Color(0xB2FE724C)
-                      : Colors.black12,
+                  color: i == selectedIndex ? const Color(0xB2FE724C) : Colors.black12,
                 ),
               )
           ],
