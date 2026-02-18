@@ -56,7 +56,7 @@ func SetupRoutes(router *gin.Engine) {
 		marketplaceGroup.GET("/all", controller.GetAllSellingItemsHandler)
 		marketplaceGroup.GET("/get_item/:id", controller.GetSellingItemByIdHandler)
 		marketplaceGroup.PUT("/edit_item", middlewares.AuthMiddleware(), controller.EditSellingItemHandler)
-		marketplaceGroup.DELETE("/delete_item", middlewares.AuthMiddleware(), controller.DeleteSellingItemHandler)
+		marketplaceGroup.DELETE("/delete_item/:id", middlewares.AuthMiddleware(), controller.DeleteSellingItemHandler)
 		marketplaceGroup.GET("/search", controller.SearchSellingItemHandler)
 		marketplaceGroup.GET("/my_items", middlewares.AuthMiddleware(), controller.GetMySellingItemsHandler)
 	}

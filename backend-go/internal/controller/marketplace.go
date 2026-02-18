@@ -208,23 +208,15 @@ func DeleteSellingItemHandler(c *gin.Context) {
 		return
 	}
 
-	// Step 2: Get item ID from the request
-	// parsing from form data
-	// Parse the form explicitly for DELETE requests
-	if err := c.Request.ParseForm(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to parse form data"})
-		return
-	}
-	idStr := c.PostForm("item_id")
-
-	id, err := strconv.Atoi(idStr)
+	id := c.Param("id")
+	itemID, err := strconv.Atoi(id)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid item id"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid item ID"})
 		return
 	}
 
 	// Step 3: Check if the user is authorized to delete the item
-	res, err := buyandsell.AuthorizeEditDeleteItem(c, id, userID)
+	res, err := buyandsell.AuthorizeEditDeleteItem(c, itemID, userID)
 	if err != nil || !res {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
@@ -232,14 +224,14 @@ func DeleteSellingItemHandler(c *gin.Context) {
 
 	// Step 4: Delete images associated with the item
 	// Get the image URLs associated with the item
-	imageURLs, err := buyandsell.DeleteAllImageUrisSelling(c, id)
+	imageURLs, err := buyandsell.DeleteAllImageUrisSelling(c, itemID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch images"})
 		return
 	}
 
 	// Step 5: Delete the item from the selling table
-	_, err = config.DB.Exec(c, "DELETE FROM selling WHERE id = $1", id)
+	_, err = config.DB.Exec(c, "DELETE FROM selling WHERE id = $1", itemID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete item"})
 		return
@@ -247,7 +239,7 @@ func DeleteSellingItemHandler(c *gin.Context) {
 
 	// Step 6: Delete the images from the database
 	// This step deletes the item images from the 'selling_images' table in the database
-	_, err = buyandsell.DeleteItemImagesFromSelling(c, id)
+	_, err = buyandsell.DeleteItemImagesFromSelling(c, itemID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete images from database"})
 		return
