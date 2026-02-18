@@ -210,6 +210,11 @@ func DeleteSellingItemHandler(c *gin.Context) {
 
 	// Step 2: Get item ID from the request
 	// parsing from form data
+	// Parse the form explicitly for DELETE requests
+	if err := c.Request.ParseForm(); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to parse form data"})
+		return
+	}
 	idStr := c.PostForm("item_id")
 
 	id, err := strconv.Atoi(idStr)
