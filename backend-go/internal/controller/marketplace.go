@@ -126,6 +126,8 @@ func GetAllSellingItemsHandler(c *gin.Context) {
 			"user_id":       item.UserID,
 			"name":          item.ItemName,
 			"selling_price": item.SellingPrice,
+			"description":   item.ItemDescription,
+			"created_at":    item.CreatedAt,
 			"images":        images,
 		}
 		response = append(response, itemData)
@@ -400,9 +402,12 @@ func GetMySellingItemsHandler(c *gin.Context) {
 
 		itemData := map[string]any{
 			"id":            item.ID,
+			"user_id":       item.UserID,
 			"name":          item.ItemName,
-			"images":        images,
 			"selling_price": item.SellingPrice,
+			"description":   item.ItemDescription,
+			"created_at":    item.CreatedAt,
+			"images":        images,
 		}
 		response = append(response, itemData)
 	}
