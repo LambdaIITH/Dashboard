@@ -365,5 +365,28 @@ func GetMySellingItemsHandler(c *gin.Context) {
 		return
 	}
 
+	// Get images of the items
+	var itemIDs []int
+	for _, item := range items {
+		itemIDs = append(itemIDs, item.ID)
+	}
+
+	imageRows, err := buyandsell.GetSomeImgUrisSelling(c, itemIDs)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch images"})
+		return
+	}
+
+	// Organize the image URLs by item ID
+	imageDict := make(map[int][]string)
+	for _, img := range imageRows {
+		imageDict[img.ItemID] = append(imageDict[img.ItemID], img.ImageURL)
+	}
+
+	// Update each item with its image URLs
+	for i := range items {
+		items[i].Images = imageDict[items[i].ID]
+	}
+
 	c.JSON(http.StatusOK, items)
 }	
