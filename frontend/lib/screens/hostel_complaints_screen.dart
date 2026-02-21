@@ -382,6 +382,65 @@ class _HostelComplaintsScreenState extends State<HostelComplaintsScreen>
     final backgroundColor = Theme.of(context).scaffoldBackgroundColor;
     final cardColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
 
+    // TODO: Remove this Coming Soon screen and uncomment the original body below
+    return Scaffold(
+      backgroundColor: backgroundColor,
+      appBar: CustomAppBar(title: 'Hostel Complaints'),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.construction_rounded,
+                size: 80,
+                color: const Color(0xffFE724C).withOpacity(0.8),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Coming Soon!',
+                style: GoogleFonts.inter(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: textColor,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'We\'re currently working on this feature. It will be available soon. Stay tuned!',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  fontSize: 15,
+                  color: textColor.withOpacity(0.7),
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 32),
+              ElevatedButton.icon(
+                onPressed: () => context.pop(),
+                icon: const Icon(Icons.arrow_back_rounded),
+                label: Text(
+                  'Go Back',
+                  style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xffFE724C),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // TODO : ORIGINAL BODY — uncomment this and remove the Coming Soon return above when feature is ready to be pushed
+    /*
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: CustomAppBar(title: 'Hostel Complaints'),
@@ -422,6 +481,7 @@ class _HostelComplaintsScreenState extends State<HostelComplaintsScreen>
         ],
       ),
     );
+    */
   }
 
   Widget _buildNewComplaintTab(
