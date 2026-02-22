@@ -835,6 +835,214 @@ class ApiServices {
 
   // ====================Lost and found ends=====================================
 
+  // ====================Marketplace/Buy and Sell starts=========================
+
+  Future<Map<String, dynamic>> getMarketplaceItems(BuildContext context) async {
+    try {
+      final response = await dio.get('/marketplace/all');
+      final items = (response.data as List).map((e) => e).toList();
+      return {'status': response.statusCode, 'items': items};
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        await logout(context);
+        return {'error': 'Unauthorized user', 'status': 401};
+      }
+      if (e.response != null) {
+        return {'error': e.response?.data['detail'], 'status': e.response?.statusCode};
+      }
+      return {'error': 'get Marketplace items failed', 'status': e.response?.statusCode};
+    }
+  }
+
+  Future<Map<String, dynamic>> getMyMarketplaceItems(BuildContext context) async {
+    try {
+      final response = await dio.get('/marketplace/my_items');
+
+      // Handle different response formats
+      List<dynamic> items;
+      if (response.data is List) {
+        items = response.data as List<dynamic>;
+      } else if (response.data is Map) {
+        // If backend returns a map with items key
+        items = (response.data['items'] ?? []) as List<dynamic>;
+      } else {
+        items = [];
+      }
+
+      return {'status': response.statusCode, 'items': items};
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        await logout(context);
+        return {'error': 'Unauthorized user', 'status': 401, 'items': []};
+      }
+      if (e.response != null) {
+        return {
+          'error':
+              e.response?.data['detail'] ?? e.response?.data['error'] ?? 'Failed to fetch items',
+          'status': e.response?.statusCode,
+          'items': []
+        };
+      }
+      return {'error': 'get my Marketplace items failed', 'status': 500, 'items': []};
+    }
+  }
+
+  Future<Map<String, dynamic>> getMarketplaceItem({
+    required String id,
+    required BuildContext context,
+  }) async {
+    try {
+      final url = "/marketplace/get_item/$id";
+      final response = await dio.get(url);
+
+      return {'status': response.statusCode, 'item': response.data};
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        await logout(context);
+        return {'error': 'Unauthorized user', 'status': 401};
+      }
+      if (e.response != null) {
+        return {'error': e.response?.data['detail'], 'status': e.response?.statusCode};
+      }
+      debugPrint("get marketplace item failed: $e");
+      return {'error': 'get Marketplace item failed', 'status': e.response?.statusCode};
+    }
+  }
+
+  Future<Map<String, dynamic>> addMarketplaceItem({
+    required String itemName,
+    required String itemDescription,
+    required double sellingPrice,
+    required List<Uint8List> imagesWeb,
+    required List<PickedFile> images,
+  }) async {
+    try {
+      const url = "/marketplace/add_item";
+
+      List<MultipartFile> multiPartList = [];
+
+      if (kIsWeb) {
+        multiPartList = await Future.wait(imagesWeb.map((img) async {
+          return MultipartFile.fromBytes(
+            img,
+            filename:
+                "IITH_DASHBOARD_BY_LAMBDA-marketplace-item-from-web-${DateTime.now().toIso8601String()}",
+          );
+        }).toList());
+      } else {
+        multiPartList = await Future.wait(images.map((img) async {
+          return MultipartFile.fromFile(
+            img.path,
+            filename:
+                "IITH_DASHBOARD_BY_LAMBDA-${img.path.split('/').last}-${DateTime.now().toIso8601String()}",
+          );
+        }).toList());
+      }
+
+      debugPrint('MultiPart List: $multiPartList');
+
+      final formData = FormData.fromMap({
+        "form_data": jsonEncode({
+          "item_name": itemName,
+          "item_description": itemDescription,
+          "selling_price": sellingPrice,
+        }),
+        "images": multiPartList,
+      });
+
+      debugPrint('FormData: ${formData.fields}');
+      debugPrint('FormData files: ${formData.files}');
+
+      final response = await dio.post(url, data: formData);
+      debugPrint(response.statusMessage);
+      debugPrint("success");
+      return {'status': response.statusCode};
+    } on DioException catch (e) {
+      if (e.response != null) {
+        debugPrint(e.response.toString());
+        return {'error': e.response?.data?['detail'], 'status': e.response?.statusCode};
+      }
+      debugPrint("add marketplace item failed: $e");
+      return {'error': 'add Marketplace item failed', 'status': e.response?.statusCode};
+    }
+  }
+
+  Future<Map<String, dynamic>> deleteMarketplaceItem({
+    required String id,
+    required BuildContext context,
+  }) async {
+    try {
+      final url = "/marketplace/delete_item/$id";
+      final response = await dio.delete(url);
+
+      return {'status': response.statusCode};
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        await logout(context);
+        return {'error': 'Unauthorized user', 'status': 401};
+      }
+      if (e.response != null) {
+        return {'error': e.response?.data['detail'], 'status': e.response?.statusCode};
+      }
+      debugPrint("delete marketplace item failed: $e");
+      return {'error': 'delete Marketplace item failed', 'status': e.response?.statusCode};
+    }
+  }
+
+  Future<Map<String, dynamic>> editMarketplaceItem({
+    required String id,
+    required String itemName,
+    required String itemDescription,
+    required double sellingPrice,
+    required BuildContext context,
+  }) async {
+    try {
+      const url = "/marketplace/edit_item";
+
+      final response = await dio.put(url, data: {
+        "item_id": int.parse(id),
+        "item_name": itemName,
+        "item_description": itemDescription,
+        "selling_price": sellingPrice,
+      });
+
+      return {'status': response.statusCode};
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        await logout(context);
+        return {'error': 'Unauthorized user', 'status': 401};
+      }
+      if (e.response != null) {
+        return {'error': e.response?.data['detail'], 'status': e.response?.statusCode};
+      }
+      debugPrint("edit marketplace item failed: $e");
+      return {'error': 'edit Marketplace item failed', 'status': e.response?.statusCode};
+    }
+  }
+
+  Future<Map<String, dynamic>> searchMarketplaceItems(String search, BuildContext context) async {
+    try {
+      final response = await dio.get('/marketplace/search?query=$search');
+
+      final items = (response.data as List).map((e) => e).toList();
+      debugPrint('searching marketplace: ${response.statusCode}');
+      debugPrint(items.toString());
+      return {'status': response.statusCode, 'items': items};
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        await logout(context);
+        return {'error': 'Unauthorized user', 'status': 401};
+      }
+      if (e.response != null) {
+        return {'error': e.response?.data['detail'], 'status': e.response?.statusCode};
+      }
+      debugPrint("search marketplace items failed: $e");
+      return {'error': 'search Marketplace items failed', 'status': e.response?.statusCode};
+    }
+  }
+
+  // ====================Marketplace/Buy and Sell ends===========================
+
   Future<String> getEventText() async {
     try {
       final response = await dio.get('/time');

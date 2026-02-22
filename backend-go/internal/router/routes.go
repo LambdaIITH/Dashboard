@@ -49,14 +49,16 @@ func SetupRoutes(router *gin.Engine) {
 		transportGroup.GET("/qr/recent", middlewares.AuthMiddleware(), controller.GetRecentTransaction)
 	}
 
-	sellGroup := router.Group("/sell")
+	// Group routes for buy and sell marketplace
+	marketplaceGroup := router.Group("/marketplace")
 	{
-		sellGroup.POST("/add_item", controller.AddSellItemHandler)
-		sellGroup.GET("/all", controller.GetAllSellItemsHandler)
-		sellGroup.GET("/get_item/:id", controller.GetSellItemByIdHandler)
-		sellGroup.PUT("/edit_item", controller.EditSellItemHandler)
-		sellGroup.DELETE("/delete_item", controller.DeleteSellItemHandler)
-		sellGroup.GET("/search", controller.SearchSellItemHandler)
+		marketplaceGroup.POST("/add_item", middlewares.AuthMiddleware(), controller.AddSellingItemHandler)
+		marketplaceGroup.GET("/all", controller.GetAllSellingItemsHandler)
+		marketplaceGroup.GET("/get_item/:id", controller.GetSellingItemByIdHandler)
+		marketplaceGroup.PUT("/edit_item", middlewares.AuthMiddleware(), controller.EditSellingItemHandler)
+		marketplaceGroup.DELETE("/delete_item/:id", middlewares.AuthMiddleware(), controller.DeleteSellingItemHandler)
+		marketplaceGroup.GET("/search", controller.SearchSellingItemHandler)
+		marketplaceGroup.GET("/my_items", middlewares.AuthMiddleware(), controller.GetMySellingItemsHandler)
 	}
 
 	userGroup := router.Group("/user")

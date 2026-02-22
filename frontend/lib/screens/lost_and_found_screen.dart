@@ -50,8 +50,7 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
 
     if (shouldAsk) {
       _showNotificationPermissionSheet(context);
-      SharedService().saveLastPermsRequestDate(
-          date: DateFormat("dd-MM-yyyy").format(now).trim());
+      SharedService().saveLastPermsRequestDate(date: DateFormat("dd-MM-yyyy").format(now).trim());
     }
   }
 
@@ -328,7 +327,14 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              CustomSearchBar(),
+                              CustomSearchBar(
+                                controller: _searchController,
+                                onSearch: (value) {
+                                  setState(() {
+                                    _search = value;
+                                  });
+                                },
+                              ),
                               // SearchBar(
                               //   hintText: 'Search...',
                               //   controller: _searchController,

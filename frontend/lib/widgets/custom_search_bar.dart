@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 class CustomSearchBar extends StatefulWidget {
   final Function(String)? onSearch;
+  final TextEditingController? controller;
   final String hintText;
   final Color backgroundColor;
   final Color searchBarColor;
@@ -11,6 +12,7 @@ class CustomSearchBar extends StatefulWidget {
   const CustomSearchBar({
     super.key,
     this.onSearch,
+    this.controller,
     this.hintText = 'Search for something',
     this.backgroundColor = Colors.black,
     this.searchBarColor = const Color(0xFF333333),
@@ -21,8 +23,7 @@ class CustomSearchBar extends StatefulWidget {
   State<CustomSearchBar> createState() => _CustomSearchBarState();
 }
 
-class _CustomSearchBarState extends State<CustomSearchBar>
-    with SingleTickerProviderStateMixin {
+class _CustomSearchBarState extends State<CustomSearchBar> with SingleTickerProviderStateMixin {
   late TextEditingController _controller;
   late FocusNode _focusNode;
   bool _isSearching = false;
@@ -30,7 +31,7 @@ class _CustomSearchBarState extends State<CustomSearchBar>
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController();
+    _controller = widget.controller ?? TextEditingController();
     _focusNode = FocusNode();
     _focusNode.addListener(_onFocusChange);
   }
@@ -42,16 +43,21 @@ class _CustomSearchBarState extends State<CustomSearchBar>
   }
 
   void _clearSearch() {
+    _controller.clear();
+    _focusNode.unfocus();
     setState(() {
-      _controller.clear();
-      _focusNode.unfocus();
       _isSearching = false;
     });
+    if (widget.onSearch != null) {
+      widget.onSearch!('');
+    }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    if (widget.controller == null) {
+      _controller.dispose();
+    }
     _focusNode.dispose();
     super.dispose();
   }
@@ -62,7 +68,9 @@ class _CustomSearchBarState extends State<CustomSearchBar>
       children: [
         AnimatedContainer(
           duration: Duration(milliseconds: 200),
-          width: _isSearching ? MediaQuery.of(context).size.width - 78 : MediaQuery.of(context).size.width - 40,
+          width: _isSearching
+              ? MediaQuery.of(context).size.width - 78
+              : MediaQuery.of(context).size.width - 40,
           curve: Curves.easeInOut,
           child: Container(
             decoration: BoxDecoration(
@@ -84,9 +92,7 @@ class _CustomSearchBarState extends State<CustomSearchBar>
                     });
                   },
                 ),
-                hintText: !_isSearching && _controller.text.isEmpty
-                    ? widget.hintText
-                    : null,
+                hintText: !_isSearching && _controller.text.isEmpty ? widget.hintText : null,
                 hintStyle: TextStyle(color: Colors.grey[400], fontSize: 15),
                 border: InputBorder.none,
               ),
@@ -97,17 +103,19 @@ class _CustomSearchBarState extends State<CustomSearchBar>
             ),
           ),
         ),
-        _isSearching? AnimatedOpacity(
-          duration: Duration(milliseconds: 500),
-          opacity: _isSearching ? 1.0 : 0.0,
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 4),
-            child: IconButton(
-              icon: Icon(Icons.close, color: widget.iconColor, size: 30),
-              onPressed: _clearSearch,
-            ),
-          ),
-        ): SizedBox(),
+        _isSearching
+            ? AnimatedOpacity(
+                duration: Duration(milliseconds: 500),
+                opacity: _isSearching ? 1.0 : 0.0,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 4),
+                  child: IconButton(
+                    icon: Icon(Icons.close, color: widget.iconColor, size: 30),
+                    onPressed: _clearSearch,
+                  ),
+                ),
+              )
+            : SizedBox(),
       ],
     );
   }

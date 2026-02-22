@@ -28,15 +28,25 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 void main() async {
-
-   WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized();
 
   await dotenv.load(fileName: ".env");
   // WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    // name: "Dashboard",
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+
+  // Check if Firebase is already initialized before initializing
+  try {
+    await Firebase.initializeApp(
+      // name: "Dashboard",
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    if (e.toString().contains('duplicate-app')) {
+      // Firebase already initialized, continue
+      debugPrint('Firebase already initialized');
+    } else {
+      rethrow;
+    }
+  }
 
   final apiServices = ApiServices();
   await apiServices.configureDio();
