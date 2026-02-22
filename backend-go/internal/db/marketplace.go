@@ -185,12 +185,6 @@ func GetParticularSellingItem(ctx context.Context, itemID int) (schema.SellingIt
 		&sellingItem.SellingPrice,
 	)
 
-	if sellingItem.UserPhoneNumber == "" {
-		// If the phone number is not available, set it to an empty string
-		sellingItem.UserPhoneNumber = ""
-	}
-
-
 	if err != nil {
 		return sellingItem, err
 	}

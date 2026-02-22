@@ -12,7 +12,7 @@ type SellingItem struct {
 	UserID          int       `db:"user_id"`
 	UserName        string    `db:"username"`
 	UserEmail       string    `db:"user_email"`
-	UserPhoneNumber string    `db:"-"` // This field is not mapped to the database column, but will be populated in the application logic
+	UserPhoneNumber string    `default:""`
 	Images          []string  `db:"images"`
 	CreatedAt       time.Time `db:"created_at"`
 }
