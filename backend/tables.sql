@@ -308,3 +308,20 @@ CREATE TRIGGER update_lambdaverse_registrations_timestamp
 BEFORE UPDATE ON lambdaverse_registrations
 FOR EACH ROW
 EXECUTE FUNCTION update_modified_column();
+
+CREATE TABLE IF NOT EXISTS selling
+(
+    id BIGSERIAL PRIMARY KEY,
+    item_name VARCHAR(256) NOT NULL,
+    item_description VARCHAR(1000) NOT NULL,
+    selling_price NUMERIC(10, 2) NOT NULL DEFAULT 0.00,
+    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS selling_images
+(
+    id BIGSERIAL PRIMARY KEY,
+    image_url VARCHAR(512) NOT NULL,
+    item_id BIGINT NOT NULL REFERENCES selling(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
