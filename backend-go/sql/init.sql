@@ -18,6 +18,10 @@ DROP TABLE IF EXISTS lost_images CASCADE;
 DROP TABLE IF EXISTS found_images CASCADE;
 DROP TABLE IF EXISTS transactions CASCADE;
 DROP TABLE IF EXISTS face CASCADE;
+DROP TABLE IF EXISTS hostel_complaints CASCADE;
+DROP TABLE IF EXISTS hostel_complaint_images CASCADE;
+DROP TABLE IF EXISTS selling CASCADE;
+DROP TABLE IF EXISTS selling_images CASCADE;
 
 
 -- Re-create the tables and types
@@ -230,4 +234,53 @@ CREATE TABLE IF NOT EXISTS announcements
     tags TEXT[],
     category TEXT[],
     imageURI TEXT
+);
+
+CREATE TABLE IF NOT EXISTS hostel_complaints
+(
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    complaint_description VARCHAR(1000) NOT NULL,
+    complaint_data JSONB DEFAULT '{}',
+    complaint_status VARCHAR(50) DEFAULT 'Pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    resolved_at TIMESTAMP NULL,
+    is_sheet_synced BOOLEAN DEFAULT FALSE,
+    sheet_sync_attempts INT DEFAULT 0,
+    hostel VARCHAR(100),
+    room_number VARCHAR(50)
+);
+
+CREATE TABLE IF NOT EXISTS hostel_complaint_images
+(
+    id BIGSERIAL PRIMARY KEY,
+    complaint_id BIGINT NOT NULL REFERENCES hostel_complaints(id) ON DELETE CASCADE,
+    image_url VARCHAR(256) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS hostels
+(
+    id BIGSERIAL PRIMARY KEY,
+    email VARCHAR(256) UNIQUE NOT NULL REFERENCES users(email) ON DELETE CASCADE ON UPDATE CASCADE,
+    hostel_block VARCHAR(50) NOT NULL,
+    room_number VARCHAR(50) NOT NULL,
+    gender VARCHAR(20)
+);
+
+-- Marketplace/Buy-Sell tables
+CREATE TABLE IF NOT EXISTS selling
+(
+    id BIGSERIAL PRIMARY KEY,
+    item_name VARCHAR(256) NOT NULL,
+    item_description VARCHAR(1000) NOT NULL,
+    selling_price NUMERIC(10, 2) NOT NULL DEFAULT 0.00,
+    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS selling_images
+(
+    id BIGSERIAL PRIMARY KEY,
+    image_url VARCHAR(512) NOT NULL,
+    item_id BIGINT NOT NULL REFERENCES selling(id) ON DELETE CASCADE ON UPDATE CASCADE
 );

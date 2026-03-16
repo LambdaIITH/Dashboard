@@ -77,7 +77,7 @@ func GetMessMenu(c *gin.Context) {
 	}
 	defer menuFile.Close()
 
-	var menu map[string]interface{}
+	var menu interface{}
 	if err := json.NewDecoder(menuFile).Decode(&menu); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error: invalid menu file"})
 		return

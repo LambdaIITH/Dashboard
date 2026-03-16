@@ -111,7 +111,7 @@ func GetUser(c context.Context, id int) schema.UserStruct {
 }
 
 func UpdatePhone(c context.Context, id int, phone string) schema.UserStruct {
-	query := "UPDATE users SET phoneNumber = $1 WHERE id = $2 RETURNING id, email, name ,cr , phone_number"
+	query := "UPDATE users SET phone_number = $1 WHERE id = $2 RETURNING id, email, name ,cr , phone_number"
 
 	rows, err := config.DB.Query(c, query, phone, id)
 	if err != nil {

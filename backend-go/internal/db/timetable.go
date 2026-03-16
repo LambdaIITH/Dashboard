@@ -14,7 +14,7 @@ import (
 
 // GetTimetable retrieves the timetable of the user with the given user_id.
 func GetTimetable(ctx context.Context, userID int) (string, error) {
-	query := "SELECT timetable FROM user_timetable WHERE id = $1"
+	query := "SELECT timetable FROM users WHERE id = $1"
 
 	var result string
 	err := config.DB.QueryRow(ctx, query, userID).Scan(&result)
@@ -31,7 +31,7 @@ func PostTimetable(ctx context.Context, userID int, timetable schema.Timetable) 
 		return nil, err
 	}
 
-	query := "UPDATE user_timetable SET timetable = $1 WHERE id = $2"
+	query := "UPDATE users SET timetable = $1 WHERE id = $2"
 
 	var result map[string]interface{}
 	_, err = config.DB.Exec(ctx, query, string(timetableJSON), userID)

@@ -6,6 +6,7 @@ import (
 
 	"github.com/LambdaIITH/Dashboard/backend/config"
 	"github.com/LambdaIITH/Dashboard/backend/internal/router"
+	"github.com/LambdaIITH/Dashboard/backend/internal/worker"
 )
 
 func init() {
@@ -22,6 +23,9 @@ func main() {
 
 	r := router.SetupRouter()
 	defer config.DB.Close()
+
+	// Start Background Workers
+	go worker.StartRetryWorker()
 
 	r.Run(":" + port)
 }

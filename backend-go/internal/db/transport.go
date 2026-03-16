@@ -87,31 +87,32 @@ func GetLastTransaction(ctx context.Context, userId int) map[string]interface{} 
 	transaction := make(map[string]interface{})
 	for i, col := range columns {
 		val := values[i]
-		if col == "transaction_id" {
+		switch col {
+		case "transaction_id":
 			if v, ok := val.(string); ok {
 				transaction["transactionId"] = v
 			}
-		} else if col == "user_id" {
+		case "user_id":
 			if v, ok := val.(int64); ok {
 				transaction["userId"] = v
 			}
-		} else if col == "payment_time" {
+		case "payment_time":
 			if v, ok := val.(time.Time); ok {
 				transaction["paymentTime"] = v.Format("13:12")
 			}
-		} else if col == "bus_timing" {
+		case "bus_timing":
 			if v, ok := val.(time.Time); ok {
 				transaction["busTiming"] = v.Format("13:12")
 			}
-		} else if col == "travel_date" {
+		case "travel_date":
 			if v, ok := val.(time.Time); ok {
 				transaction["travelDate"] = v.Format("04/02/09")
 			}
-		} else if col == "isUsed" {
+		case "isUsed":
 			if v, ok := val.(bool); ok {
 				transaction["isUsed"] = fmt.Sprintf("%v", v)
 			}
-		} else {
+		default:
 			if v, ok := val.(string); ok {
 				transaction[col] = v
 			}

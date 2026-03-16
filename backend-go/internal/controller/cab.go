@@ -747,10 +747,11 @@ func ExitBooking(c *gin.Context) {
 	}
 
 	ownerEmail, err := db.GetOwnerEmail(c, bookingID)
-	if ownerEmail == "" {
+	switch ownerEmail {
+	case "":
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Ride does not exist"})
 		return
-	} else if ownerEmail == email {
+	case email:
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Owner cannot exit a ride, but you can delete it"})
 		return
 	}

@@ -88,6 +88,41 @@ class LfResponse(BaseModel):
     def from_row(cls, row: tuple, image_urls: List[str] ):
         return LfResponse(id = row[0], item_name=row[1], item_description=row[2], created_at=row[3], image_urls=image_urls,user_email=row[6], username=row[7])
     
+class SellingItem(BaseModel):
+    id: int
+    item_name: str
+    item_description: str
+    selling_price: float
+    created_at: datetime
+    image_urls: Optional[List[str]] = None
+    user_id: int
+
+    @classmethod
+    def from_row(cls, row: tuple):
+        return SellingItem(id=row[0], item_name=row[1], item_description=row[2],
+                           selling_price=float(row[3]), user_id=row[4], created_at=row[5])
+
+class SellingResponse(BaseModel):
+    id: int
+    item_name: str
+    description: str
+    selling_price: float
+    created_at: datetime
+    images: List[str]
+    user_email: str
+    username: str
+    user_phone_number: Optional[str] = None
+
+    @classmethod
+    def from_row(cls, row: tuple, image_urls: List[str]):
+        # selling table: id[0], item_name[1], item_description[2], selling_price[3], user_id[4], created_at[5]
+        # users table (via JOIN): users.id[6], email[7], name[8], cr[9], phone_number[10], timetable[11]
+        return SellingResponse(id=row[0], item_name=row[1], description=row[2],
+                               selling_price=float(row[3]), created_at=row[5],
+                               images=image_urls, user_email=row[7],
+                               username=row[8],
+                               user_phone_number=row[10] if len(row) > 10 else None)
+
 class image_info(BaseModel):
     id: int
     image_url: str

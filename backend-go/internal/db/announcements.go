@@ -12,12 +12,13 @@ func GetAnnouncementsFromDB(c *gin.Context, limit int, offset int) ([]schema.Ann
 
 	query := `SELECT (id ,title, description, createdat, createdby, tags, category, imageURI) FROM announcements ORDER BY createdat DESC LIMIT $1 OFFSET $2`
 	rows, err := config.DB.Query(c, query, limit, offset)
-	defer rows.Close()
-
 	if err != nil {
 		fmt.Printf("ERROR: Querying Announcement Tables")
 		return nil, err
 	}
+
+	defer rows.Close()
+
 	var announcements []schema.AnnouncementWithImages
 
 	for rows.Next() {

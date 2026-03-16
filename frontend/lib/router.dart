@@ -4,6 +4,8 @@ import 'package:dashbaord/models/mess_menu_model.dart';
 import 'package:dashbaord/models/user_model.dart';
 import 'package:dashbaord/screens/announcement_full_screen.dart';
 import 'package:dashbaord/screens/announcement_screen.dart';
+import 'package:dashbaord/screens/buy_and_sell_item_screen.dart';
+import 'package:dashbaord/screens/buy_and_sell_screen.dart';
 import 'package:dashbaord/screens/campus_map_screen.dart';
 import 'package:dashbaord/screens/city_bus_screen.dart';
 import 'package:dashbaord/screens/bus_timings_screen.dart';
@@ -24,6 +26,7 @@ import 'package:dashbaord/screens/mess_registration_screen.dart';
 import 'package:dashbaord/screens/profile_screen.dart';
 import 'package:dashbaord/screens/merch_shop_screen.dart';
 import 'package:dashbaord/screens/merch_orders_screen.dart';
+import 'package:dashbaord/screens/hostel_complaints_screen.dart';
 import 'package:dashbaord/services/analytics_service.dart';
 import 'package:dashbaord/utils/bus_schedule.dart';
 import 'package:dashbaord/utils/loading_widget.dart';
@@ -393,6 +396,70 @@ class AppRouter {
         },
       ),
       GoRoute(
+        path: '/marketplace',
+        pageBuilder: (context, state) {
+          final data = state.extra as Map<String, dynamic>? ?? {};
+          final currentUserEmail = data['currentUserEmail'] as String?;
+
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: BuyAndSellScreen(
+              currentUserEmail: currentUserEmail,
+            ),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(1, 0),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
+              );
+            },
+          );
+        },
+      ),
+      GoRoute(
+        path: '/marketplace/:item/:id',
+        pageBuilder: (context, state) {
+          final id = state.pathParameters['id'];
+
+          if (id == null) {
+            return CustomTransitionPage(
+              child: const ErrorScreen(),
+              transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                return SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 0),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: child,
+                );
+              },
+            );
+          }
+
+          final data = state.extra as Map<String, dynamic>? ?? {};
+          final currentUserEmail = data['currentUserEmail'] as String?;
+
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: BuyAndSellItemScreen(
+              currentUserEmail: currentUserEmail,
+              id: id,
+            ),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(1, 0),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
+              );
+            },
+          );
+        },
+      ),
+      GoRoute(
         path: '/mess',
         pageBuilder: (context, state) {
           final data = state.extra as Map<String, dynamic>? ?? {};
@@ -608,6 +675,10 @@ class AppRouter {
             },
           );
         },
+      ),
+      GoRoute(
+        path: '/hostel-complaints',
+        builder: (context, state) => const HostelComplaintsScreen(),
       ),
     ],
     errorBuilder: (context, state) => const ErrorScreen(),

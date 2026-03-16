@@ -1,0 +1,1 @@
+Hostel Complaint Status Update: {{.id}} - {{.complaint_status}}
