@@ -97,7 +97,6 @@ dev_dependencies:
 
 dependency_overrides:
   camera_android_camerax: 0.6.11
-  petitparser: 6.1.0
 
 flutter_launcher_icons:
   android: "launcher_icon"
