@@ -11,6 +11,9 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout Repository
@@ -24,7 +27,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GH_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
@@ -43,7 +46,7 @@ jobs:
             set -e
 
             cd ~/Dashboard
-            echo ${{ secrets.GH_TOKEN }} | sudo docker login ghcr.io -u bhaskaraa45 --password-stdin
+            echo ${{ secrets.GITHUB_TOKEN }} | sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
             echo "Stopping and removing all containers..."
             sudo docker rm -f $(sudo docker ps -aq) || true
