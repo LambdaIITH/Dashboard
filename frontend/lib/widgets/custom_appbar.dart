@@ -1,6 +1,7 @@
 import 'package:dashbaord/extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -30,8 +31,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             size: 28,
           ),
           onPressed: () {
-            if (Navigator.of(context).canPop()) {
-              Navigator.pop(context);
+            if (context.canPop()) {
+              context.pop();
             }
           },
         ),

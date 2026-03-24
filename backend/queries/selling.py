@@ -96,6 +96,8 @@ def search_selling_items(search_query: str, max_results: int = 10):
 
 
 def get_some_image_uris(item_ids: list):
+    if not item_ids:
+        return "SELECT item_id, image_url FROM selling_images WHERE FALSE"
     query = Query.from_(selling_images_table).select(
         selling_images_table['item_id'], selling_images_table['image_url']
     ).where(selling_images_table['item_id'].isin(item_ids))

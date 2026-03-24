@@ -93,9 +93,11 @@ class _BuyAndSellScreenState extends State<BuyAndSellScreen> {
   }
 
   bool isLoading = true;
-  late UserModel user;
+  late final UserModel user;
   List<Widget> allItems = [];
   List<Widget> myItems = [];
+  bool _allItemsLoading = true;
+  bool _myItemsLoading = true;
 
   Future<void> fetchUser() async {
     final response = await ApiServices().getUserDetails(context);
@@ -110,6 +112,7 @@ class _BuyAndSellScreenState extends State<BuyAndSellScreen> {
   }
 
   Future<List<Widget>> getItems() async {
+    setState(() { _allItemsLoading = true; });
     final Map<String, dynamic> data;
     if (_search.isEmpty) {
       data = await ApiServices().getMarketplaceItems(context);
@@ -129,11 +132,13 @@ class _BuyAndSellScreenState extends State<BuyAndSellScreen> {
     }
     setState(() {
       allItems = finalItems;
+      _allItemsLoading = false;
     });
     return finalItems;
   }
 
   Future<List<Widget>> getMyItems() async {
+    setState(() { _myItemsLoading = true; });
     final Map<String, dynamic> data = await ApiServices().getMyMarketplaceItems(context);
 
     List<Widget> finalItems = [];
@@ -153,6 +158,7 @@ class _BuyAndSellScreenState extends State<BuyAndSellScreen> {
     }
     setState(() {
       myItems = finalItems;
+      _myItemsLoading = false;
     });
     return finalItems;
   }
@@ -265,30 +271,18 @@ class _BuyAndSellScreenState extends State<BuyAndSellScreen> {
       onRefresh: () async {
         await getItems();
       },
-      child: FutureBuilder(
-        future: allItems.isEmpty ? getItems() : Future.value(allItems),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting && allItems.isEmpty) {
-            return const Center(child: CustomLoadingScreen());
-          }
-          return buildItemsGrid(allItems);
-        },
-      ),
+      child: _allItemsLoading
+          ? const Center(child: CustomLoadingScreen())
+          : buildItemsGrid(allItems),
     );
 
     Widget myListingsTab = RefreshIndicator(
       onRefresh: () async {
         await getMyItems();
       },
-      child: FutureBuilder(
-        future: myItems.isEmpty ? getMyItems() : Future.value(myItems),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting && myItems.isEmpty) {
-            return const Center(child: CustomLoadingScreen());
-          }
-          return buildItemsGrid(myItems, showSearch: false);
-        },
-      ),
+      child: _myItemsLoading
+          ? const Center(child: CustomLoadingScreen())
+          : buildItemsGrid(myItems, showSearch: false),
     );
 
     return isLoading
