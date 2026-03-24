@@ -123,7 +123,9 @@ class _BuyAndSellScreenState extends State<BuyAndSellScreen> {
     List<Widget> finalItems = [];
     if (data['status'] == 200) {
       final items = data['items'] as List<dynamic>;
-      finalItems.addAll(items.map((item) {
+      finalItems.addAll(items
+          .where((item) => item['user_id']?.toString() != user.id.toString())
+          .map((item) {
         return BuySellItem(
           currentUserEmail: user.email,
           item: BuyAndSellModel.fromJson(item),
