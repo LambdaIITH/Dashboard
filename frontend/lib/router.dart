@@ -26,6 +26,7 @@ import 'package:dashbaord/screens/mess_registration_screen.dart';
 import 'package:dashbaord/screens/profile_screen.dart';
 import 'package:dashbaord/screens/merch_shop_screen.dart';
 import 'package:dashbaord/screens/merch_orders_screen.dart';
+import 'package:dashbaord/screens/emergency_contacts_screen.dart';
 import 'package:dashbaord/screens/hostel_complaints_screen.dart';
 import 'package:dashbaord/services/analytics_service.dart';
 import 'package:dashbaord/utils/bus_schedule.dart';
@@ -664,6 +665,24 @@ class AppRouter {
           return CustomTransitionPage(
             key: state.pageKey,
             child: const MerchOrdersScreen(),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(1, 0),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
+              );
+            },
+          );
+        },
+      ),
+      GoRoute(
+        path: '/emergency-contacts',
+        pageBuilder: (context, state) {
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: const EmergencyContactsScreen(),
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return SlideTransition(
                 position: Tween<Offset>(

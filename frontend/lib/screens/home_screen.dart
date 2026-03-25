@@ -792,6 +792,23 @@ class _HomeScreenState extends State<HomeScreen> {
                                         },
                                       ),
                                     ),
+                                    SizedBox(
+                                      width: MediaQuery.of(context).size.width > 450
+                                          ? 200
+                                          : MediaQuery.of(context).size.width / 3 - 28,
+                                      child: HomeScreenCardSmall(
+                                        width: MediaQuery.of(context).size.width > 450
+                                            ? 200
+                                            : MediaQuery.of(context).size.width / 2 - 25,
+                                        isComingSoon: false,
+                                        reduceImageSize: true,
+                                        title: 'Emergency Contacts',
+                                        child: 'assets/icons/emergency.svg',
+                                        onTap: () {
+                                          context.push("/emergency-contacts");
+                                        },
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ],
