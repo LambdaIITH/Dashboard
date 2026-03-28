@@ -642,7 +642,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         isComingSoon: false,
                                         reduceImageSize: true,
                                         title: 'Marketplace',
-                                        child: 'assets/icons/merch.svg',
+                                        child: 'assets/icons/Marketplace.svg',
                                         onTap: widget.isGuest
                                             ? showError
                                             : () => context.push('/marketplace', extra: {
@@ -681,7 +681,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         isComingSoon: false,
                                         reduceImageSize: true,
                                         title: 'Mess Registration',
-                                        child: 'assets/icons/mess-reg.svg',
+                                        child: 'assets/icons/Mess Registration.svg',
                                         onTap: () {
                                           context.push('/sva');
                                         },
@@ -735,7 +735,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         isComingSoon: false,
                                         reduceImageSize: true,
                                         title: 'Campus Map',
-                                        child: 'assets/icons/campus-map.svg',
+                                        child: 'assets/icons/campus_map.svg',
                                         onTap: () {
                                           context.push("/map");
                                         },
@@ -803,7 +803,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         isComingSoon: false,
                                         reduceImageSize: true,
                                         title: 'Emergency Contacts',
-                                        child: 'assets/icons/emergency.svg',
+                                        child: 'assets/icons/Emergency Contacts.svg',
                                         onTap: () {
                                           context.push("/emergency-contacts");
                                         },
