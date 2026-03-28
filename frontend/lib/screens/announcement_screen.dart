@@ -6,7 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:dashbaord/services/api_service.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:dashbaord/utils/loading_widget.dart';
 
 class AnnouncementScreen extends StatefulWidget {
   const AnnouncementScreen({super.key});
@@ -474,11 +474,8 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
                 id: announcement.id,
               );
             } else if (isLoading) {
-              return Center(
-                child: LoadingAnimationWidget.beat(
-                  color: Colors.blue,
-                  size: 50,
-                ),
+              return const Center(
+                child: CustomLoadingIndicator(width: 80, height: 80),
               );
             } else {
               return const SizedBox.shrink();

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:lottie/lottie.dart';
 
 class CustomLoadingScreen extends StatelessWidget {
   const CustomLoadingScreen({super.key});
@@ -8,12 +8,30 @@ class CustomLoadingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: Center(
-        child: LoadingAnimationWidget.fourRotatingDots(
-          color: const Color(0xffFE724C),
-          size: 50,
-        ),
+      body: const Center(
+        child: CustomLoadingIndicator(),
       ),
+    );
+  }
+}
+
+class CustomLoadingIndicator extends StatelessWidget {
+  final double width;
+  final double height;
+
+  const CustomLoadingIndicator({
+    super.key,
+    this.width = 150,
+    this.height = 150,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Lottie.asset(
+      'assets/animations/Dashboard-Logo-Big.json',
+      width: width,
+      height: height,
+      fit: BoxFit.contain,
     );
   }
 }
