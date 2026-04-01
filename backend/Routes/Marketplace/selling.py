@@ -46,27 +46,22 @@ async def add_item(request: Request,
 async def get_all_selling_item_names() -> List[Dict[str, Any]]:
     try:
         with conn.cursor() as cur:
-            cur.execute(get_all_selling_items())
+            cur.execute("SELECT id, item_name, item_description, user_id, created_at, selling_price FROM selling ORDER BY created_at DESC")
             rows = cur.fetchall()
 
-            # get_all_selling_items() returns:
-            # s.id[0], s.item_name[1], s.item_description[2], s.user_id[3], images[4], s.created_at[5], s.selling_price[6]
-            # json_agg may return a Python list or a JSON string depending on psycopg2 version
-            def parse_images(img_val):
-                if img_val is None:
-                    return []
-                if isinstance(img_val, str):
-                    return json.loads(img_val)
-                return img_val
+            cur.execute("SELECT item_id, image_url FROM selling_images")
+            images = cur.fetchall()
+
+            image_dict = get_image_dict(images)
 
             result = list(map(lambda x: {
                 "id": x[0],
                 "user_id": x[3],
                 "name": x[1],
-                "selling_price": float(x[6]),
+                "selling_price": float(x[5]),
                 "description": x[2],
-                "created_at": str(x[5]),
-                "images": parse_images(x[4]),
+                "created_at": x[4].isoformat() + "Z" if x[4] else None,
+                "images": image_dict.get(x[0], []),
             }, rows))
 
             return result
@@ -187,7 +182,7 @@ def search(query: str, max_results: int = 100) -> List[Dict[str, Any]]:
                 "item_name": x[1],
                 "item_description": x[2],
                 "user_id": x[4],
-                "created_at": str(x[5]),
+                "created_at": x[5].isoformat() + "Z" if x[5] else None,
                 "images": image_dict.get(x[0], [])
             }, res))
 
@@ -222,7 +217,7 @@ def get_my_items(request: Request) -> List[Dict[str, Any]]:
                 "name": x[1],
                 "selling_price": float(x[3]),
                 "description": x[2],
-                "created_at": str(x[5]),
+                "created_at": x[5].isoformat() + "Z" if x[5] else None,
                 "images": image_dict.get(x[0], [])
             }, rows))
 
