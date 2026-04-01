@@ -115,7 +115,8 @@ class SellingResponse(BaseModel):
 
     @classmethod
     def from_row(cls, row: tuple, image_urls: List[str]):
-        ist_time = row[5].isoformat() + "Z" if row[5] else ""
+        from datetime import timedelta
+        ist_time = (row[5] + timedelta(hours=5, minutes=30)).strftime("%Y-%m-%d %H:%M:%S") if row[5] else ""
         # selling table: id[0], item_name[1], item_description[2], selling_price[3], user_id[4], created_at[5]
         # users table (via JOIN): users.id[6], email[7], name[8], cr[9], phone_number[10], timetable[11]
         return SellingResponse(id=row[0], item_name=row[1], description=row[2],
