@@ -60,7 +60,7 @@ async def get_all_selling_item_names() -> List[Dict[str, Any]]:
                 "name": x[1],
                 "selling_price": float(x[5]),
                 "description": x[2],
-                "created_at": x[4].isoformat() + "Z" if x[4] else None,
+                "created_at": x[4].astimezone().isoformat() if x[4] else None,
                 "images": image_dict.get(x[0], []),
             }, rows))
 
@@ -182,7 +182,7 @@ def search(query: str, max_results: int = 100) -> List[Dict[str, Any]]:
                 "item_name": x[1],
                 "item_description": x[2],
                 "user_id": x[4],
-                "created_at": x[5].isoformat() + "Z" if x[5] else None,
+                "created_at": x[5].astimezone().isoformat() if x[5] else None,
                 "images": image_dict.get(x[0], [])
             }, res))
 
@@ -217,7 +217,7 @@ def get_my_items(request: Request) -> List[Dict[str, Any]]:
                 "name": x[1],
                 "selling_price": float(x[3]),
                 "description": x[2],
-                "created_at": x[5].isoformat() + "Z" if x[5] else None,
+                "created_at": x[5].astimezone().isoformat() if x[5] else None,
                 "images": image_dict.get(x[0], [])
             }, rows))
 
