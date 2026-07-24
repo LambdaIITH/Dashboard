@@ -296,13 +296,13 @@ class _MessMenuPageState extends State<MessMenuPage> {
               ShowMessMenu(
                 extras: extras?.breakfast ?? [],
                 whichMeal: 'Breakfast',
-                time:'7:30AM-10:30AM',
+                time: isWeekend()? '7:30AM-10:30AM' : '7:30AM-10:00AM',
                 meals: meals.breakfast,
               ),
               ShowMessMenu(
                 extras: extras?.lunch ?? [],
                 whichMeal: 'Lunch',
-                time: isWeekend() ? '12:30PM-3:00PM' : '12:00PM-3:00PM',
+                time:   '12:30PM-2:45PM',
                 meals: meals.lunch,
               ),
               ShowMessMenu(
@@ -314,7 +314,7 @@ class _MessMenuPageState extends State<MessMenuPage> {
               ShowMessMenu(
                 extras: extras?.dinner ?? [],
                 whichMeal: 'Dinner',
-                time: '7:00PM-9:30PM',
+                time: '7:30PM-9:30PM',
                 meals: meals.dinner,
               ),
             ] else

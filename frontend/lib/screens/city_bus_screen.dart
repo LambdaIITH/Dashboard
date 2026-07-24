@@ -680,8 +680,11 @@ class _CityBusScreenState extends State<CityBusScreen>
   }
 
   Widget _buildNoteWidget() {
+    final bool isMiyapurRoute = destination == "Miyapur" || startingPoint == "Miyapur";
     return Text(
-      '*Bus not available on weekends and Institute Holidays',
+      isMiyapurRoute
+          ? '*Bus available on weekends. Not available on Institute Holidays'
+          : '*Bus not available on weekends and Institute Holidays',
       style: GoogleFonts.inter(fontSize: 14),
     );
   }
