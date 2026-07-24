@@ -41,13 +41,13 @@ class HomeScreenMessMenu extends StatelessWidget {
         (currentTime.hour == 10 && currentTime.minute <= 30)) {
       currentMeal = 'Breakfast';
       currentMealData = meals.breakfast;
-      mealTime = '7:30AM-10:30AM';
+      mealTime = isWeekend() ? '7:30AM-10:30AM' : '7:30AM-10:00AM';
       extras = additional?.breakfast ?? [];
     } else if (currentTime.hour < 14 ||
         (currentTime.hour == 14 && currentTime.minute <= 45)) {
       currentMeal = 'Lunch';
       currentMealData = meals.lunch;
-      mealTime = isWeekend() ? '12:30PM-3:00PM' : '12:00PM-3:00PM';
+      mealTime = '12:30PM-2:45PM';
       extras = additional?.lunch ?? [];
     } else if (currentTime.hour < 18 ||
         (currentTime.hour == 18 && currentTime.minute <= 0)) {
@@ -59,7 +59,7 @@ class HomeScreenMessMenu extends StatelessWidget {
         (currentTime.hour == 21 && currentTime.minute <= 30)) {
       currentMeal = 'Dinner';
       currentMealData = meals.dinner;
-      mealTime = '7:00PM-9:30PM';
+      mealTime = '7:30PM-9:30PM';
       extras = additional?.dinner ?? [];
     } else {
       return noMealToday('No meals available for today', context);
