@@ -79,6 +79,12 @@ func SetupRoutes(router *gin.Engine) {
 		foundGroup.GET("/search", controller.SearchFoundItemHandler)
 	}
 
+	//Group routes for lost-found items
+	lostFoundGroup := router.Group("/lost_found")
+	{
+		lostFoundGroup.GET("/", controller.GetCombinedAllItemsHandler) //optional parameter max_limit
+	}
+
 	//Group routes for timetable/calendar
 	timetableGroup := router.Group("/schedule")
 	{

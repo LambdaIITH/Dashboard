@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"sort"
 	"strconv"
+	"time"
 
 	"github.com/LambdaIITH/Dashboard/backend/config"
 	lost "github.com/LambdaIITH/Dashboard/backend/internal/db"
@@ -130,6 +132,83 @@ func GetAllItemsHandler(c *gin.Context) {
 		response = append(response, itemData)
 	}
 
+	c.JSON(http.StatusOK, response)
+}
+
+/*
+GetCombinedAllItemsHandler fetches all the lost and found items and returns them as a JSON response ordered by creation time.
+*/
+func GetCombinedAllItemsHandler(c *gin.Context) {
+
+	maxLimit := 100
+	if limitStr := c.Query("max_limit"); limitStr != "" {
+		if limit, err := strconv.Atoi(limitStr); err == nil {
+			maxLimit = limit
+		}
+	}
+
+	//Step 1: Fetching lost items AND found items
+	lostItems, err := lost.GetAllLostItems(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch items"})
+
+		return
+	}
+
+
+	foundItems, err := lost.GetAllFoundItems(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch items"})
+		return
+	}
+
+
+
+	//Step 2: Initialize response slice
+	response := make([]map[string]any, 0, len(lostItems)+len(foundItems))
+
+	for _, item := range lostItems {
+		images := item.Images
+		if images == nil {
+			images = []string{}
+		}
+
+		itemData := map[string]any{
+			"id":         item.ID,
+			"name":       item.ItemName,
+			"images":     images,
+			"created_at": item.CreatedAt,
+			"type":       "lost",
+		}
+		response = append(response, itemData)
+	}
+	for _, item := range foundItems {
+		images := item.Images
+		if images == nil {
+			images = []string{}
+		}
+
+		itemData := map[string]any{
+			"id":         item.ID,
+			"name":       item.ItemName,
+			"images":     images,
+			"created_at": item.CreatedAt,
+			"type":       "found",
+		}
+		response = append(response, itemData)
+	}
+
+	sort.Slice(response, func(i, j int) bool {
+		t1 := response[i]["created_at"].(time.Time)
+		t2 := response[j]["created_at"].(time.Time)
+		return t1.After(t2) // newest first
+	})
+
+	if len(response) > maxLimit {
+		response = response[:maxLimit]
+	}
+
+	// Step 4: Return the response
 	c.JSON(http.StatusOK, response)
 }
 
