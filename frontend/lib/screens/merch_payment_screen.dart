@@ -74,7 +74,9 @@ class _MerchPaymentScreenState extends State<MerchPaymentScreen>
       final result = await _apiServices.createMerchOrder(
         widget.item.id,
         widget.selectedSize,
-        _nameController.text.trim(),
+        _nameController.text.trim().isEmpty
+            ? 'John Doe'
+            : _nameController.text.trim(),
         _transactionIdController.text.trim(),
         widget.isOversized,
       );

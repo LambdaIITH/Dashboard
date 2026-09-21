@@ -224,7 +224,7 @@ CREATE TABLE IF NOT EXISTS merch
     upi_id VARCHAR(100) NOT NULL,
     is_oversized BOOLEAN DEFAULT FALSE,
     size_guide_url VARCHAR(256),
-    ask_display_name BOOLEAN DEFAULT FALSE,
+    ask_display_name BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
