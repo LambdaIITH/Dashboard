@@ -416,7 +416,7 @@ class _MerchPaymentScreenState extends State<MerchPaymentScreen>
                         ),
                       ),
                     ),
-                    if (widget.item.askDisplayName) ...[
+                    /*if (widget.item.askDisplayName) ...[
                       _buildSectionHeader(
                           context, 'Merch Information', Icons.person_outline),
                       const SizedBox(height: 16),
@@ -431,7 +431,7 @@ class _MerchPaymentScreenState extends State<MerchPaymentScreen>
                           },
                       ),
                       const SizedBox(height: 24),
-                    ],
+                    ],*/
                     _buildSectionHeader(
                         context, 'Payment Details', Icons.payment_outlined),
                     const SizedBox(height: 16),
