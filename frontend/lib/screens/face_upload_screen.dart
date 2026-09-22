@@ -116,8 +116,7 @@ class _FaceUploadScreenState extends State<FaceUploadScreen> {
 
   Future<void> _uploadPhoto() async {
     if (_capturedImage != null && _isFaceDetected) {
-      // print("UPLOADING");
-      File imageFile = File(_capturedImage!.path);  // Convert XFile to File
+      File imageFile = File(_capturedImage!.path);
       ApiServices().uploadPhoto(imageFile);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
