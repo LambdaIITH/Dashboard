@@ -30,6 +30,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:in_app_update/in_app_update.dart';
 import 'package:text_scroll/text_scroll.dart';
+import 'package:dashbaord/services/mess_menu_service.dart';
 
 class HomeScreen extends StatefulWidget {
   final bool isGuest;
@@ -111,40 +112,25 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  int? week;
-  Future<void> fetchWeekNumber() async {
-    final response = await ApiServices().getWeekNumber(context);
-    if (response != null) {
-      setState(() {
-        week = response['week'];
-        week = week != null ? week! + 1 : week;
-      });
-    }
-  }
+  int week = MessMenuService.getCurrentWeek();
 
   void fetchMessMenu() async {
-    final response = await ApiServices().getMessMenu(context);
-    if (response == null) {
-      showError(msg: "Server Refresh Failed...");
-      final res = await SharedService().getMessMenu();
+    try {
+      final response = await MessMenuService.loadWeek(week);
+
       setState(() {
-        messMenu = res;
+        messMenu = response;
         changeState();
       });
-      return;
+
+      await SharedService().saveMessMenu(response);
+      updateAndroidWidget(response);
+    } catch (e) {
+      debugPrint("Failed to load mess menu: $e");
+      showError(msg: "Failed to load mess menu");
     }
-
-    await fetchWeekNumber();
-    setState(() {
-      messMenu = response;
-      changeState();
-    });
-
-    //save mess menu
-    await SharedService().saveMessMenu(response);
-    updateAndroidWidget(response);
   }
-
+  
   void updateAndroidWidget(MessMenuModel messMenu) {
     HomeWidget.saveWidgetData("widget_mess_menu", jsonEncode(messMenu.toJson()));
     HomeWidget.updateWidget(
