@@ -82,7 +82,7 @@ async def cookie_verification_middleware(request: Request, call_next):
 
 @app.middleware("http")
 async def apply_middleware(request: Request, call_next):
-    excluded_routes = ["/auth/login", "/auth/logout", "/docs", "/openapi.json", "/transport/", "/transport/cityBus", "/mess_menu/"]  # Add routes to exclude guard here
+    excluded_routes = ["/auth/login", "/auth/logout", "/docs", "/openapi.json", "/transport/", "/transport/cityBus", "/mess_menu/", "/mess_menu/webhook/sheets"]
 
     if request.url.path not in excluded_routes:
         return await cookie_verification_middleware(request, call_next)

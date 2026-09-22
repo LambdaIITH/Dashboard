@@ -33,9 +33,23 @@ function onEdit(e) {
   }
 }
 
-// to be run only once to store the secret token, delete everything below after running this function in apps script
+// Run this ONCE to set token AND create installable trigger
 function setWebhookToken() {
-  const token = 'your-random-secret-here';  // must match SHEETS_WEBHOOK_TOKEN in EC2 .env
+  const token = 'your-random-secret-here';  // CHANGE THIS to match EC2 SHEETS_WEBHOOK_TOKEN
   PropertiesService.getScriptProperties().setProperty('WEBHOOK_TOKEN', token);
-  console.log('Token saved. Delete this function after running.');
+  
+  // Delete existing onEdit triggers for this project
+  ScriptApp.getProjectTriggers().forEach(t => {
+    if (t.getHandlerFunction() === 'onEdit') {
+      ScriptApp.deleteTrigger(t);
+    }
+  });
+  
+  // Create installable onEdit trigger
+  ScriptApp.newTrigger('onEdit')
+    .forSpreadsheet(SpreadsheetApp.getActive())
+    .onEdit()
+    .create();
+  
+  console.log('Token saved & installable trigger created. Check Triggers tab to verify.');
 }

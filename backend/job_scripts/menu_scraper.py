@@ -189,12 +189,12 @@ json_data = {
 mess_menu_dir = os.path.join(os.path.dirname(__file__), "..", "Routes", "MessMenu")
 os.makedirs(mess_menu_dir, exist_ok=True)
 
-# Write all files
-for fname in ["mess.json"] + [f"{w}.json" for w in range(4)]:
+# Write only mess.json (reference) and current week file (what API reads)
+api_week = (current_week - 1) % 4
+for fname in ["mess.json", f"{api_week}.json"]:
     with open(os.path.join(mess_menu_dir, fname), "w") as f:
         json.dump(json_data, f, indent=4)
 
-api_week = (current_week - 1) % 4
 with open(os.path.join(mess_menu_dir, "config.json"), "w") as f:
     json.dump({"week": api_week}, f, indent=4)
 
