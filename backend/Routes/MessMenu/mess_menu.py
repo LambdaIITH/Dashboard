@@ -100,10 +100,9 @@ async def get_current_week_number(request: Request):
 
 @router.post("/webhook/sheets")
 async def sheets_webhook(request: Request, background_tasks: BackgroundTasks):
-    if SHEETS_WEBHOOK_TOKEN:
-        token = request.headers.get("X-Webhook-Token")
-        if token != SHEETS_WEBHOOK_TOKEN:
-            raise HTTPException(status_code=401, detail="Invalid webhook token")
+    token = request.headers.get("X-Webhook-Token")
+    if not SHEETS_WEBHOOK_TOKEN or token != SHEETS_WEBHOOK_TOKEN:
+        raise HTTPException(status_code=401, detail="Invalid webhook token")
     
     background_tasks.add_task(run_menu_scraper)
     return {"status": "scraper triggered"}
