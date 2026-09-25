@@ -1,8 +1,9 @@
 import json
 import os
+import sys
+import fcntl
 import gspread
 import datetime
-import re
 from oauth2client.service_account import ServiceAccountCredentials
 
 try:
@@ -11,12 +12,38 @@ try:
 except ImportError:
     pass
 
+# -------------------------------------------------------------------------------
+# Timezone: IST (Asia/Kolkata)
+try:
+    IST = datetime.timezone(datetime.timedelta(hours=5, minutes=30))
+except AttributeError:
+    # Python < 3.9 fallback
+    import time
+    IST = datetime.timezone(datetime.timedelta(hours=5, minutes=30))
+
+def now_ist() -> datetime.datetime:
+    return datetime.datetime.now(IST)
+
+def today_ist() -> datetime.date:
+    return now_ist().date()
+
+# -------------------------------------------------------------------------------
+# Lock file to prevent concurrent scraper runs
+LOCK_FILE = "/tmp/menu_scraper.lock"
+lock_fp = open(LOCK_FILE, "w")
+try:
+    fcntl.flock(lock_fp, fcntl.LOCK_EX | fcntl.LOCK_NB)
+except BlockingIOError:
+    print("Another scraper instance is running, exiting")
+    sys.exit(0)
+
+# -------------------------------------------------------------------------------
 log_file_path = os.path.join(os.path.dirname(__file__), "menu_scraper.log")
 
 def log(msg: str):
     try:
         with open(log_file_path, "a") as f:
-            f.write(f"{datetime.datetime.now()}: {msg}\n")
+            f.write(f"{now_ist().isoformat()}: {msg}\n")
     except Exception:
         pass
 
@@ -31,8 +58,8 @@ if not SHEET_URL:
 
 WEBHOOK_TOKEN = os.environ.get("SHEETS_WEBHOOK_TOKEN", "")  # For potential future use
 
-# Current week (1-4) based on Mondays in month so far
-d = datetime.date.today()
+# Current week (1-4) based on Mondays in month so far (IST)
+d = today_ist()
 start_date = datetime.date(d.year, d.month, 1)
 num_mondays = sum(1 for i in range((d - start_date).days + 1) 
                   if (start_date + datetime.timedelta(days=i)).weekday() == 0)
@@ -180,7 +207,9 @@ log(f"Extras_Menu parsed: { {d: {m: len(v) for m, v in meals.items()} for d, mea
 # 5. Special_Dinner: date-specific dinner overrides
 # Columns: Date (DD-MM-YYYY), Items
 # Parse ALL special dinners, store in special_dinners.json for API to apply at request time
+# FILTER OUT PAST DATES
 special_dinners = {}
+today = today_ist()
 for row in special_dinner_data[1:]:
     if len(row) < 2:
         continue
@@ -189,13 +218,17 @@ for row in special_dinner_data[1:]:
         continue
     # Validate date format (DD-MM-YYYY)
     try:
-        datetime.datetime.strptime(date_str, "%d-%m-%Y")
+        parsed_date = datetime.datetime.strptime(date_str, "%d-%m-%Y").date()
     except ValueError:
         log(f"Invalid date format in Special_Dinner: {date_str}")
         continue
+    # Only keep today and future dates
+    if parsed_date < today:
+        log(f"Skipping past special dinner: {date_str}")
+        continue
     special_dinners[date_str] = parse_items(items_str)
 
-log(f"Special_Dinner parsed: {len(special_dinners)} entries")
+log(f"Special_Dinner parsed: {len(special_dinners)} entries (past dates filtered)")
 
 # -------------------------------------------------------------------------------
 # Build output (WITHOUT applying special dinner - API will do that at request time)
@@ -215,8 +248,11 @@ for fname in ["mess.json", f"{api_week}.json"]:
     with open(os.path.join(mess_menu_dir, fname), "w") as f:
         json.dump(json_data, f, indent=4)
 
-with open(os.path.join(mess_menu_dir, "config.json"), "w") as f:
+# Write config.json with current calculated week (auto-sync)
+config_file = os.path.join(mess_menu_dir, "config.json")
+with open(config_file, "w") as f:
     json.dump({"week": api_week}, f, indent=4)
+log(f"Updated config.json with calculated week={api_week}")
 
 # Write special_dinners.json for API to check at request time
 special_file = os.path.join(mess_menu_dir, "special_dinners.json")

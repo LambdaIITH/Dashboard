@@ -16,16 +16,38 @@ admins = ["ms22btech11010@iith.ac.in", "lambda@iith.ac.in", "ma22btech11003@iith
 
 SHEETS_WEBHOOK_TOKEN = os.getenv("SHEETS_WEBHOOK_TOKEN")
 
+# -------------------------------------------------------------------------------
+# Timezone: IST (Asia/Kolkata)
+try:
+    IST = datetime.timezone(datetime.timedelta(hours=5, minutes=30))
+except AttributeError:
+    IST = datetime.timezone(datetime.timedelta(hours=5, minutes=30))
+
+def now_ist() -> datetime.datetime:
+    return datetime.datetime.now(IST)
+
+def today_ist() -> datetime.date:
+    return now_ist().date()
+
 DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+
+def get_today_name() -> str:
+    """Get today's day name matching our DAYS array (Sunday=0) in IST."""
+    py_wd = today_ist().weekday()  # Mon=0...Sun=6
+    return DAYS[0 if py_wd == 6 else py_wd + 1]
+
+def log_api(msg: str):
+    """Log API events to menu_scraper.log for unified observability."""
+    try:
+        log_path = os.path.join(os.path.dirname(__file__), "..", "..", "job_scripts", "menu_scraper.log")
+        with open(log_path, "a") as f:
+            f.write(f"{now_ist().isoformat()} [API] {msg}\n")
+    except Exception:
+        pass
 
 class MenuWeekChangeRequest(BaseModel):
     password: str
     number: int
-
-def get_today_name() -> str:
-    """Get today's day name matching our DAYS array (Sunday=0)."""
-    py_wd = datetime.date.today().weekday()  # Mon=0...Sun=6
-    return DAYS[0 if py_wd == 6 else py_wd + 1]
 
 @router.get("/")
 async def get_mess_menu():
@@ -37,12 +59,12 @@ async def get_mess_menu():
         with open(dir + f"/{week}.json") as file:
             menu = json.load(file)
         
-        # Check for special dinner override for today
+        # Check for special dinner override for today (IST)
         special_file = os.path.join(dir, "special_dinners.json")
         if os.path.exists(special_file):
             with open(special_file) as f:
                 specials = json.load(f)
-            today_str = datetime.date.today().strftime("%d-%m-%Y")
+            today_str = today_ist().strftime("%d-%m-%Y")
             if today_str in specials:
                 today_name = get_today_name()
                 special_items = specials[today_str]
@@ -51,19 +73,21 @@ async def get_mess_menu():
                     menu["LDH"][today_name]["Dinner"] = special_items
                 if today_name in menu.get("UDH", {}):
                     menu["UDH"][today_name]["Dinner"] = special_items
+                log_api(f"Special dinner applied for {today_str} ({today_name}): {len(special_items)} items")
         
+        log_api(f"Menu served for week={week}, date={today_ist()}")
         return menu
-    except FileNotFoundError:
+    except FileNotFoundError as e:
+        log_api(f"Menu file not found: {e}")
         raise HTTPException(
             status_code=500, detail="Mess menu file does not exist. Please make one."
         )
-        
 
 @router.post("/")
 async def post_mess_menu(admin: MenuWeekChangeRequest, request: Request):
     isAdmin = False
     user_id = None
-        
+    
     try:
         token = request.cookies.get("session")
         if token:
@@ -77,20 +101,19 @@ async def post_mess_menu(admin: MenuWeekChangeRequest, request: Request):
             isAdmin = True
     except HTTPException:
         isAdmin = False 
-            
+        
     if not isAdmin and admin.password != password:
         raise HTTPException(status_code=401, detail="Incorrect password")
     
     if admin.number not in allowed_numbers:
         raise HTTPException(status_code=400, detail="Invalid week number")
     
-    
     dir = os.path.dirname(os.path.realpath(__file__))
     with open(dir + "/config.json", "w") as file:
         json.dump({"week": admin.number}, file, indent=1)
-
+    
+    log_api(f"Admin week override: week={admin.number} by user={user_id}")
     return {"message": "Week number updated successfully"}
-
 
 @router.get("/week")
 async def get_current_week_number(request: Request):
@@ -118,16 +141,16 @@ async def get_current_week_number(request: Request):
             status_code=500, detail="Mess menu file does not exist. Please make one."
         )
 
-
 @router.post("/webhook/sheets")
 async def sheets_webhook(request: Request, background_tasks: BackgroundTasks):
     token = request.headers.get("X-Webhook-Token")
     if SHEETS_WEBHOOK_TOKEN and token != SHEETS_WEBHOOK_TOKEN:
+        log_api(f"Webhook rejected: invalid token from {request.client.host if request.client else 'unknown'}")
         raise HTTPException(status_code=401, detail="Invalid webhook token")
     
+    log_api(f"Webhook received from {request.client.host if request.client else 'unknown'}, triggering scraper")
     background_tasks.add_task(run_menu_scraper)
     return {"status": "scraper triggered"}
-
 
 def run_menu_scraper():
     try:
@@ -141,11 +164,10 @@ def run_menu_scraper():
             cwd=os.path.join(base_dir, "..", "..")
         )
         if result.returncode != 0:
-            print(f"Scraper failed: {result.stderr}")
+            log_api(f"Scraper FAILED: {result.stderr[:500]}")
         else:
-            print(f"Scraper completed: {result.stdout}")
+            log_api(f"Scraper SUCCESS: {result.stdout[:200]}")
     except subprocess.TimeoutExpired:
-        print("Scraper timed out after 120 seconds")
+        log_api("Scraper TIMEOUT after 120 seconds")
     except Exception as e:
-        print(f"Scraper error: {e}")
-        
+        log_api(f"Scraper ERROR: {e}")
