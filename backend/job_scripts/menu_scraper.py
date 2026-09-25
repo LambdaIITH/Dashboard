@@ -81,20 +81,40 @@ def parse_week_pattern(pattern: str, week: int) -> bool:
     return False
 
 def parse_items(text: str) -> list:
-    """Parse comma/semicolon/newline separated items."""
+    """
+    Parse items split by comma, semicolon, plus, or newline.
+    Does NOT split on delimiters inside parentheses.
+    Example: "Sambar (Carrot, Drumstick), Rice" -> ["Sambar (Carrot, Drumstick)", "Rice"]
+    """
     text = text.strip()
     if not text:
         return []
+    
     items = []
-    for delim in [",", ";", "\n"]:
-        if delim in text:
-            for item in text.split(delim):
-                c = clean(item)
-                if c:
-                    items.append(c)
-            break
-    else:
-        items.append(clean(text))
+    current = []
+    paren_depth = 0
+    
+    for char in text:
+        if char == '(':
+            paren_depth += 1
+            current.append(char)
+        elif char == ')':
+            paren_depth = max(0, paren_depth - 1)
+            current.append(char)
+        elif paren_depth == 0 and char in ',;+\n':
+            # Delimiter outside parentheses
+            item = ''.join(current).strip()
+            if item:
+                items.append(item)
+            current = []
+        else:
+            current.append(char)
+    
+    # Last token
+    item = ''.join(current).strip()
+    if item:
+        items.append(item)
+    
     return items
 
 # -------------------------------------------------------------------------------
@@ -157,28 +177,28 @@ for row in extras_menu_data[1:]:
 log(f"Extras_Menu parsed: { {d: {m: len(v) for m, v in meals.items()} for d, meals in extra_items.items()} }")
 
 # -------------------------------------------------------------------------------
-# 5. Special_Dinner: date-specific dinner override
+# 5. Special_Dinner: date-specific dinner overrides
 # Columns: Date (DD-MM-YYYY), Items
-special_dinner_items = None
+# Parse ALL special dinners, store in special_dinners.json for API to apply at request time
+special_dinners = {}
 for row in special_dinner_data[1:]:
     if len(row) < 2:
         continue
     date_str, items_str = map(clean, row[:2])
-    if date_str == current_date_str and items_str:
-        special_dinner_items = parse_items(items_str)
-        log(f"Special dinner found for {current_date_str}: {special_dinner_items}")
-        break
+    if not date_str or not items_str:
+        continue
+    # Validate date format (DD-MM-YYYY)
+    try:
+        datetime.datetime.strptime(date_str, "%d-%m-%Y")
+    except ValueError:
+        log(f"Invalid date format in Special_Dinner: {date_str}")
+        continue
+    special_dinners[date_str] = parse_items(items_str)
 
-if special_dinner_items:
-    # Python weekday: Mon=0...Sun=6 → Our DAYS: Sun=0...Sat=6
-    py_wd = d.weekday()
-    today_idx = 0 if py_wd == 6 else py_wd + 1
-    today_name = DAYS[today_idx]
-    regular_items[today_name]["Dinner"] = special_dinner_items
-    log(f"Overrode dinner for {today_name}")
+log(f"Special_Dinner parsed: {len(special_dinners)} entries")
 
 # -------------------------------------------------------------------------------
-# Build output
+# Build output (WITHOUT applying special dinner - API will do that at request time)
 json_data = {
     "LDH": regular_items,
     "UDH": regular_items,
@@ -198,5 +218,10 @@ for fname in ["mess.json", f"{api_week}.json"]:
 with open(os.path.join(mess_menu_dir, "config.json"), "w") as f:
     json.dump({"week": api_week}, f, indent=4)
 
-log(f"Done. Week={current_week} (API={api_week}), Date={current_date_str}, Special={'Yes' if special_dinner_items else 'No'}")
+# Write special_dinners.json for API to check at request time
+special_file = os.path.join(mess_menu_dir, "special_dinners.json")
+with open(special_file, "w") as f:
+    json.dump(special_dinners, f, indent=4)
+
+log(f"Done. Week={current_week} (API={api_week}), Date={current_date_str}, Special dinners={len(special_dinners)}")
 print(f"Scraper completed. Week: {current_week}, API week: {api_week}, Date: {current_date_str}")

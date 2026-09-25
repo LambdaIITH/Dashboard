@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends, Request, BackgroundTasks
 import json
 import os
-import dotenv
+import datetime
 import subprocess
 from pydantic import BaseModel
 from Routes.Auth.cookie import get_user_id
@@ -16,9 +16,16 @@ admins = ["ms22btech11010@iith.ac.in", "lambda@iith.ac.in", "ma22btech11003@iith
 
 SHEETS_WEBHOOK_TOKEN = os.getenv("SHEETS_WEBHOOK_TOKEN")
 
+DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+
 class MenuWeekChangeRequest(BaseModel):
     password: str
     number: int
+
+def get_today_name() -> str:
+    """Get today's day name matching our DAYS array (Sunday=0)."""
+    py_wd = datetime.date.today().weekday()  # Mon=0...Sun=6
+    return DAYS[0 if py_wd == 6 else py_wd + 1]
 
 @router.get("/")
 async def get_mess_menu():
@@ -26,11 +33,25 @@ async def get_mess_menu():
         dir = os.path.dirname(os.path.realpath(__file__))
         with open(dir + "/config.json") as file:
             week = json.load(file)["week"]
-            
         
-        file = open(dir + f"/{week}.json")
-        menu = json.load(file)
-        file.close()
+        with open(dir + f"/{week}.json") as file:
+            menu = json.load(file)
+        
+        # Check for special dinner override for today
+        special_file = os.path.join(dir, "special_dinners.json")
+        if os.path.exists(special_file):
+            with open(special_file) as f:
+                specials = json.load(f)
+            today_str = datetime.date.today().strftime("%d-%m-%Y")
+            if today_str in specials:
+                today_name = get_today_name()
+                special_items = specials[today_str]
+                # Override dinner for both messes
+                if today_name in menu.get("LDH", {}):
+                    menu["LDH"][today_name]["Dinner"] = special_items
+                if today_name in menu.get("UDH", {}):
+                    menu["UDH"][today_name]["Dinner"] = special_items
+        
         return menu
     except FileNotFoundError:
         raise HTTPException(
@@ -101,7 +122,7 @@ async def get_current_week_number(request: Request):
 @router.post("/webhook/sheets")
 async def sheets_webhook(request: Request, background_tasks: BackgroundTasks):
     token = request.headers.get("X-Webhook-Token")
-    if not SHEETS_WEBHOOK_TOKEN or token != SHEETS_WEBHOOK_TOKEN:
+    if SHEETS_WEBHOOK_TOKEN and token != SHEETS_WEBHOOK_TOKEN:
         raise HTTPException(status_code=401, detail="Invalid webhook token")
     
     background_tasks.add_task(run_menu_scraper)
