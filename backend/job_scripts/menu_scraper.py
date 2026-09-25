@@ -1,234 +1,237 @@
 import json
 import os
+import sys
+import fcntl
 import gspread
-import numpy
-import string
 import datetime
 from oauth2client.service_account import ServiceAccountCredentials
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
+# -------------------------------------------------------------------------------
+# Timezone: IST (Asia/Kolkata)
+try:
+    IST = datetime.timezone(datetime.timedelta(hours=5, minutes=30))
+except AttributeError:
+    # Python < 3.9 fallback
+    import time
+    IST = datetime.timezone(datetime.timedelta(hours=5, minutes=30))
+
+def now_ist() -> datetime.datetime:
+    return datetime.datetime.now(IST)
+
+def today_ist() -> datetime.date:
+    return now_ist().date()
+
+# -------------------------------------------------------------------------------
+# Lock file to prevent concurrent scraper runs
+LOCK_FILE = "/tmp/menu_scraper.lock"
+lock_fp = open(LOCK_FILE, "w")
+try:
+    fcntl.flock(lock_fp, fcntl.LOCK_EX | fcntl.LOCK_NB)
+except BlockingIOError:
+    print("Another scraper instance is running, exiting")
+    sys.exit(0)
+
+# -------------------------------------------------------------------------------
 log_file_path = os.path.join(os.path.dirname(__file__), "menu_scraper.log")
 
-# -------------------------------------------------------------------------------
-# Adding Logs with file open
-try:
-    with open(log_file_path, "a") as log_file:
-        log_file.write(f"Script executed at: {datetime.datetime.now()}\n")
-except Exception as e:
-    with open(log_file_path, "a") as log_file:
-        log_file.write(f"Error opening log file: {str(e)}\n")
+def log(msg: str):
+    try:
+        with open(log_file_path, "a") as f:
+            f.write(f"{now_ist().isoformat()}: {msg}\n")
+    except Exception:
+        pass
 
 # -------------------------------------------------------------------------------
-# What week is now? (1/2/3/4) (for deciding which menu to use)
-# d = datetime.date.today()
-# current_week = (
-#     d.isocalendar()[1] - datetime.date(d.year, d.month, 1).isocalendar()[1] 
-# )
+log("Script started")
 
-## Finding the current week using the number of mondays in the month
+# Environment variables
+SHEET_URL = os.environ.get("GOOGLE_SHEET_URL")
+if not SHEET_URL:
+    log("ERROR: GOOGLE_SHEET_URL not set in environment")
+    raise ValueError("GOOGLE_SHEET_URL environment variable is required")
 
-d = datetime.date.today()
+WEBHOOK_TOKEN = os.environ.get("SHEETS_WEBHOOK_TOKEN", "")  # For potential future use
+
+# Current week (1-4) based on Mondays in month so far (IST)
+d = today_ist()
 start_date = datetime.date(d.year, d.month, 1)
-next_day = d + datetime.timedelta(days=1)
-num_mondays = 0
-while start_date != next_day:
-    if start_date.weekday() == 0:
-        num_mondays += 1
-    start_date += datetime.timedelta(days=1)
-if num_mondays == 0:
-    num_mondays = 1
-current_week = (num_mondays)%4
-is_even_week = (current_week + 1) % 2 # should be 1 for even week and 0 for odd week
+num_mondays = sum(1 for i in range((d - start_date).days + 1) 
+                  if (start_date + datetime.timedelta(days=i)).weekday() == 0)
+current_week = (num_mondays % 4) or 4
+current_date_str = d.strftime("%d-%m-%Y")
 
+log(f"Current week: {current_week}, Date: {current_date_str}")
 
 # -------------------------------------------------------------------------------
-# Get sheets
+# Google Sheets auth
 scope = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive",
-    "https://spreadsheets.google.com/feeds",
 ]
-filename = os.path.join(os.path.dirname(__file__), "credentials.json")
-creds = ServiceAccountCredentials.from_json_keyfile_name(filename, scope)
+creds_path = os.path.join(os.path.dirname(__file__), "credentials.json")
+if not os.path.exists(creds_path):
+    log(f"ERROR: credentials.json not found at {creds_path}")
+    raise FileNotFoundError(f"credentials.json not found at {creds_path}")
+
+creds = ServiceAccountCredentials.from_json_keyfile_name(creds_path, scope)
 gc = gspread.authorize(creds)
 
-# gc = gspread.oauth()
-
-
-sh = gc.open_by_url(
-    "https://docs.google.com/spreadsheets/d/1-Kekt-ywamjEujQqoH_wrUu4SMzx146CBitiqM9RokU/edit"
-)
-
-weekly = sh.worksheet("Main Menu")
-additionals = sh.worksheet("Extras")
-
-
-weekly_grid = numpy.array(weekly.get_all_values())
-additionals_grid = numpy.array(additionals.get_all_values())
+sh = gc.open_by_url(SHEET_URL)
 
 # -------------------------------------------------------------------------------
-# number of coloumns for each meal
-breakfast = weekly.find("Breakfast").col
-lunch = weekly.find("Lunch").col
-snacks = weekly.find("Snacks").col
-dinner = weekly.find("Dinner").col
+# Load sheets (no ID column in any sheet)
+weekly_menu_data = sh.worksheet("Weekly_Menu").get_all_values()
+daily_base_data = sh.worksheet("Daily_Base").get_all_values()
+extras_menu_data = sh.worksheet("Extras_Menu").get_all_values()
+special_dinner_data = sh.worksheet("Special_Dinner").get_all_values()
 
-space = {
-    "Breakfast": lunch - breakfast,
-    "Lunch": snacks - lunch,
-    "Snacks": dinner - snacks,
-    "Dinner": weekly_grid.shape[1] - snacks,
-}
+DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+MEALS = ["Breakfast", "Lunch", "Snacks", "Dinner"]
 
-total_space = sum(space.values())
+def clean(text: str) -> str:
+    return text.strip() if text else ""
 
-# -------------------------------------------------------------------------------
-# Build object structure
+def parse_week_pattern(pattern: str, week: int) -> bool:
+    pattern = pattern.strip()
+    if pattern == "All Weeks":
+        return True
+    elif pattern == "Week 1 & 3":
+        return week in (1, 3)
+    elif pattern == "Week 2 & 4":
+        return week in (2, 4)
+    return False
 
-days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
-meals = ["Breakfast", "Lunch", "Snacks", "Dinner"]
-
-
-regular_items = {day: {meal: [] for meal in meals} for day in days}
-extra_items = {day: {meal: [] for meal in meals} for day in days}
-daily_items = {meal: [] for meal in meals}
-
-
-def clean(text: str):
-    return text.strip()
-
-
-# -------------------------------------------------------------------------------
-# Takes contents of a cell and splits it into multiple
-def parse_cell_items(text: str):
+def parse_items(text: str) -> list:
+    """
+    Parse items split by comma, semicolon, plus, or newline.
+    Does NOT split on delimiters inside parentheses.
+    Example: "Sambar (Carrot, Drumstick), Rice" -> ["Sambar (Carrot, Drumstick)", "Rice"]
+    """
     text = text.strip()
-
-    if text == "":
+    if not text:
         return []
-
+    
     items = []
-
-    # Numbered list detection
-    if text.lstrip().startswith("1."):
-        for line in text.split("\n"):
-            spl = line.lstrip().split(".", 1)
-            if len(spl) > 1 and spl[0].isdigit():
-                content = spl[1].strip()
-                # Handle multiple items in one line
-                if "," in content and not (("(" in content) and (content.index("(") < content.index(",") < content.index(")"))):
-                    for a in content.split(","):
-                        items.append(clean(a))
-                else:
-                    items.append(clean(content))
-            else:
-                if spl[0].strip() == "":
-                    continue
-                if items:
-                    items[-1] += " " + clean(spl[0]).replace("\n", "")
-                else:
-                    items.append(clean(spl[0]).replace("\n", ""))
-        return items
-
-    # Fallback: comma, plus, or newline-separated
-    for delim in [",", "+", "\n"]:
-        if delim in text:
-            if "(" in text and (text.index("(") < text.index(delim) < text.index(")")):
-                continue
-            for item in text.split(delim):
-                if item.strip():
-                    items.append(clean(item).replace("\n", ""))
-            break
-    else:
-        # Single item
-        items.append(clean(text).replace("\n", ""))
-
+    current = []
+    paren_depth = 0
+    
+    for char in text:
+        if char == '(':
+            paren_depth += 1
+            current.append(char)
+        elif char == ')':
+            paren_depth = max(0, paren_depth - 1)
+            current.append(char)
+        elif paren_depth == 0 and char in ',;+\n':
+            # Delimiter outside parentheses
+            item = ''.join(current).strip()
+            if item:
+                items.append(item)
+            current = []
+        else:
+            current.append(char)
+    
+    # Last token
+    item = ''.join(current).strip()
+    if item:
+        items.append(item)
+    
     return items
 
+# -------------------------------------------------------------------------------
+# 1. Daily_Base: standing items per meal (every day)
+# Columns: Meal, Item
+daily_base = {meal: [] for meal in MEALS}
+for row in daily_base_data[1:]:  # Skip header
+    if len(row) >= 2:
+        meal = clean(row[0])
+        item = clean(row[1])
+        if meal in MEALS and item:
+            daily_base[meal].extend(parse_items(item))
+
+log(f"Daily_Base parsed: { {m: len(v) for m, v in daily_base.items()} }")
 
 # -------------------------------------------------------------------------------
-# skips empty cells and parses each non-empty cell
-def format(item: list):
-    l = []
-    for i in item:
-        if i == "":
-            pass
-        else:
-            l.extend(parse_cell_items(i))
-    return l
+# 2. Weekly_Menu: recurring items per day/meal/week
+# Columns: Day, Meal, WeekPattern, Item
+weekly_menu = {day: {meal: [] for meal in MEALS} for day in DAYS}
+for row in weekly_menu_data[1:]:
+    if len(row) < 4:
+        continue
+    day, meal, week_pattern, item = map(clean, row[:4])
+    if day not in DAYS or meal not in MEALS or not item:
+        continue
+    if not parse_week_pattern(week_pattern, current_week):
+        continue
+    weekly_menu[day][meal].extend(parse_items(item))
 
-
-# -------------------------------------------------------------------------------
-# Fill in the regular_items dict
-def parse_regular():
-
-    # BUG:
-    #  Lunch doesn't include drinks
-    #  Snacks given in Sunday only (handled)
-
-    # if odd week, use top menu, else use bottom menu
-    
-    daily_item_cell = weekly.findall("Daily")[is_even_week]
-    daily_items_list = weekly.row_values(daily_item_cell.row)
-    # -------------------------------------------------------------------------------
-    # mapping daily items to meals (spaces kept in mind)
-    daily_items[meals[0]].extend(parse_cell_items(daily_items_list[1]))
-    daily_items[meals[1]].extend(
-        parse_cell_items(daily_items_list[1 + space[meals[0]]])
-    )
-    daily_items[meals[3]].extend(
-        parse_cell_items(
-            daily_items_list[1 + space[meals[0]] + space[meals[1]] + space[meals[2]]]
-        )
-    )
-    # -------------------------------------------------------------------------------
-    # extracting items data from sheet according to week
-    cell = weekly.findall("Sunday")[is_even_week]
-    start_cell = f"{string.ascii_uppercase[cell.col - 1]}{cell.row}"
-    end_cell = f"{string.ascii_uppercase[cell.col + total_space -1]}{cell.row + 6}"
-    items_grid = numpy.array(weekly.get(f"{start_cell}:{end_cell}"))
-
-    # -------------------------------------------------------------------------------
-    snacks = []
-    for day_num in range(len(items_grid)):
-        day = items_grid[day_num][0]
-        index = 1
-        for meal in meals:
-            item_list = items_grid[day_num][index : index + space[meal]]
-            if meal == "Snacks" and day_num == 0:
-                # Snacks present only for Sunday
-                snacks.extend(item_list)
-            regular_items[day][meal].extend(format(item_list))
-            index += space[meal]
-        if day_num != 0:
-            # Filling up Snacks in rest of the days
-            regular_items[day]["Snacks"].extend(format(snacks))
-
+log(f"Weekly_Menu parsed for week {current_week}")
 
 # -------------------------------------------------------------------------------
-# Fill in the extra_items dict
-def parse_extras():
-    for row in range(1, len(additionals_grid)):
-        day = additionals_grid[row][0]
-        if day not in days:
-            # skip other columns
-            continue
-        for col in range(1, len(additionals_grid[0])):
-            meal = additionals_grid[0][col]
-            parsed = parse_cell_items(additionals_grid[row][col])
-            extra_items[day][meal].extend(parsed)
-
+# 3. Combine: Daily_Base ∪ Weekly_Menu (deduplicated)
+regular_items = {day: {meal: [] for meal in MEALS} for day in DAYS}
+for day in DAYS:
+    for meal in MEALS:
+        seen = set()
+        for item in daily_base[meal] + weekly_menu[day][meal]:
+            if item not in seen:
+                regular_items[day][meal].append(item)
+                seen.add(item)
 
 # -------------------------------------------------------------------------------
-parse_regular()
-parse_extras()
+# 4. Extras_Menu: paid add-ons per day AND meal
+# Columns: Day, Meal, Item, Price (Rs)
+extra_items = {day: {meal: [] for meal in MEALS} for day in DAYS}
+for row in extras_menu_data[1:]:
+    if len(row) < 4:
+        continue
+    day, meal, item, price = map(clean, row[:4])
+    if day not in DAYS or meal not in MEALS or not item:
+        continue
+    # Format: "Item (Rs. Price)" if price is valid
+    if price and not price.lower().startswith("price"):
+        formatted = f"{item} (Rs. {price})"
+    else:
+        formatted = item
+    extra_items[day][meal].append(formatted)
+
+log(f"Extras_Menu parsed: { {d: {m: len(v) for m, v in meals.items()} for d, meals in extra_items.items()} }")
 
 # -------------------------------------------------------------------------------
-# Write final json
+# 5. Special_Dinner: date-specific dinner overrides
+# Columns: Date (DD-MM-YYYY), Items
+# Parse ALL special dinners, store in special_dinners.json for API to apply at request time
+# FILTER OUT PAST DATES
+special_dinners = {}
+today = today_ist()
+for row in special_dinner_data[1:]:
+    if len(row) < 2:
+        continue
+    date_str, items_str = map(clean, row[:2])
+    if not date_str or not items_str:
+        continue
+    # Validate date format (DD-MM-YYYY)
+    try:
+        parsed_date = datetime.datetime.strptime(date_str, "%d-%m-%Y").date()
+    except ValueError:
+        log(f"Invalid date format in Special_Dinner: {date_str}")
+        continue
+    # Only keep today and future dates
+    if parsed_date < today:
+        log(f"Skipping past special dinner: {date_str}")
+        continue
+    special_dinners[date_str] = parse_items(items_str)
 
-for day in regular_items.keys():
-    for meal in regular_items[day].keys():
-        regular_items[day][meal].extend(daily_items[meal])
+log(f"Special_Dinner parsed: {len(special_dinners)} entries (past dates filtered)")
 
+# -------------------------------------------------------------------------------
+# Build output (WITHOUT applying special dinner - API will do that at request time)
 json_data = {
     "LDH": regular_items,
     "UDH": regular_items,
@@ -236,7 +239,25 @@ json_data = {
     "UDH Additional": extra_items,
 }
 
-outname = os.path.dirname(__file__) + "/../Routes/MessMenu/mess.json"
+mess_menu_dir = os.path.join(os.path.dirname(__file__), "..", "Routes", "MessMenu")
+os.makedirs(mess_menu_dir, exist_ok=True)
 
-with open(outname, "w") as outfile:
-    json.dump(json_data, outfile, indent=4)
+# Write only mess.json (reference) and current week file (what API reads)
+api_week = (current_week - 1) % 4
+for fname in ["mess.json", f"{api_week}.json"]:
+    with open(os.path.join(mess_menu_dir, fname), "w") as f:
+        json.dump(json_data, f, indent=4)
+
+# Write config.json with current calculated week (auto-sync)
+config_file = os.path.join(mess_menu_dir, "config.json")
+with open(config_file, "w") as f:
+    json.dump({"week": api_week}, f, indent=4)
+log(f"Updated config.json with calculated week={api_week}")
+
+# Write special_dinners.json for API to check at request time
+special_file = os.path.join(mess_menu_dir, "special_dinners.json")
+with open(special_file, "w") as f:
+    json.dump(special_dinners, f, indent=4)
+
+log(f"Done. Week={current_week} (API={api_week}), Date={current_date_str}, Special dinners={len(special_dinners)}")
+print(f"Scraper completed. Week: {current_week}, API week: {api_week}, Date: {current_date_str}")
