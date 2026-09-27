@@ -144,8 +144,10 @@ async def get_current_week_number(request: Request):
 @router.post("/webhook/sheets")
 async def sheets_webhook(request: Request, background_tasks: BackgroundTasks):
     token = request.headers.get("X-Webhook-Token")
-    if SHEETS_WEBHOOK_TOKEN and token != SHEETS_WEBHOOK_TOKEN:
-        log_api(f"Webhook rejected: invalid token from {request.client.host if request.client else 'unknown'}")
+    if not SHEETS_WEBHOOK_TOKEN:
+        raise HTTPException(status_code=500, detail="Webhook token not configured")
+
+    if token != SHEETS_WEBHOOK_TOKEN:
         raise HTTPException(status_code=401, detail="Invalid webhook token")
     
     log_api(f"Webhook received from {request.client.host if request.client else 'unknown'}, triggering scraper")
