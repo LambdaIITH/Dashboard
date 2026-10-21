@@ -1,6 +1,8 @@
-from fastapi import APIRouter, HTTPException, Depends, Request, BackgroundTasks
+from fastapi import APIRouter, HTTPException, Request, BackgroundTasks
 import json
 import os
+import sys
+import secrets
 import datetime
 import subprocess
 from pydantic import BaseModel
@@ -53,10 +55,10 @@ class MenuWeekChangeRequest(BaseModel):
 async def get_mess_menu():
     try:    
         dir = os.path.dirname(os.path.realpath(__file__))
-        with open(dir + "/config.json") as file:
+        with open(os.path.join(dir, "config.json")) as file:
             week = json.load(file)["week"]
         
-        with open(dir + f"/{week}.json") as file:
+        with open(os.path.join(dir, f"{week}.json")) as file:
             menu = json.load(file)
         
         # Check for special dinner override for today (IST)
@@ -95,9 +97,10 @@ async def post_mess_menu(admin: MenuWeekChangeRequest, request: Request):
             if status:
                 user_id = data["sub"] 
         
+        user_details = None
         if user_id:
             user_details = get_user(user_id=user_id)
-        if user_details['email'] in admins:
+        if user_details and user_details.get('email') in admins:
             isAdmin = True
     except HTTPException:
         isAdmin = False 
@@ -109,7 +112,7 @@ async def post_mess_menu(admin: MenuWeekChangeRequest, request: Request):
         raise HTTPException(status_code=400, detail="Invalid week number")
     
     dir = os.path.dirname(os.path.realpath(__file__))
-    with open(dir + "/config.json", "w") as file:
+    with open(os.path.join(dir, "config.json"), "w") as file:
         json.dump({"week": admin.number}, file, indent=1)
     
     log_api(f"Admin week override: week={admin.number} by user={user_id}")
@@ -123,16 +126,16 @@ async def get_current_week_number(request: Request):
     try:
         user_id = get_user_id(request)
         user_details = get_user(user_id=user_id)
-        if user_details['email'] in admins:
+        if user_details and user_details.get('email') in admins:
             isAdmin = True
-    except HTTPException:
+    except Exception:
         isAdmin = False 
     
-    if not isAdmin :
-        return {"message" :"unauthorized"} 
+    if not isAdmin:
+        return {"message": "unauthorized"} 
     try:    
         dir = os.path.dirname(os.path.realpath(__file__))
-        with open(dir + "/config.json") as file:
+        with open(os.path.join(dir, "config.json")) as file:
             week = json.load(file)["week"]
             
         return {"week": week}
@@ -145,9 +148,11 @@ async def get_current_week_number(request: Request):
 async def sheets_webhook(request: Request, background_tasks: BackgroundTasks):
     token = request.headers.get("X-Webhook-Token")
     if not SHEETS_WEBHOOK_TOKEN:
+        log_api("Webhook rejected: SHEETS_WEBHOOK_TOKEN not configured on server")
         raise HTTPException(status_code=500, detail="Webhook token not configured")
 
-    if token != SHEETS_WEBHOOK_TOKEN:
+    if not token or not secrets.compare_digest(token, SHEETS_WEBHOOK_TOKEN):
+        log_api(f"Webhook rejected: invalid token from {request.client.host if request.client else 'unknown'}")
         raise HTTPException(status_code=401, detail="Invalid webhook token")
     
     log_api(f"Webhook received from {request.client.host if request.client else 'unknown'}, triggering scraper")
@@ -159,7 +164,7 @@ def run_menu_scraper():
         base_dir = os.path.dirname(os.path.realpath(__file__))
         scraper_path = os.path.join(base_dir, "..", "..", "job_scripts", "menu_scraper.py")
         result = subprocess.run(
-            ["python", scraper_path],
+            [sys.executable, scraper_path],
             capture_output=True,
             text=True,
             timeout=120,

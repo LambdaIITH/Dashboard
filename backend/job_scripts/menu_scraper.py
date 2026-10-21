@@ -91,6 +91,21 @@ daily_base_data = sh.worksheet("Daily_Base").get_all_values()
 extras_menu_data = sh.worksheet("Extras_Menu").get_all_values()
 special_dinner_data = sh.worksheet("Special_Dinner").get_all_values()
 
+# Optional: Public sheet fallback (for testing without credentials.json):
+# import re, urllib.request, csv, io
+# sheet_match = re.search(r"/spreadsheets/d/([a-zA-Z0-9-_]+)", SHEET_URL)
+# if sheet_match:
+#     sheet_id = sheet_match.group(1)
+#     def fetch_public_tab(tab_name: str) -> list:
+#         url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/gviz/tq?tqx=out:csv&sheet={tab_name}"
+#         req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+#         with urllib.request.urlopen(req) as resp:
+#             return list(csv.reader(io.StringIO(resp.read().decode("utf-8"))))
+#     weekly_menu_data = fetch_public_tab("Weekly_Menu")
+#     daily_base_data = fetch_public_tab("Daily_Base")
+#     extras_menu_data = fetch_public_tab("Extras_Menu")
+#     special_dinner_data = fetch_public_tab("Special_Dinner")
+
 DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
 MEALS = ["Breakfast", "Lunch", "Snacks", "Dinner"]
 
@@ -158,31 +173,30 @@ for row in daily_base_data[1:]:  # Skip header
 log(f"Daily_Base parsed: { {m: len(v) for m, v in daily_base.items()} }")
 
 # -------------------------------------------------------------------------------
-# 2. Weekly_Menu: recurring items per day/meal/week
-# Columns: Day, Meal, WeekPattern, Item
-weekly_menu = {day: {meal: [] for meal in MEALS} for day in DAYS}
-for row in weekly_menu_data[1:]:
-    if len(row) < 4:
-        continue
-    day, meal, week_pattern, item = map(clean, row[:4])
-    if day not in DAYS or meal not in MEALS or not item:
-        continue
-    if not parse_week_pattern(week_pattern, current_week):
-        continue
-    weekly_menu[day][meal].extend(parse_items(item))
+# 2 & 3. Build Regular Items per week (Daily_Base ∪ Weekly_Menu, deduplicated)
+def build_regular_items_for_week(target_week: int) -> dict:
+    weekly_menu = {day: {meal: [] for meal in MEALS} for day in DAYS}
+    for row in weekly_menu_data[1:]:
+        if len(row) < 4:
+            continue
+        day, meal, week_pattern, item = map(clean, row[:4])
+        if day not in DAYS or meal not in MEALS or not item:
+            continue
+        if not parse_week_pattern(week_pattern, target_week):
+            continue
+        weekly_menu[day][meal].extend(parse_items(item))
 
-log(f"Weekly_Menu parsed for week {current_week}")
+    regular_items = {day: {meal: [] for meal in MEALS} for day in DAYS}
+    for day in DAYS:
+        for meal in MEALS:
+            seen = set()
+            for item in daily_base[meal] + weekly_menu[day][meal]:
+                if item not in seen:
+                    regular_items[day][meal].append(item)
+                    seen.add(item)
+    return regular_items
 
-# -------------------------------------------------------------------------------
-# 3. Combine: Daily_Base ∪ Weekly_Menu (deduplicated)
-regular_items = {day: {meal: [] for meal in MEALS} for day in DAYS}
-for day in DAYS:
-    for meal in MEALS:
-        seen = set()
-        for item in daily_base[meal] + weekly_menu[day][meal]:
-            if item not in seen:
-                regular_items[day][meal].append(item)
-                seen.add(item)
+log(f"Weekly_Menu parser initialized for week {current_week}")
 
 # -------------------------------------------------------------------------------
 # 4. Extras_Menu: paid add-ons per day AND meal
@@ -231,22 +245,34 @@ for row in special_dinner_data[1:]:
 log(f"Special_Dinner parsed: {len(special_dinners)} entries (past dates filtered)")
 
 # -------------------------------------------------------------------------------
-# Build output (WITHOUT applying special dinner - API will do that at request time)
-json_data = {
-    "LDH": regular_items,
-    "UDH": regular_items,
-    "LDH Additional": extra_items,
-    "UDH Additional": extra_items,
-}
-
+# Build and write outputs
 mess_menu_dir = os.path.join(os.path.dirname(__file__), "..", "Routes", "MessMenu")
 os.makedirs(mess_menu_dir, exist_ok=True)
 
-# Write only mess.json (reference) and current week file (what API reads)
+# Write all 4 week files (0.json, 1.json, 2.json, 3.json)
+for w in range(1, 5):
+    api_w = (w - 1) % 4
+    week_regular = build_regular_items_for_week(w)
+    week_data = {
+        "LDH": week_regular,
+        "UDH": week_regular,
+        "LDH Additional": extra_items,
+        "UDH Additional": extra_items,
+    }
+    with open(os.path.join(mess_menu_dir, f"{api_w}.json"), "w") as f:
+        json.dump(week_data, f, indent=4)
+
+# Write mess.json for current week reference
 api_week = (current_week - 1) % 4
-for fname in ["mess.json", f"{api_week}.json"]:
-    with open(os.path.join(mess_menu_dir, fname), "w") as f:
-        json.dump(json_data, f, indent=4)
+current_regular = build_regular_items_for_week(current_week)
+current_json_data = {
+    "LDH": current_regular,
+    "UDH": current_regular,
+    "LDH Additional": extra_items,
+    "UDH Additional": extra_items,
+}
+with open(os.path.join(mess_menu_dir, "mess.json"), "w") as f:
+    json.dump(current_json_data, f, indent=4)
 
 # Write config.json with current calculated week (auto-sync)
 config_file = os.path.join(mess_menu_dir, "config.json")

@@ -1,3 +1,4 @@
 *.service
 .venv
 *.log
+**/credentials.json

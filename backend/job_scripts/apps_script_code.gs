@@ -2,7 +2,10 @@
 const WEBHOOK_URL = 'https://api.iith.dev/mess_menu/webhook/sheets';
 const WATCHED_SHEETS = ['Weekly_Menu', 'Daily_Base', 'Extras_Menu', 'Special_Dinner'];
 
-function onEdit(e) {
+// NOTE: Named `onSheetEdit` instead of `onEdit` because simple triggers (functions named `onEdit`)
+// are forbidden from making outbound network requests via UrlFetchApp in Google Apps Script.
+// This function MUST be invoked via an installable trigger (configured via setWebhookToken).
+function onSheetEdit(e) {
   if (!e || !e.range) return;
   const sheet = e.range.getSheet();
   if (!WATCHED_SHEETS.includes(sheet.getName())) return;
@@ -38,15 +41,15 @@ function setWebhookToken() {
   const token = 'your-random-secret-here';  // CHANGE THIS to match EC2 SHEETS_WEBHOOK_TOKEN
   PropertiesService.getScriptProperties().setProperty('WEBHOOK_TOKEN', token);
   
-  // Delete existing onEdit triggers for this project
+  // Delete existing triggers for this project to prevent duplicates
   ScriptApp.getProjectTriggers().forEach(t => {
-    if (t.getHandlerFunction() === 'onEdit') {
+    if (t.getHandlerFunction() === 'onSheetEdit' || t.getHandlerFunction() === 'onEdit') {
       ScriptApp.deleteTrigger(t);
     }
   });
   
-  // Create installable onEdit trigger
-  ScriptApp.newTrigger('onEdit')
+  // Create installable onEdit trigger pointing to onSheetEdit
+  ScriptApp.newTrigger('onSheetEdit')
     .forSpreadsheet(SpreadsheetApp.getActive())
     .onEdit()
     .create();
