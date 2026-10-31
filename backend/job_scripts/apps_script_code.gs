@@ -24,13 +24,24 @@ function onSheetEdit(e) {
       headers['X-Webhook-Token'] = token;
     }
     
-    UrlFetchApp.fetch(WEBHOOK_URL, {
+    const response = UrlFetchApp.fetch(WEBHOOK_URL, {
       method: 'post',
       contentType: 'application/json',
       headers: headers,
       payload: JSON.stringify({ sheet: sheet.getName(), timestamp: new Date().toISOString() }),
       muteHttpExceptions: true
     });
+
+    // muteHttpExceptions suppresses HTTP errors, so check the status ourselves.
+    // Throwing marks the execution as failed in the Executions log and triggers
+    // Apps Script's failure notification emails.
+    const code = response.getResponseCode();
+    if (code < 200 || code >= 300) {
+      const msg = 'Webhook failed for sheet "' + sheet.getName() + '": HTTP ' + code + ' ' +
+        response.getContentText().substring(0, 500);
+      console.error(msg);
+      throw new Error(msg);
+    }
   } finally {
     lock.releaseLock();
   }
