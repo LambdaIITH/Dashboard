@@ -16,6 +16,7 @@ services:
       - /home/ubuntu/dashboard-production/2.json:/backend/Routes/MessMenu/2.json
       - /home/ubuntu/dashboard-production/3.json:/backend/Routes/MessMenu/3.json
       - /home/ubuntu/dashboard-production/config.json:/backend/Routes/MessMenu/config.json
+      - /home/ubuntu/dashboard-production/special_dinners.json:/backend/Routes/MessMenu/special_dinners.json
       - /home/ubuntu/dashboard-production/cityBus.json:/backend/Routes/Transport/cityBus.json
       - /home/ubuntu/dashboard-production/transport.json:/backend/Routes/Transport/transport.json
       - /home/ubuntu/dashboard-production/all_courses.json:/backend/Routes/TimeTable/all_courses.json
