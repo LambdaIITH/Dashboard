@@ -274,12 +274,6 @@ current_json_data = {
 with open(os.path.join(mess_menu_dir, "mess.json"), "w") as f:
     json.dump(current_json_data, f, indent=4)
 
-# Write config.json with current calculated week (auto-sync)
-config_file = os.path.join(mess_menu_dir, "config.json")
-with open(config_file, "w") as f:
-    json.dump({"week": api_week}, f, indent=4)
-log(f"Updated config.json with calculated week={api_week}")
-
 # Write special_dinners.json for API to check at request time
 special_file = os.path.join(mess_menu_dir, "special_dinners.json")
 with open(special_file, "w") as f:
