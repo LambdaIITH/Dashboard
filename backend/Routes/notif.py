@@ -6,8 +6,11 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Initialize Firebase Admin SDK only once
 if not firebase_admin._apps:
-    cred = credentials.Certificate("serviceAccount.json")
-    firebase_admin.initialize_app(cred)
+    try:
+        cred = credentials.Certificate("serviceAccount.json")
+        firebase_admin.initialize_app(cred)
+    except Exception as e:
+        print("Warning: Firebase credentials (serviceAccount.json) not found. Push notifications will be skipped.")
 
 def send_personalized_fcm_notification(token, title, body, image_url=None, redirect_url=None, notification_type=None, extra_data=None):
     """Sends an FCM notification to a specific device with data payload support."""
