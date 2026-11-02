@@ -2,6 +2,7 @@ import json
 import os
 import sys
 import fcntl
+import tempfile
 import gspread
 import datetime
 from oauth2client.service_account import ServiceAccountCredentials
@@ -46,6 +47,22 @@ def log(msg: str):
             f.write(f"{now_ist().isoformat()}: {msg}\n")
     except Exception:
         pass
+
+def write_json_atomic(path: str, data: dict):
+    directory = os.path.dirname(path)
+    fd, temp_path = tempfile.mkstemp(dir=directory, prefix=".menu-", suffix=".json")
+    try:
+        with os.fdopen(fd, "w") as f:
+            json.dump(data, f, indent=4)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(temp_path, path)
+    except Exception:
+        try:
+            os.unlink(temp_path)
+        except FileNotFoundError:
+            pass
+        raise
 
 # -------------------------------------------------------------------------------
 log("Script started")
@@ -259,8 +276,7 @@ for w in range(1, 5):
         "LDH Additional": extra_items,
         "UDH Additional": extra_items,
     }
-    with open(os.path.join(mess_menu_dir, f"{api_w}.json"), "w") as f:
-        json.dump(week_data, f, indent=4)
+    write_json_atomic(os.path.join(mess_menu_dir, f"{api_w}.json"), week_data)
 
 # Write mess.json for current week reference
 api_week = (current_week - 1) % 4
@@ -271,13 +287,11 @@ current_json_data = {
     "LDH Additional": extra_items,
     "UDH Additional": extra_items,
 }
-with open(os.path.join(mess_menu_dir, "mess.json"), "w") as f:
-    json.dump(current_json_data, f, indent=4)
+write_json_atomic(os.path.join(mess_menu_dir, "mess.json"), current_json_data)
 
 # Write special_dinners.json for API to check at request time
 special_file = os.path.join(mess_menu_dir, "special_dinners.json")
-with open(special_file, "w") as f:
-    json.dump(special_dinners, f, indent=4)
+write_json_atomic(special_file, special_dinners)
 
 log(f"Done. Week={current_week} (API={api_week}), Date={current_date_str}, Special dinners={len(special_dinners)}")
 print(f"Scraper completed. Week: {current_week}, API week: {api_week}, Date: {current_date_str}")
