@@ -36,7 +36,8 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SQL_DIR = os.path.join(BASE_DIR, "sql")
 queries = aiosql.from_path(SQL_DIR, "psycopg2")
 
-conn.autocommit = False
+if conn:
+    conn.autocommit = False
 
 # s3 = boto3.client('s3', aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"), aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"))
 

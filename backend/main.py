@@ -33,6 +33,7 @@ domains = os.getenv("ALLOWED_DOMAINS", "").split(",")
 
 # TODO: change for prod
 origins = [
+    "http://localhost:3000",
     "http://localhost:5500",
     "http://localhost:5000",
     "http://localhost:8080",
@@ -82,7 +83,18 @@ async def cookie_verification_middleware(request: Request, call_next):
 
 @app.middleware("http")
 async def apply_middleware(request: Request, call_next):
-    excluded_routes = ["/auth/login", "/auth/logout", "/docs", "/openapi.json", "/transport/", "/transport/cityBus", "/mess_menu/"]  # Add routes to exclude guard here
+    excluded_routes = [
+        "/",
+        "/auth/login",
+        "/auth/logout",
+        "/docs",
+        "/openapi.json",
+        "/transport/",
+        "/transport/cityBus",
+        "/mess_menu/",
+        "/mess_menu/week",
+        "/mess_menu/webhook/sheets",
+    ]
 
     if request.url.path not in excluded_routes:
         return await cookie_verification_middleware(request, call_next)
