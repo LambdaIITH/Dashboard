@@ -74,6 +74,10 @@ if not SHEET_URL:
     raise ValueError("GOOGLE_SHEET_URL environment variable is required")
 
 WEBHOOK_TOKEN = os.environ.get("SHEETS_WEBHOOK_TOKEN", "")  # For potential future use
+MENU_DATA_DIR = os.environ.get(
+    "MESS_MENU_DATA_DIR",
+    os.path.join(os.path.dirname(__file__), "..", "Routes", "MessMenu"),
+)
 
 # Current week (1-4) based on Mondays in month so far (IST)
 d = today_ist()
@@ -263,7 +267,7 @@ log(f"Special_Dinner parsed: {len(special_dinners)} entries (past dates filtered
 
 # -------------------------------------------------------------------------------
 # Build and write outputs
-mess_menu_dir = os.path.join(os.path.dirname(__file__), "..", "Routes", "MessMenu")
+mess_menu_dir = MENU_DATA_DIR
 os.makedirs(mess_menu_dir, exist_ok=True)
 
 # Write all 4 week files (0.json, 1.json, 2.json, 3.json)

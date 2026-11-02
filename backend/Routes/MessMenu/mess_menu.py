@@ -13,6 +13,7 @@ from Routes.Auth.tokens import verify_token
 router = APIRouter(prefix="/mess_menu", tags=["mess_menu"])
 password = os.getenv("ADMIN_PASS")
 allowed_numbers = [0,1,2,3]
+MENU_DATA_DIR = os.getenv("MESS_MENU_DATA_DIR", os.path.dirname(os.path.realpath(__file__)))
 
 admins = ["ms22btech11010@iith.ac.in", "lambda@iith.ac.in", "ma22btech11003@iith.ac.in", "cs22btech11017@iith.ac.in", "cs22btech11028@iith.ac.in"]
 
@@ -54,15 +55,14 @@ class MenuWeekChangeRequest(BaseModel):
 @router.get("/")
 async def get_mess_menu():
     try:    
-        dir = os.path.dirname(os.path.realpath(__file__))
-        with open(os.path.join(dir, "config.json")) as file:
+        with open(os.path.join(MENU_DATA_DIR, "config.json")) as file:
             week = json.load(file)["week"]
         
-        with open(os.path.join(dir, f"{week}.json")) as file:
+        with open(os.path.join(MENU_DATA_DIR, f"{week}.json")) as file:
             menu = json.load(file)
         
         # Check for special dinner override for today (IST)
-        special_file = os.path.join(dir, "special_dinners.json")
+        special_file = os.path.join(MENU_DATA_DIR, "special_dinners.json")
         if os.path.exists(special_file):
             with open(special_file) as f:
                 specials = json.load(f)
@@ -111,8 +111,7 @@ async def post_mess_menu(admin: MenuWeekChangeRequest, request: Request):
     if admin.number not in allowed_numbers:
         raise HTTPException(status_code=400, detail="Invalid week number")
     
-    dir = os.path.dirname(os.path.realpath(__file__))
-    with open(os.path.join(dir, "config.json"), "w") as file:
+    with open(os.path.join(MENU_DATA_DIR, "config.json"), "w") as file:
         json.dump({"week": admin.number}, file, indent=1)
     
     log_api(f"Admin week override: week={admin.number} by user={user_id}")
@@ -134,8 +133,7 @@ async def get_current_week_number(request: Request):
     if not isAdmin:
         return {"message": "unauthorized"} 
     try:    
-        dir = os.path.dirname(os.path.realpath(__file__))
-        with open(os.path.join(dir, "config.json")) as file:
+        with open(os.path.join(MENU_DATA_DIR, "config.json")) as file:
             week = json.load(file)["week"]
             
         return {"week": week}

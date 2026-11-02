@@ -9,9 +9,11 @@ services:
       - "1234:8000"
     env_file:
       - /home/ubuntu/dashboard-production/.env
+    environment:
+      MESS_MENU_DATA_DIR: /backend/mess-menu-data
     volumes:
       - /home/ubuntu/dashboard-production/credentials.json:/backend/job_scripts/credentials.json
-      - /home/ubuntu/dashboard-production/mess-menu:/backend/Routes/MessMenu
+      - /home/ubuntu/dashboard-production/mess-menu:/backend/mess-menu-data
       - /home/ubuntu/dashboard-production/cityBus.json:/backend/Routes/Transport/cityBus.json
       - /home/ubuntu/dashboard-production/transport.json:/backend/Routes/Transport/transport.json
       - /home/ubuntu/dashboard-production/all_courses.json:/backend/Routes/TimeTable/all_courses.json
